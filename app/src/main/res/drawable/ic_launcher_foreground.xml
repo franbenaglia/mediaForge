@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícono provisorio: triángulo de reproducción sobre un yunque estilizado. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFB74D"
+        android:pathData="M30,66h48v6h-6l-4,8h-28l-4,-8h-6z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,32l22,14l-22,14z" />
+</vector>
