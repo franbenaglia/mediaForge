@@ -1,0 +1,70 @@
+init_ms=12153
+native libffmpeg.so 326 KiB
+native libffmpeg.zip.so 37690 KiB
+native libffprobe.so 225 KiB
+native libpython.so 4 KiB
+native libpython.zip.so 13967 KiB
+native libqjs.so 958 KiB
+packages_dir_kib=243146
+yt-dlp version=null
+python exit=0 out=Python 3.12.11
+qjs exit=1 first=QuickJS version 2025-04-26
+ffmpeg exit=0
+ffmpeg version 7.1.1 Copyright (c) 2000-2025 the FFmpeg developers
+built with Android (13624864, +pgo, +bolt, +lto, +mlgo, based on r530567e) clang version 19.0.1 (https://android.googlesource.com/toolchain/llvm-project 97a699bf4812a18fb657c2779f5296a4ab2694d2)
+configuration: --arch=x86_64 --as=x86_64-linux-android-clang --cc=x86_64-linux-android-clang --cxx=x86_64-linux-android-clang++ --nm=llvm-nm --ar=llvm-ar --ranlib=llvm-ranlib --pkg-config=/home/builder/.termux-build/_cache/android-r28c-api-24-v1/bin/pkg-config --strip=llvm-strip --cross-prefix=x86_64-linux-android- --disable-indevs --disable-outdevs --enable-indev=lavfi --disable-static --disable-symver --enable-cross-compile --enable-gnutls --enable-gpl --enable-version3 --enable-jni --enable-lcms2 --enable-libaom --enable-libass --enable-libbluray --enable-libdav1d --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libharfbuzz --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenmpt --enable-libopus --enable-librav1e --enable-librubberband --enable-libsoxr --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtheora --enable-libv4l2 --enable-libvidstab --enable-libvmaf --enable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-libzmq --enable-mediacodec --enable-opencl --enable-shared --prefix=/data/data/com.termux/files/usr --target-os=android --extra-libs=-landroid-glob --disable-vulkan --disable-libfdk-aac
+encoder libmp3lame=YES
+encoder aac=YES
+encoder libopus=YES
+encoder opus=YES
+encoder libvorbis=YES
+encoder flac=YES
+encoder pcm_s16le=YES
+encoder alac=YES
+encoder libx264=YES
+encoder libx265=YES
+encoder libopenh264=no
+encoder mpeg4=YES
+encoder libvpx=YES
+encoder libvpx-vp9=YES
+encoder libaom-av1=YES
+encoder libsvtav1=YES
+encoder librav1e=YES
+encoder h264_mediacodec=YES
+encoder hevc_mediacodec=YES
+encoder av1_mediacodec=YES
+gen_libx264 exit=0 ms=18862 size=157933
+mp4_to_mp3 exit=0 ms=808 size=242144
+progress_lines=1
+remux_mkv exit=0 size=151582
+to_opus exit=0 size=98009
+to_flac exit=0 size=505884
+youtube OK ms=105478 title='Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film' extractor=Youtube duration=635.0 formats=39
+youtube heights=[27, 45, 90, 144, 180, 240, 360, 480, 720, 1080, 1440, 2160]
+youtube vcodecs=[none, avc1, vp9, av01]
+youtube acodecs=[none, mp4a, opus, ac-3, ec-3]
+youtube stderr_warnings=WARNING: Your yt-dlp version (2025.11.12) is older than 90 days! | WARNING: [youtube] [Errno 7] No address associated with hostname. Retrying (1/3)... | WARNING: [youtube] [Errno 7] No address associated with hostname. Retrying (2/3)... | WARNING: [youtube] unable to extract yt initial data; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U | WARNING: [youtube] Incomplete data received in embedded initial data; re-fetching using API. | WARNING: [youtube] aqz-KE-bpKQ: Some web client https formats have been skipped as they are missing a url. YouTube is forcing SABR streaming for this client. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+vimeo FAIL ms=10703 YoutubeDLException: WARNING: Your yt-dlp version (2025.11.12) is older than 90 days!
+         It is strongly recommended to always use the latest version.
+         Run "yt-dlp --update" or "yt-dlp -U" to update.
+         To suppress this warning, add --no-update to your command/config.
+WARNING: [vimeo] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies
+ERROR: [vimeo] 1084537: The web client only works when logged-in. Use --cookies, --cookies-from-browser, --username and --password, --netrc-cmd, or --netrc (vimeo) to provide account credentials. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies
+
+download_mp3 FAIL ms=29409 YoutubeDLException: WARNING: Your yt-dlp version (2025.11.12) is older than 90 days!
+         It is strongly recommended to always use the latest version.
+         Run "yt-dlp --update" or "yt-dlp -U" to update.
+         To suppress this warning, add --no-update to your command/config.
+WARNING: [youtube] aqz-KE-bpKQ: Some web client https formats have been skipped as they are missing a url. YouTube is forcing SABR streaming for this client. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+ERROR: unable to download video data: HTTP Error 403: Forbidden
+
+cancel_called result=true
+cancel OK CanceledException ms=8061
+cancel leftover_processes=0  1898
+cancel partial_files=[]
+update status=DONE before=null after=2026.10.26 ms=44150
+youtube_updated OK ms=28671 title='Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film' extractor=Youtube duration=635.0 formats=61
+youtube_updated heights=[27, 45, 90, 144, 180, 240, 360, 480, 720, 1080, 1440, 2160]
+youtube_updated vcodecs=[none, vp09, avc1, vp9, av01, ]
+youtube_updated acodecs=[none, , mp4a, opus, ac-3, ec-3]
+youtube_updated stderr_warnings=WARNING: Unknown codec iamf.001.001.Opus
