@@ -45,6 +45,7 @@ Usá siempre `./gradlew`. El `gradle` del sistema es 7.4.2 y no sirve.
 - JDK 17, SDK en `~/Android/Sdk`, compila contra la plataforma 37. AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21.
 - **Nunca uses el emulador**: cuelga la máquina (fue borrado). Lo que requiera dispositivo va a un teléfono físico por USB.
 - **Pedí permiso al usuario antes de instalar algo en el teléfono.** Cada instalación por USB muestra un aviso de ~10 s que por defecto deniega (`INSTALL_FAILED_USER_RESTRICTED`): avisá para que esté mirando y toque "Instalar". No envíes toques por adb sin permiso.
+- **La máquina se cuelga con builds pesados** (15 GB de RAM, 2 GB de swap). Usá `./scripts/verify.sh`, que corre en dos pasos con `nice` y detiene los daemons al final. No subas `workers.max` ni los heaps de `gradle.properties`, y no corras dos builds a la vez. La importación de Gradle de la extensión de Java de VS Code está desactivada en `.vscode/settings.json` por el mismo motivo.
 - El disco de la máquina tiene poco espacio libre. No agregues cachés ni artefactos grandes sin necesidad; `spikes/*/build` se puede borrar.
 - `spikes/engine-spike/` es un proyecto Gradle aparte (prueba técnica de la Etapa 0). No forma parte del build.
 

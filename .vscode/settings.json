@@ -1,0 +1,7 @@
+{
+    // La extensión de Java importaba el proyecto con su propio Gradle en paralelo al build
+    // (y generaba carpetas bin/). El proyecto es Kotlin y se compila con ./gradlew.
+    "java.import.gradle.enabled": false,
+    "java.autobuild.enabled": false,
+    "java.configuration.updateBuildConfiguration": "disabled"
+}
