@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- yt-dlp necesita red para consultar y descargar. Sin este permiso Python no resuelve DNS
+     ("[Errno 7] No address associated with hostname"), visto en el teléfono el 2026-11-07. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>
