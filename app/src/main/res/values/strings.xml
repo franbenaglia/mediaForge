@@ -50,7 +50,12 @@
     <string name="home_paste">Paste</string>
     <string name="home_clear">Clear</string>
     <string name="home_analyze">Analyze</string>
-    <string name="home_analysis_unavailable">Link analysis is not available yet.</string>
+    <string name="home_analyzing">Analyzing link…</string>
+    <string name="home_first_run_hint">The first analysis prepares the engine and can take a few seconds.</string>
+    <plurals name="home_formats_count">
+        <item quantity="one">%d format available</item>
+        <item quantity="other">%d formats available</item>
+    </plurals>
 
     <!-- Validación de enlaces -->
     <string name="url_error_empty">Enter a link.</string>

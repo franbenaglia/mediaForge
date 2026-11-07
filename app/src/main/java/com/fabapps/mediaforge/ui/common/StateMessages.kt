@@ -50,10 +50,20 @@ fun EmptyState(
     }
 }
 
-/** Error explicado al usuario, con reintento opcional. */
+/** Error explicado al usuario, centrado en toda la pantalla, con reintento opcional. */
 @Composable
 fun ErrorState(error: MediaError, modifier: Modifier = Modifier, onRetry: (() -> Unit)? = null) {
-    CenteredMessage(modifier) {
+    CenteredMessage(modifier) { ErrorMessage(error, onRetry = onRetry) }
+}
+
+/** El mismo mensaje, para usar dentro de otra pantalla (no ocupa todo el alto). */
+@Composable
+fun ErrorMessage(error: MediaError, modifier: Modifier = Modifier, onRetry: (() -> Unit)? = null) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(
             stringResource(error.messageRes()),
             style = MaterialTheme.typography.bodyLarge,

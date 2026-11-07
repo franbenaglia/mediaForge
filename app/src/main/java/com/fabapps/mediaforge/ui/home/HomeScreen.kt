@@ -2,7 +2,6 @@ package com.fabapps.mediaforge.ui.home
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,34 +12,38 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fabapps.mediaforge.R
+import com.fabapps.mediaforge.domain.model.MediaError
+import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.model.SourceSite
 import com.fabapps.mediaforge.domain.url.UrlCheck
+import com.fabapps.mediaforge.ui.common.ErrorMessage
+import com.fabapps.mediaforge.ui.common.MediaCard
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 import kotlinx.coroutines.launch
 
@@ -50,33 +53,20 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val snackbar = remember { SnackbarHostState() }
-    val unavailable = stringResource(R.string.home_analysis_unavailable)
 
-    // El análisis llega con el motor de extracción (Etapa 3). Hasta entonces se avisa, sin simular nada.
-    LaunchedEffect(state.pendingAnalysis) {
-        if (state.pendingAnalysis != null) {
-            viewModel.onAnalysisHandled()
-            snackbar.showSnackbar(unavailable)
-        }
-    }
-
-    Box(Modifier.fillMaxSize()) {
-        HomeContent(
-            state = state,
-            onInputChange = viewModel::onInputChange,
-            onPaste = {
-                scope.launch {
-                    val clip = clipboard.getClipEntry()?.clipData
-                    val text = clip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString()
-                    viewModel.onPaste(text)
-                }
-            },
-            onClear = viewModel::onClear,
-            onAnalyze = viewModel::onAnalyze,
-        )
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
-    }
+    HomeContent(
+        state = state,
+        onInputChange = viewModel::onInputChange,
+        onPaste = {
+            scope.launch {
+                val clip = clipboard.getClipEntry()?.clipData
+                val text = clip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString()
+                viewModel.onPaste(text)
+            }
+        },
+        onClear = viewModel::onClear,
+        onAnalyze = viewModel::onAnalyze,
+    )
 }
 
 @Composable
@@ -131,6 +121,47 @@ private fun HomeContent(
                 Text(stringResource(R.string.home_analyze))
             }
         }
+        AnalysisResult(state.analysis, onRetry = onAnalyze)
+    }
+}
+
+@Composable
+private fun AnalysisResult(analysis: AnalysisState, onRetry: () -> Unit) {
+    when (analysis) {
+        AnalysisState.Idle -> Unit
+        AnalysisState.Loading -> Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            CircularProgressIndicator()
+            Text(stringResource(R.string.home_analyzing), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                stringResource(R.string.home_first_run_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        is AnalysisState.Loaded -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val info = analysis.info
+            MediaCard(
+                title = info.title,
+                siteName = info.site.displayName,
+                uploader = info.uploader,
+                durationSeconds = info.durationSeconds,
+            )
+            Text(
+                pluralStringResource(R.plurals.home_formats_count, info.formats.size, info.formats.size),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        is AnalysisState.Failed -> ErrorMessage(
+            error = analysis.error,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            onRetry = onRetry,
+        )
     }
 }
 
@@ -152,6 +183,55 @@ private fun HomeContentReadyPreview() {
         Surface {
             HomeContent(
                 state = HomeUiState(input = "https://www.youtube.com/watch?v=aqz-KE-bpKQ", status = InputStatus.READY),
+                onInputChange = {},
+                onPaste = {},
+                onClear = {},
+                onAnalyze = {},
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeContentLoadedPreview() {
+    MediaForgeTheme(dynamicColor = false) {
+        Surface {
+            HomeContent(
+                state = HomeUiState(
+                    input = "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+                    status = InputStatus.READY,
+                    analysis = AnalysisState.Loaded(
+                        MediaInfo(
+                            id = "aqz-KE-bpKQ",
+                            sourceUrl = "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+                            title = "Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film",
+                            site = SourceSite("Youtube", "YouTube"),
+                            uploader = "Blender",
+                            durationSeconds = 635,
+                        ),
+                    ),
+                ),
+                onInputChange = {},
+                onPaste = {},
+                onClear = {},
+                onAnalyze = {},
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun HomeContentFailedPreview() {
+    MediaForgeTheme(dynamicColor = false) {
+        Surface {
+            HomeContent(
+                state = HomeUiState(
+                    input = "https://vimeo.com/1",
+                    status = InputStatus.READY,
+                    analysis = AnalysisState.Failed(MediaError.LoginRequired()),
+                ),
                 onInputChange = {},
                 onPaste = {},
                 onClear = {},

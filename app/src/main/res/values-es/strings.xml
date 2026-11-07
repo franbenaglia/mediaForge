@@ -44,7 +44,13 @@
     <string name="home_paste">Pegar</string>
     <string name="home_clear">Borrar</string>
     <string name="home_analyze">Analizar</string>
-    <string name="home_analysis_unavailable">El análisis de enlaces todavía no está disponible.</string>
+    <string name="home_analyzing">Analizando enlace…</string>
+    <string name="home_first_run_hint">El primer análisis prepara el motor y puede tardar unos segundos.</string>
+    <plurals name="home_formats_count">
+        <item quantity="one">%d formato disponible</item>
+        <item quantity="many">%d formatos disponibles</item>
+        <item quantity="other">%d formatos disponibles</item>
+    </plurals>
 
     <!-- Validación de enlaces -->
     <string name="url_error_empty">Ingresá un enlace.</string>
