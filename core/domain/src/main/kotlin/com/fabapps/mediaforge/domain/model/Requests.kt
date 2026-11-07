@@ -11,8 +11,10 @@ sealed interface DownloadSelection {
 
     data class Audio(
         val format: AudioFormat,
-        /** Solo para formatos con pérdida; nulo = calidad automática. */
+        /** Solo cuando se recodifica a un formato con pérdida; nulo = sin bitrate fijo (copia o sin pérdida). */
         val bitrateKbps: Int? = null,
+        /** Formato de origen concreto; vacío = el mejor audio disponible. */
+        val formatIds: List<String> = emptyList(),
     ) : DownloadSelection
 }
 

@@ -152,3 +152,20 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 **Descartadas:** Bouncy Castle (tamaño); confiar solo en el SHA-256 de GitHub (no protege si se compromete el release); el actualizador de youtubedl-android (no verifica nada y borra la versión anterior).
 
 **Riesgo:** si yt-dlp rota su clave, las actualizaciones fallan con un error explícito hasta publicar un APK con la clave nueva. Es el comportamiento seguro.
+
+---
+
+## ADR-015 · Audio: AAC como M4A, copia sin recodificar y bitrates acotados
+
+**Fecha:** 2026-11-07 · **Estado:** aceptada
+
+**Contexto:** main.md §4.1 pide MP3, M4A, AAC, Opus, OGG, WAV y FLAC, y §4.2 pide bitrates solo donde tengan sentido. yt-dlp (`-x`) copia el audio sin recodificar cuando el códec de origen coincide con el de salida y, en ese caso, ignora `--audio-quality`.
+
+**Decisión:**
+- AAC se ofrece como M4A (AAC en contenedor MP4). El `.aac` suelto (ADTS) no admite portada ni metadatos y duplicaría la opción.
+- Si el sitio tiene el audio en el códec de salida (AAC → M4A, Opus → Opus), se copia y no se ofrece bitrate: elegirlo no cambiaría nada y sería una opción simulada.
+- Bitrates por formato: MP3 128/192/256/320, M4A 128/192/256, Opus 96/128/160, OGG 128/192/256. WAV y FLAC no tienen.
+- "Automático" es el menor bitrate de la lista que iguala o supera al original. Si se elige uno mayor que el original, la UI avisa que no mejora la calidad.
+- Para recodificar se parte de Opus cuando existe (rinde más que AAC al mismo bitrate). Sin pistas de audio sueltas (Dailymotion), se usa el combinado más liviano.
+
+**Descartadas:** ofrecer `.aac` aparte; mostrar bitrates también cuando se copia.

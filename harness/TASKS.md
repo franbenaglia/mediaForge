@@ -104,9 +104,26 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Acepta:* `EngineDeviceTest` o validación manual registrada en STATE.md.
   *Validada a mano por el usuario (2026-11-07):* YouTube (merge) y Dailymotion (HLS) descargados y reproducidos; cancelar sin parciales. Un primer intento de Dailymotion falló con `Unknown` sin detalle visible y no se pudo reproducir; desde entonces los errores muestran "Detalles técnicos". `EngineDeviceTest.t5` descarga Dailymotion (necesita correr antes `t1b`, porque reinstalar el APK de prueba borra el yt-dlp actualizado).
 
-## Etapa 5 · Extracción de audio (resumen)
+## Etapa 5 · Extracción de audio
 
-MP3 / M4A / Opus primero; bitrate solo para formatos con pérdida; metadatos y portada; nombre editable; aviso de que subir el bitrate no mejora la calidad.
+Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Python del APK trae `mutagen` 1.47 (verificado en el teléfono): portada y metadatos en MP3, M4A, Opus, OGG y FLAC.
+
+- [x] **T5.1** · P1 · `AudioOptions` en el dominio: un formato por opción (MP3, M4A, Opus primero; OGG, WAV, FLAC), formato de origen concreto, copia sin recodificar cuando el códec coincide, bitrates por formato (ninguno si es sin pérdida o se copia), automático = el menor ≥ al original, aviso si el bitrate supera al original, tamaño estimado. ADR-015 (AAC como M4A).
+  *Depende de:* —
+  *Acepta:* pruebas con formatos armados y con los fixtures reales de YouTube y Dailymotion.
+  *Hecho:* `AudioOptions` + `DownloadSelection.Audio.formatIds`. 11 pruebas + 2 con fixtures reales.
+- [ ] **T5.2** · P1 · `YtDlpCommand.download` para audio (`-x`, `--audio-format`, `--audio-quality`, `--embed-thumbnail` salvo WAV) y pasos de audio en el parser (`ExtractAudio`, `EmbedThumbnail`).
+  *Depende de:* T5.1
+  *Acepta:* pruebas de argumentos y de líneas de salida.
+- [ ] **T5.3** · P1 · `YtDlpDownloader` acepta `DownloadSelection.Audio`: salida por extensión esperada (no la portada ni el original) y MIME que MediaStore acepta.
+  *Depende de:* T5.2
+  *Acepta:* pruebas con yt-dlp falso; `MediaLibraryDeviceTest` guarda MP3, M4A, Opus, OGG, WAV y FLAC en `Music/MediaForge` sin cambiar el nombre.
+- [ ] **T5.4** · P1 · Inicio: elegir Video o Audio; en audio, formato, bitrate (con "Automático"), avisos de calidad y tamaño.
+  *Depende de:* T5.1, T5.3
+  *Acepta:* pruebas de `HomeViewModel`; `[~]` hasta probarlo en el teléfono.
+- [ ] **T5.5** · P1 · Prueba en el teléfono: MP3 320 kbps con portada y título, M4A sin recodificar, Opus.
+  *Depende de:* T5.4
+  *Acepta:* validación manual registrada (el archivo se reproduce y muestra portada en la app de música).
 
 ## Etapa 6 · Conversor (resumen)
 

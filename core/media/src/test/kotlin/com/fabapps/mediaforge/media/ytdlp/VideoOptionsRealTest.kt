@@ -1,7 +1,9 @@
 package com.fabapps.mediaforge.media.ytdlp
 
+import com.fabapps.mediaforge.domain.download.AudioOptions
 import com.fabapps.mediaforge.domain.download.VideoOptions
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.MediaInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -41,5 +43,23 @@ class VideoOptionsRealTest {
         assertEquals(listOf("hls-380"), option.selection.formatIds)
         assertTrue(option.sizeIsApproximate)
         assertTrue(option.hasAudio)
+    }
+
+    @Test
+    fun youtubeAudio() {
+        val options = AudioOptions.from(parse("youtube-real.json")).associateBy { it.format }
+        // M4A copia el mejor AAC sin DRC; Opus copia 251; MP3 recodifica desde Opus.
+        assertEquals("258", options.getValue(AudioFormat.M4A).sourceFormatId)
+        assertTrue(options.getValue(AudioFormat.M4A).copiesWithoutReencoding)
+        assertEquals("251", options.getValue(AudioFormat.OPUS).sourceFormatId)
+        assertEquals("251", options.getValue(AudioFormat.MP3).sourceFormatId)
+        assertEquals(128, options.getValue(AudioFormat.MP3).autoKbps)
+    }
+
+    @Test
+    fun dailymotionAudio() {
+        val options = AudioOptions.from(parse("dailymotion-real.json")).associateBy { it.format }
+        assertEquals("hls-380", options.getValue(AudioFormat.MP3).sourceFormatId)
+        assertTrue(options.getValue(AudioFormat.M4A).copiesWithoutReencoding)
     }
 }

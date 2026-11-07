@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 5 (extracción de audio): detallar las tareas en `TASKS.md`. Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
+Etapa 5: sigue T5.2 (comando de audio y pasos en el parser). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
 
 ## Etapas
 
@@ -13,7 +13,7 @@ Etapa 5 (extracción de audio): detallar las tareas en `TASKS.md`. Pendiente men
 - [x] 2. Interfaz base
 - [x] 3. Motor de extracción (todo validado en el teléfono)
 - [x] 4. Descarga de video (validada en el teléfono: YouTube y Dailymotion)
-- [ ] 5. Extracción de audio
+- [ ] 5. Extracción de audio (en curso)
 - [ ] 6. Conversor multimedia
 - [ ] 7. Gestor de trabajos
 - [ ] 8. Android Sharesheet
@@ -40,6 +40,7 @@ Etapa 5 (extracción de audio): detallar las tareas en `TASKS.md`. Pendiente men
 - `YtDlpUpdater` (implementa `ExtractorEngine`): última versión permitida por `_update_spec` → `SHA2-256SUMS` con firma OpenPGP de la clave fijada de yt-dlp (`OpenPgp`, sin Bouncy Castle) → SHA-256 del zipapp → prueba de `--version` → activa y conserva la anterior (`YtDlpVersions`). El motor usa la versión activa o la del APK. 22 pruebas.
 - Descarga de video (T4.3–T4.5): comando con formatos concretos, `YtDlpProgressParser` (varias partes como un avance, merge, metadatos) y `YtDlpDownloader` (registrado en Hilt; carpeta privada por trabajo que se borra al fallar o cancelar).
 - `MediaLibrary` / `MediaStoreLibrary` (T4.6): copia a `Movies/MediaForge` o `Music/MediaForge` con `IS_PENDING` (Android 10+) o permiso de escritura (8–9), nombre único, y borra la copia privada.
+- `AudioOptions` (dominio, T5.1, ADR-015): formatos de audio con copia sin recodificar, bitrates y automático.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
