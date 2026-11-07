@@ -50,8 +50,6 @@ class MediaStoreLibrary(private val context: Context, private val io: CoroutineD
             } else {
                 saveLegacy(source, name, file.mimeType, kind)
             }
-            source.delete()
-            source.parentFile?.takeIf { it.list().isNullOrEmpty() }?.delete()
             Outcome.Success(saved)
         } catch (e: IOException) {
             val noSpace = e.message.orEmpty().contains("ENOSPC") || e.message.orEmpty().contains("No space")
@@ -64,6 +62,10 @@ class MediaStoreLibrary(private val context: Context, private val io: CoroutineD
             )
         } catch (e: SecurityException) {
             Outcome.Failure(MediaError.Unknown(detail = "storage permission: ${e.message}"))
+        } finally {
+            // También si falla: el archivo privado no se reintenta y ocuparía espacio para siempre.
+            source.delete()
+            source.parentFile?.takeIf { it.list().isNullOrEmpty() }?.delete()
         }
     }
 

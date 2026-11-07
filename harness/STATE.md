@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.7 (pantalla de descarga). Pendiente en el teléfono: T4.1 (miniatura) y `MediaLibraryDeviceTest` (T4.6); el clasificador de permisos bloqueó la instalación, hay que pedir permiso al usuario. El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
+Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Código de la Etapa 4 completo. Falta todo lo del teléfono: `MediaLibraryDeviceTest` (T4.6), instalar la app y probar a mano miniatura (T4.1), descarga y cancelación (T4.7, T4.8). El clasificador de permisos bloqueó la instalación: hay que pedir permiso al usuario. El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
 
 ## Etapas
 
@@ -30,6 +30,7 @@ Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.7 (pantal
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
+- Pantalla Inicio (descarga, T4.7): elegir calidad, nombre, descargar con progreso, cancelar, guardar en la galería y abrir/compartir. Corre en el `viewModelScope`: cerrar la app cancela la descarga hasta la Etapa 7.
 - Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Miniatura con Coil (T4.1, falta verla en el teléfono). Si el error es "motor desactualizado", ofrece "Actualizar motor" y reintenta solo (T3.9, validado en el teléfono).
 - `:core:media`: youtubedl-android 0.18.1 (Python, FFmpeg, QuickJS), un APK por ABI y `EngineInitializer` (una sola vez, fuera del hilo principal, chequea antes el espacio libre; estado observable). Todavía nadie lo llama: lo usa T3.6.
 - `YtDlpInfoParser`: `--dump-json` → `MediaInfo` con la lista completa de formatos (descarta storyboards), tamaños exactos o aproximados, playlists rechazadas, JSON inválido como error. 13 pruebas.
@@ -46,8 +47,8 @@ Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.7 (pantal
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 146 pruebas (34 dominio + 33 app + 79 media) + 5 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
-| APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 189 pruebas (45 dominio + 44 app + 100 media), lint sin errores, ktlint OK | 2026-11-07 |
+| APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
 Último commit validado: ver `git log -1` (commit de cierre de la Etapa 3).

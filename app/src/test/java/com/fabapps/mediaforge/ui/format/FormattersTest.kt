@@ -48,4 +48,12 @@ class FormattersTest {
         assertEquals("1:00:00", Formatters.duration(3600))
         assertEquals("2:03:04", Formatters.duration(7384))
     }
+
+    @Test
+    fun qualityShowsFpsOnlyAboveThirty() {
+        assertEquals("1080p60", Formatters.quality(1080, 60.0))
+        assertEquals("720p", Formatters.quality(720, 30.0))
+        assertEquals("240p", Formatters.quality(240, null))
+        assertEquals("480p", Formatters.quality(480, 29.97))
+    }
 }

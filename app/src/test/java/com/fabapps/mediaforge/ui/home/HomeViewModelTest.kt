@@ -1,15 +1,27 @@
 package com.fabapps.mediaforge.ui.home
 
 import com.fabapps.mediaforge.domain.engine.ExtractorEngine
+import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.model.DownloadRequest
+import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
+import com.fabapps.mediaforge.domain.model.MediaFormat
 import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.model.OutputFile
+import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.SourceSite
+import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.UrlCheck
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -54,8 +66,33 @@ class HomeViewModelTest {
         }
     }
 
+    /** Emite lo que la prueba manda por [events]. */
+    private class FakeDownloader : MediaDownloader {
+        val requests = mutableListOf<DownloadRequest>()
+        var events = Channel<JobState>(Channel.UNLIMITED)
+        var cancelled = 0
+        override fun download(request: DownloadRequest): Flow<JobState> {
+            requests += request
+            return events.consumeAsFlow().onCompletion {
+                if (it is kotlinx.coroutines.CancellationException) cancelled++
+            }
+        }
+    }
+
+    private class FakeLibrary : MediaLibrary {
+        val saved = mutableListOf<OutputFile>()
+        var result: (OutputFile) -> Outcome<OutputFile> = { Outcome.Success(it.copy(location = "content://media/1")) }
+        override suspend fun save(file: OutputFile): Outcome<OutputFile> {
+            saved += file
+            return result(file)
+        }
+        override fun needsWritePermission() = false
+    }
+
     private val extractor = FakeExtractor()
     private val engine = FakeEngine()
+    private val downloader = FakeDownloader()
+    private val library = FakeLibrary()
     private lateinit var vm: HomeViewModel
     private val state get() = vm.state.value
 
@@ -64,12 +101,17 @@ class HomeViewModelTest {
         sourceUrl = "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
         title = "Big Buck Bunny",
         site = SourceSite("Youtube", "YouTube"),
+        formats = listOf(
+            MediaFormat("299", "mp4", videoCodec = "avc1", height = 1080, fps = 60.0, fileSizeBytes = 1000),
+            MediaFormat("134", "mp4", videoCodec = "avc1", height = 360, fileSizeBytes = 100),
+            MediaFormat("140", "m4a", audioCodec = "mp4a.40.2", bitrateKbps = 129.0, fileSizeBytes = 50),
+        ),
     )
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = HomeViewModel(extractor, engine)
+        vm = HomeViewModel(extractor, engine, downloader, library)
     }
 
     @After
@@ -265,5 +307,139 @@ class HomeViewModelTest {
         assertEquals(AnalysisState.UpdateFailed(MediaError.Network()), state.analysis)
         assertTrue(state.canUpdateEngine)
         assertEquals(1, extractor.calls.size)
+    }
+
+    // Descarga (T4.7)
+
+    private val privateFile = OutputFile("/data/jobs/1/media.mp4", "Big Buck Bunny.mp4", "video/mp4", 1050)
+
+    private suspend fun TestScope.analyzed() {
+        vm.onInputChange("https://www.youtube.com/watch?v=aqz-KE-bpKQ")
+        vm.onAnalyze()
+        extractor.pending.complete(Outcome.Success(info))
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun analysisOffersQualitiesAndTitleAsFileName() = test {
+        analyzed()
+        assertEquals(listOf(1080, 360), state.options.map { it.height })
+        assertEquals(0, state.selectedOption)
+        assertEquals("Big Buck Bunny", state.fileName)
+        assertTrue(state.canDownload)
+    }
+
+    @Test
+    fun downloadUsesSelectedQualityAndEditedName() = test {
+        analyzed()
+        vm.onSelectOption(1)
+        vm.onFileNameChange("Conejo")
+        vm.onDownload()
+        advanceUntilIdle()
+        val request = downloader.requests.single()
+        assertEquals(
+            listOf("134", "140"),
+            (request.selection as DownloadSelection.Video).formatIds,
+        )
+        assertEquals("Conejo", request.fileName)
+        assertEquals(150L, request.expectedBytes)
+        assertEquals(info.sourceUrl, request.sourceUrl)
+    }
+
+    @Test
+    fun blankNameFallsBackToTitle() = test {
+        analyzed()
+        vm.onFileNameChange("  ")
+        vm.onDownload()
+        advanceUntilIdle()
+        assertEquals("Big Buck Bunny", downloader.requests.single().fileName)
+    }
+
+    @Test
+    fun progressThenSavedInGallery() = test {
+        analyzed()
+        vm.onDownload()
+        val progress = JobState.Downloading(0.5f, 500, 1000, 100)
+        downloader.events.send(progress)
+        advanceUntilIdle()
+        assertEquals(DownloadState.Running(progress), state.download)
+        assertTrue(state.inputLocked)
+        assertFalse(state.canAnalyze)
+        assertFalse(state.canDownload)
+
+        downloader.events.send(JobState.Processing(ProcessingStep.MERGE, null))
+        downloader.events.send(JobState.Completed(listOf(privateFile)))
+        downloader.events.close()
+        advanceUntilIdle()
+        assertEquals(listOf(privateFile), library.saved)
+        assertEquals(DownloadState.Saved(privateFile.copy(location = "content://media/1")), state.download)
+        assertFalse(state.inputLocked)
+    }
+
+    @Test
+    fun linkCannotChangeWhileDownloading() = test {
+        analyzed()
+        vm.onDownload()
+        advanceUntilIdle()
+        vm.onInputChange("https://example.com/other")
+        vm.onPaste("https://example.com/other")
+        vm.onClear()
+        assertEquals("https://www.youtube.com/watch?v=aqz-KE-bpKQ", state.input)
+        assertTrue(state.analysis is AnalysisState.Loaded)
+        vm.onDownload()
+        assertEquals(1, downloader.requests.size)
+    }
+
+    @Test
+    fun cancelStopsTheDownload() = test {
+        analyzed()
+        vm.onDownload()
+        downloader.events.send(JobState.Downloading(0.1f, 10, 100, null))
+        advanceUntilIdle()
+        vm.onCancelDownload()
+        advanceUntilIdle()
+        assertEquals(1, downloader.cancelled)
+        assertEquals(DownloadState.Cancelled, state.download)
+        assertTrue(library.saved.isEmpty())
+        assertTrue(state.canDownload)
+    }
+
+    @Test
+    fun engineFailureIsShownAndCanRetry() = test {
+        analyzed()
+        vm.onDownload()
+        downloader.events.send(JobState.Failed(MediaError.AccessDenied()))
+        downloader.events.close()
+        advanceUntilIdle()
+        assertEquals(DownloadState.Failed(MediaError.AccessDenied()), state.download)
+        assertTrue(state.canDownload)
+
+        downloader.events = Channel(Channel.UNLIMITED)
+        vm.onDownload()
+        advanceUntilIdle()
+        assertEquals(2, downloader.requests.size)
+    }
+
+    @Test
+    fun saveFailureIsShown() = test {
+        library.result = { Outcome.Failure(MediaError.InsufficientStorage(1050, 10)) }
+        analyzed()
+        vm.onDownload()
+        downloader.events.send(JobState.Completed(listOf(privateFile)))
+        downloader.events.close()
+        advanceUntilIdle()
+        assertEquals(DownloadState.Failed(MediaError.InsufficientStorage(1050, 10)), state.download)
+    }
+
+    @Test
+    fun analyzingAgainClearsThePreviousDownload() = test {
+        analyzed()
+        vm.onDownload()
+        downloader.events.send(JobState.Failed(MediaError.Network()))
+        downloader.events.close()
+        advanceUntilIdle()
+        extractor.pending = CompletableDeferred()
+        vm.onAnalyze()
+        assertEquals(DownloadState.None, state.download)
     }
 }

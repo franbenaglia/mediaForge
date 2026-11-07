@@ -63,4 +63,23 @@
     <string name="url_error_missing_host">El enlace no tiene dirección de sitio.</string>
     <string name="url_error_credentials">No se aceptan enlaces con usuario o contraseña.</string>
     <string name="url_error_local">No se aceptan enlaces a direcciones locales o de red privada.</string>
+
+    <string name="download_quality">Calidad</string>
+    <string name="download_best">Mejor calidad</string>
+    <string name="download_no_audio">sin audio</string>
+    <string name="download_size_approx">~%1$s</string>
+    <string name="download_size_unknown">tamaño desconocido</string>
+    <string name="download_file_name">Nombre del archivo</string>
+    <string name="download_start">Descargar</string>
+    <string name="download_cancel">Cancelar</string>
+    <string name="download_keep_open">Dejá MediaForge abierta hasta que termine la descarga.</string>
+    <string name="download_saving">Guardando en la galería…</string>
+    <string name="download_saved">Guardado en Movies/MediaForge</string>
+    <string name="download_open">Abrir</string>
+    <string name="download_share">Compartir</string>
+    <string name="download_no_app">Ninguna app puede abrir este archivo.</string>
+    <string name="download_cancelled">Descarga cancelada. Se borraron los archivos parciales.</string>
+    <string name="download_failed">La descarga falló.</string>
+    <string name="download_again">Descargar de nuevo</string>
+    <string name="download_permission_denied">MediaForge necesita permiso de almacenamiento para guardar el video.</string>
 </resources>

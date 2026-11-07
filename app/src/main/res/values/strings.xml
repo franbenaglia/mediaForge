@@ -68,4 +68,23 @@
     <string name="url_error_missing_host">The link has no website address.</string>
     <string name="url_error_credentials">Links that include a username or password are not accepted.</string>
     <string name="url_error_local">Links to local or private network addresses are not accepted.</string>
+
+    <string name="download_quality">Quality</string>
+    <string name="download_best">Best quality</string>
+    <string name="download_no_audio">no audio</string>
+    <string name="download_size_approx">~%1$s</string>
+    <string name="download_size_unknown">size unknown</string>
+    <string name="download_file_name">File name</string>
+    <string name="download_start">Download</string>
+    <string name="download_cancel">Cancel</string>
+    <string name="download_keep_open">Keep MediaForge open until the download finishes.</string>
+    <string name="download_saving">Saving to the gallery…</string>
+    <string name="download_saved">Saved in Movies/MediaForge</string>
+    <string name="download_open">Open</string>
+    <string name="download_share">Share</string>
+    <string name="download_no_app">No app can open this file.</string>
+    <string name="download_cancelled">Download cancelled. Partial files were deleted.</string>
+    <string name="download_failed">The download failed.</string>
+    <string name="download_again">Download again</string>
+    <string name="download_permission_denied">MediaForge needs storage permission to save the video.</string>
 </resources>

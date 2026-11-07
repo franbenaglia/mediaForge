@@ -7,8 +7,8 @@ import com.fabapps.mediaforge.domain.model.OutputFile
 interface MediaLibrary {
     /**
      * Copia un archivo privado terminado a la carpeta pública que corresponde a su tipo (video en
-     * `Movies/MediaForge`, audio en `Music/MediaForge`) con un nombre que no pisa nada. Si sale bien,
-     * borra el archivo privado. Devuelve el archivo guardado, con una URI de contenido en `location`.
+     * `Movies/MediaForge`, audio en `Music/MediaForge`) con un nombre que no pisa nada. El archivo
+     * privado se borra siempre, salga bien o mal. Devuelve el archivo guardado, con una URI de contenido en `location`.
      */
     suspend fun save(file: OutputFile): Outcome<OutputFile>
 

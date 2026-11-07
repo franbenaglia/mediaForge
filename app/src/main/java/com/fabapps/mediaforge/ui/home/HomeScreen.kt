@@ -1,5 +1,8 @@
 package com.fabapps.mediaforge.ui.home
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,6 +57,10 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Solo Android 8–9: guardar en la galería pide permiso de escritura.
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) viewModel.onDownload() else viewModel.onStoragePermissionDenied()
+    }
 
     HomeContent(
         state = state,
@@ -68,8 +75,27 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
         onClear = viewModel::onClear,
         onAnalyze = viewModel::onAnalyze,
         onUpdateEngine = viewModel::onUpdateEngine,
+        download = DownloadActions(
+            onSelectOption = viewModel::onSelectOption,
+            onFileNameChange = viewModel::onFileNameChange,
+            onDownload = {
+                if (viewModel.needsStoragePermission) {
+                    permission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                } else {
+                    viewModel.onDownload()
+                }
+            },
+            onCancel = viewModel::onCancelDownload,
+        ),
     )
 }
+
+internal data class DownloadActions(
+    val onSelectOption: (Int) -> Unit = {},
+    val onFileNameChange: (String) -> Unit = {},
+    val onDownload: () -> Unit = {},
+    val onCancel: () -> Unit = {},
+)
 
 @Composable
 private fun HomeContent(
@@ -79,6 +105,7 @@ private fun HomeContent(
     onClear: () -> Unit,
     onAnalyze: () -> Unit,
     onUpdateEngine: () -> Unit = {},
+    download: DownloadActions = DownloadActions(),
 ) {
     Column(
         modifier = Modifier
@@ -101,9 +128,10 @@ private fun HomeContent(
             label = { Text(stringResource(R.string.home_url_label)) },
             placeholder = { Text(stringResource(R.string.home_url_placeholder)) },
             singleLine = true,
+            readOnly = state.inputLocked,
             isError = error != null,
             supportingText = error?.let { { Text(stringResource(it.messageRes())) } },
-            trailingIcon = if (state.input.isNotEmpty()) {
+            trailingIcon = if (state.input.isNotEmpty() && !state.inputLocked) {
                 {
                     IconButton(onClick = onClear) {
                         Icon(painterResource(R.drawable.ic_clear), stringResource(R.string.home_clear))
@@ -116,7 +144,7 @@ private fun HomeContent(
             keyboardActions = KeyboardActions(onGo = { onAnalyze() }),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = onPaste) {
+            OutlinedButton(onClick = onPaste, enabled = !state.inputLocked) {
                 Icon(painterResource(R.drawable.ic_paste), contentDescription = null)
                 Text(stringResource(R.string.home_paste), Modifier.padding(start = 8.dp))
             }
@@ -125,6 +153,17 @@ private fun HomeContent(
             }
         }
         AnalysisResult(state.analysis, onRetry = onAnalyze)
+        val loaded = state.analysis as? AnalysisState.Loaded
+        if (loaded != null) {
+            DownloadPanel(
+                state = state,
+                siteName = loaded.info.site.displayName,
+                onSelectOption = download.onSelectOption,
+                onFileNameChange = download.onFileNameChange,
+                onDownload = download.onDownload,
+                onCancel = download.onCancel,
+            )
+        }
         if (state.canUpdateEngine) {
             Button(onClick = onUpdateEngine, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Text(stringResource(R.string.home_update_engine))

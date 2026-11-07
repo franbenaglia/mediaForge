@@ -31,4 +31,10 @@ object Formatters {
             String.format(Locale.ROOT, "%d:%02d", minutes, seconds)
         }
     }
+
+    /** `1080p`, o `1080p60` cuando el video tiene más de 30 cuadros por segundo. */
+    fun quality(height: Int, fps: Double?): String {
+        val rounded = fps?.let { kotlin.math.round(it).toInt() }
+        return if (rounded != null && rounded > 30) "${height}p$rounded" else "${height}p"
+    }
 }

@@ -95,9 +95,10 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Depende de:* T4.5
   *Acepta:* prueba instrumentada en el teléfono (archivo visible en la galería, nombre repetido → sufijo).
   *Hecho:* `MediaLibrary` (dominio) y `MediaStoreLibrary`; `MediaLibraryDeviceTest` escrita, falta correrla en el teléfono. La ruta de Android 8–9 no se puede validar con el teléfono actual (Android 15).
-- [ ] **T4.7** · P1 · Inicio: elegir calidad, nombre editable, descargar, progreso (`JobRow`), cancelar y, al terminar, abrir o compartir.
+- [~] **T4.7** · P1 · Inicio: elegir calidad, nombre editable, descargar, progreso (`JobRow`), cancelar y, al terminar, abrir o compartir.
   *Depende de:* T4.2, T4.5, T4.6
   *Acepta:* pruebas de `HomeViewModel` con un `MediaDownloader` falso; `[~]` hasta probarlo en el teléfono.
+  *Hecho:* `DownloadPanel` (calidades con tamaño, nombre, progreso con `JobRow`, cancelar, abrir/compartir, aviso de dejar la app abierta), enlace bloqueado mientras descarga, permiso en Android 8–9. 9 pruebas nuevas del ViewModel.
 - [ ] **T4.8** · P1 · Prueba en el teléfono: descargar un video corto de YouTube (merge) y uno de Dailymotion, y cancelar a mitad sin dejar parciales.
   *Depende de:* T4.7
   *Acepta:* `EngineDeviceTest` o validación manual registrada en STATE.md.
