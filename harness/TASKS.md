@@ -44,9 +44,10 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
 - [x] **T3.4** · P1 · Clasificador de errores: stderr de yt-dlp → `MediaError`.
   *Depende de:* T3.2
   *Acepta:* pruebas con los mensajes reales de la Etapa 0 (`HTTP Error 403`, "only works when logged-in", `Unsupported URL`, errores de red).
-- [ ] **T3.5** · P1 · `ProcessRunner`: lanza un binario con argumentos en lista, lee stdout/stderr en streaming y, al cancelar la corrutina, mata el árbol de procesos por PID.
+- [~] **T3.5** · P1 · `ProcessRunner`: lanza un binario con argumentos en lista, lee stdout/stderr en streaming y, al cancelar la corrutina, mata el árbol de procesos por PID.
   *Depende de:* T3.2
   *Acepta:* pruebas en la JVM con `sleep`/`sh` (cancelación, timeout, código de salida, hijos muertos).
+  *Falta:* confirmar en el teléfono que `/system/bin/sh`, `kill` y la lectura de `/proc` se comportan igual (con yt-dlp + ffmpeg reales, en T3.6).
 - [ ] **T3.6** · P1 · `YtDlpExtractor` implementa `MediaExtractor`, con `--cache-dir` propio, `--no-playlist` y `--` antes de la URL.
   *Depende de:* T3.3, T3.4, T3.5
   *Acepta:* prueba unitaria de los argumentos construidos; `[~]` hasta probar YouTube y Dailymotion en el teléfono.
