@@ -4,6 +4,16 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-07 · Etapa 2
+
+**Hecho:** T2.1 (navegación tipada con barra inferior), T2.3 (componentes y formateadores), T3.1 (`UrlValidator`, adelantada porque la necesita T2.2) y T2.2 (pantalla Inicio). 61 pruebas.
+
+**Problemas:** la máquina se colgó durante `verify.sh`. Se limitó la memoria de Gradle, `verify.sh` corre en dos pasos con `nice` y se desactivó la importación de Gradle de la extensión de Java de VS Code (generaba `bin/` y otro build en paralelo).
+
+**Verificación:** `./scripts/verify.sh` OK (pico de 8,9 GB usados en total).
+
+---
+
 ## 2026-11-06 · Etapas 0 y 1
 
 **Objetivo:** investigación técnica y estructura del proyecto.

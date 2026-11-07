@@ -36,4 +36,22 @@
 
     <!-- Acciones -->
     <string name="action_retry">Reintentar</string>
+
+    <!-- Inicio -->
+    <string name="home_headline">Pegá un enlace</string>
+    <string name="home_supporting">Video o audio de YouTube, Dailymotion, TikTok y otros sitios compatibles. Descargá solo contenido que tengas permitido.</string>
+    <string name="home_url_label">Enlace</string>
+    <string name="home_paste">Pegar</string>
+    <string name="home_clear">Borrar</string>
+    <string name="home_analyze">Analizar</string>
+    <string name="home_analysis_unavailable">El análisis de enlaces todavía no está disponible.</string>
+
+    <!-- Validación de enlaces -->
+    <string name="url_error_empty">Ingresá un enlace.</string>
+    <string name="url_error_not_a_url">Ingresá un enlace web (https://…).</string>
+    <string name="url_error_too_long">El enlace es demasiado largo.</string>
+    <string name="url_error_scheme">Solo se aceptan enlaces http y https.</string>
+    <string name="url_error_missing_host">El enlace no tiene dirección de sitio.</string>
+    <string name="url_error_credentials">No se aceptan enlaces con usuario o contraseña.</string>
+    <string name="url_error_local">No se aceptan enlaces a direcciones locales o de red privada.</string>
 </resources>

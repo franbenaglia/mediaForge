@@ -41,4 +41,23 @@
 
     <!-- Acciones -->
     <string name="action_retry">Retry</string>
+
+    <!-- Inicio -->
+    <string name="home_headline">Paste a link</string>
+    <string name="home_supporting">Video or audio from YouTube, Dailymotion, TikTok and other supported sites. Only download content you are allowed to.</string>
+    <string name="home_url_label">Link</string>
+    <string name="home_url_placeholder" translatable="false">https://…</string>
+    <string name="home_paste">Paste</string>
+    <string name="home_clear">Clear</string>
+    <string name="home_analyze">Analyze</string>
+    <string name="home_analysis_unavailable">Link analysis is not available yet.</string>
+
+    <!-- Validación de enlaces -->
+    <string name="url_error_empty">Enter a link.</string>
+    <string name="url_error_not_a_url">Enter a web link (https://…).</string>
+    <string name="url_error_too_long">The link is too long.</string>
+    <string name="url_error_scheme">Only http and https links are supported.</string>
+    <string name="url_error_missing_host">The link has no website address.</string>
+    <string name="url_error_credentials">Links that include a username or password are not accepted.</string>
+    <string name="url_error_local">Links to local or private network addresses are not accepted.</string>
 </resources>

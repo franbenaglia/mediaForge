@@ -17,12 +17,12 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
 
 ---
 
-## Etapa 2 · Interfaz base
+## Etapa 2 · Interfaz base ✅
 
 - [x] **T2.1** · P1 · Navegación (Navigation Compose, rutas tipadas): Inicio, Descargas, Conversor, Historial, Ajustes, con barra inferior.
   *Depende de:* —
   *Acepta:* compila; prueba unitaria del grafo de rutas; cada destino muestra su título desde recursos.
-- [ ] **T2.2** · P1 · Pantalla Inicio (solo UI): campo URL, botón pegar, botón analizar, `HomeViewModel` con `UiState` (vacío / escribiendo / inválida / lista).
+- [x] **T2.2** · P1 · Pantalla Inicio (solo UI): campo URL, botón pegar, botón analizar, `HomeViewModel` con `UiState` (vacío / escribiendo / inválida / lista).
   *Depende de:* T2.1, T3.1
   *Acepta:* prueba de ViewModel: pegar y escribir actualizan el estado; con una URL inválida el botón queda deshabilitado.
 - [x] **T2.3** · P2 · Componentes reutilizables: tarjeta de medio, fila de trabajo con progreso, estado vacío, estado de error.
