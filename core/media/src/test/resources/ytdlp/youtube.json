@@ -1,0 +1,28 @@
+{
+  "id": "aqz-KE-bpKQ",
+  "title": "Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film",
+  "fulltitle": "Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film",
+  "webpage_url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+  "original_url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+  "extractor": "youtube",
+  "extractor_key": "Youtube",
+  "uploader": "Blender",
+  "channel": "Blender",
+  "duration": 635,
+  "thumbnail": "https://i.ytimg.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+  "upload_date": "20140110",
+  "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+  "view_count": 1,
+  "heatmap": [{"start_time": 0.0, "end_time": 6.35, "value": 1.0}],
+  "subtitles": {},
+  "automatic_captions": {"en": [{"ext": "vtt", "url": "https://example.invalid/caption"}]},
+  "formats": [
+    {"format_id": "sb0", "format_note": "storyboard", "ext": "mhtml", "protocol": "mhtml", "vcodec": "none", "acodec": "none", "width": 48, "height": 27, "url": "https://example.invalid/sb"},
+    {"format_id": "139", "format_note": "low", "ext": "m4a", "protocol": "https", "vcodec": "none", "acodec": "mp4a.40.5", "abr": 48.8, "tbr": 48.8, "filesize": 3872012, "url": "https://example.invalid/139"},
+    {"format_id": "251", "format_note": "medium", "ext": "webm", "protocol": "https", "vcodec": "none", "acodec": "opus", "abr": 133.4, "tbr": 133.4, "filesize": 10593201, "url": "https://example.invalid/251"},
+    {"format_id": "18", "format_note": "360p", "ext": "mp4", "protocol": "https", "vcodec": "avc1.42001E", "acodec": "mp4a.40.2", "width": 640, "height": 360, "fps": 30, "tbr": 556.1, "filesize_approx": 44148213, "url": "https://example.invalid/18"},
+    {"format_id": "137", "format_note": "1080p", "ext": "mp4", "protocol": "https", "vcodec": "avc1.640028", "acodec": "none", "width": 1920, "height": 1080, "fps": 60.0, "tbr": 4319.7, "filesize": 342900123, "url": "https://example.invalid/137"},
+    {"format_id": "313", "format_note": "2160p", "ext": "webm", "protocol": "https", "vcodec": "vp9", "acodec": "none", "width": 3840, "height": 2160, "fps": 60, "tbr": 26090.5, "filesize_approx": 2.0714E9, "url": "https://example.invalid/313"},
+    {"format_id": "401", "format_note": "2160p", "ext": "mp4", "protocol": "https", "vcodec": "av01.0.13M.08", "acodec": "none", "width": 3840, "height": 2160, "fps": 60, "tbr": 18237.0, "filesize": null, "url": "https://example.invalid/401"}
+  ]
+}

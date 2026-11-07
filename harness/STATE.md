@@ -4,14 +4,14 @@
 
 ## Próximo paso
 
-Etapa 3, tarea **T3.3** (parser de `--dump-json`).
+Etapa 3, tarea **T3.4** (clasificador de errores de yt-dlp).
 
 ## Etapas
 
 - [x] 0. Investigación técnica → [docs/FEASIBILITY.md](../docs/FEASIBILITY.md)
 - [x] 1. Harness y estructura
 - [x] 2. Interfaz base
-- [ ] 3. Motor de extracción (en curso: T3.1 y T3.2 hechas)
+- [ ] 3. Motor de extracción (en curso: T3.1, T3.2 y T3.3 hechas)
 - [ ] 4. Descarga de video
 - [ ] 5. Extracción de audio
 - [ ] 6. Conversor multimedia
@@ -32,13 +32,14 @@ Etapa 3, tarea **T3.3** (parser de `--dump-json`).
 - `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
 - Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" avisa que el análisis todavía no está disponible (llega con T3.6).
 - `:core:media`: youtubedl-android 0.18.1 (Python, FFmpeg, QuickJS), un APK por ABI y `EngineInitializer` (una sola vez, fuera del hilo principal, chequea antes el espacio libre; estado observable). Todavía nadie lo llama: lo usa T3.6.
+- `YtDlpInfoParser`: `--dump-json` → `MediaInfo` con la lista completa de formatos (descarta storyboards), tamaños exactos o aproximados, playlists rechazadas, JSON inválido como error. 13 pruebas.
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
 ## Última verificación
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 68 pruebas (34 dominio + 27 app + 7 media), lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 81 pruebas (34 dominio + 27 app + 20 media), lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
 | Pruebas en dispositivo | No hay todavía | — |
 
@@ -54,6 +55,8 @@ youtubedl-android 0.18.1 (ADR-001).
 Ninguno.
 
 ## Problemas conocidos
+
+- Los fixtures de yt-dlp (`core/media/src/test/resources/ytdlp`) son reconstruidos a partir de lo observado en la Etapa 0: la política de seguridad de la sesión no permitió ejecutar yt-dlp en la PC. Reemplazarlos con salida real del teléfono (T3.6).
 
 - El APK de release (R8) todavía no se probó con youtubedl-android. Hay reglas en `core/media/consumer-rules.pro` (Jackson), pero se validan en el teléfono antes del primer release.
 

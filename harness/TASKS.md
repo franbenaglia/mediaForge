@@ -37,7 +37,8 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
 - [x] **T3.2** · P1 · Módulo `:core:media` con youtubedl-android 0.18.1, splits por ABI e inicialización en segundo plano con verificación de espacio.
   *Depende de:* —
   *Acepta:* `verify.sh` OK; tamaño del APK por ABI registrado en STATE.md.
-- [ ] **T3.3** · P1 · Parser propio de `--dump-json` → `MediaInfo` (kotlinx.serialization), tolerante a campos faltantes.
+- [~] **T3.3** · P1 · Parser propio de `--dump-json` → `MediaInfo` (kotlinx.serialization), tolerante a campos faltantes.
+  *Falta:* los fixtures son reconstruidos (no se permitió ejecutar yt-dlp en la PC); reemplazarlos por salida real capturada en el teléfono durante T3.6.
   *Depende de:* T3.2
   *Acepta:* pruebas con fixtures JSON reales de YouTube y Dailymotion (guardados en `core/media/src/test/resources`).
 - [ ] **T3.4** · P1 · Clasificador de errores: stderr de yt-dlp → `MediaError`.

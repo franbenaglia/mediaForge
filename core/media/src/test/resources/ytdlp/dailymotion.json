@@ -1,0 +1,16 @@
+{
+  "id": "x2kdx9f",
+  "title": "Big Buck Bunny",
+  "webpage_url": "https://www.dailymotion.com/video/x2kdx9f",
+  "extractor": "dailymotion",
+  "extractor_key": "Dailymotion",
+  "uploader": "Blender Foundation",
+  "duration": 596.0,
+  "thumbnail": "https://s1.dmcdn.net/v/example/x1080",
+  "upload_date": "20150301",
+  "subtitles": {"en": [{"ext": "srt", "url": "https://example.invalid/sub.srt"}]},
+  "formats": [
+    {"format_id": "hls-380", "ext": "mp4", "protocol": "m3u8_native", "vcodec": "avc1.42c00d", "acodec": "mp4a.40.2", "width": 512, "height": 288, "tbr": 380, "url": "https://example.invalid/380.m3u8"},
+    {"format_id": "hls-1080", "ext": "mp4", "protocol": "m3u8_native", "vcodec": "avc1.640028", "acodec": "mp4a.40.2", "width": 1920, "height": 1080, "fps": 25, "tbr": 2176.5, "url": "https://example.invalid/1080.m3u8"}
+  ]
+}
