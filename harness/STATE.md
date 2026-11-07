@@ -4,14 +4,14 @@
 
 ## Próximo paso
 
-Etapa 3, tarea **T3.6** (`YtDlpExtractor`). Es la primera que necesita el teléfono para validarse.
+Etapa 3, tarea **T3.8** (Inicio muestra el resultado del análisis). Después, prueba en el teléfono de T3.3/T3.5/T3.6/T3.8 (pedir permiso) y T3.7 (actualizador).
 
 ## Etapas
 
 - [x] 0. Investigación técnica → [docs/FEASIBILITY.md](../docs/FEASIBILITY.md)
 - [x] 1. Harness y estructura
 - [x] 2. Interfaz base
-- [ ] 3. Motor de extracción (en curso: T3.1 a T3.5 hechas)
+- [ ] 3. Motor de extracción (en curso: T3.1 a T3.6 hechas; T3.3, T3.5 y T3.6 sin validar en el teléfono)
 - [ ] 4. Descarga de video
 - [ ] 5. Extracción de audio
 - [ ] 6. Conversor multimedia
@@ -35,13 +35,14 @@ Etapa 3, tarea **T3.6** (`YtDlpExtractor`). Es la primera que necesita el teléf
 - `YtDlpInfoParser`: `--dump-json` → `MediaInfo` con la lista completa de formatos (descarta storyboards), tamaños exactos o aproximados, playlists rechazadas, JSON inválido como error. 13 pruebas.
 - `YtDlpErrorClassifier`: stderr → `MediaError` (login, acceso denegado, bot check, DRM, red, espacio, sitio no soportado, motor desactualizado). Un 403 con el aviso de "versión de más de 90 días" sugiere actualizar. El detalle se guarda sin query strings. 17 pruebas.
 - `ProcessRunner`: argumentos en lista vía `sh -c 'echo $$; exec "$@"'` (PID real, sin interpretar argumentos), stdout/stderr en streaming, timeout, y al cancelar mata hijos y proceso (buscados en `/proc`). 9 pruebas en la JVM con procesos reales.
+- `YtDlpExtractor` (implementa `MediaExtractor`, registrado en Hilt): valida URL → `ensureReady` → `yt-dlp --dump-json` con `ProcessRunner` → parser o clasificador. Usa el mismo entorno que la librería, armado en `YoutubeDlNativeEngine.runtime()`. 9 pruebas.
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
 ## Última verificación
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 107 pruebas (34 dominio + 27 app + 46 media), lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 116 pruebas (34 dominio + 27 app + 55 media), lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
 | Pruebas en dispositivo | No hay todavía | — |
 

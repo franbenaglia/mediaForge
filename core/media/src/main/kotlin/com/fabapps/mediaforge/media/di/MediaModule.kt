@@ -1,9 +1,12 @@
 package com.fabapps.mediaforge.media.di
 
+import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.media.engine.IoDispatcher
 import com.fabapps.mediaforge.media.engine.NativeEngine
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
 import com.fabapps.mediaforge.media.process.ProcessRunner
+import com.fabapps.mediaforge.media.ytdlp.YtDlpExtractor
+import com.fabapps.mediaforge.media.ytdlp.YtDlpRuntimeProvider
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -18,6 +21,12 @@ import kotlinx.coroutines.Dispatchers
 internal abstract class MediaModule {
     @Binds
     abstract fun nativeEngine(impl: YoutubeDlNativeEngine): NativeEngine
+
+    @Binds
+    abstract fun ytDlpRuntime(impl: YoutubeDlNativeEngine): YtDlpRuntimeProvider
+
+    @Binds
+    abstract fun mediaExtractor(impl: YtDlpExtractor): MediaExtractor
 
     companion object {
         @Provides
