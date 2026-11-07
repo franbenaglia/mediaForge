@@ -3,6 +3,7 @@ package com.fabapps.mediaforge.media.engine
 import android.content.Context
 import android.os.StatFs
 import androidx.core.content.edit
+import com.fabapps.mediaforge.media.update.YtDlpVersions
 import com.fabapps.mediaforge.media.ytdlp.YtDlpRuntime
 import com.fabapps.mediaforge.media.ytdlp.YtDlpRuntimeProvider
 import com.yausername.ffmpeg.FFmpeg
@@ -15,8 +16,10 @@ import javax.inject.Inject
  * Implementación con youtubedl-android. Las rutas internas de la librería están solo acá:
  * si se cambia de librería (ADR-001), se reemplaza esta clase.
  */
-internal class YoutubeDlNativeEngine @Inject constructor(@ApplicationContext private val context: Context) :
-    NativeEngine,
+internal class YoutubeDlNativeEngine @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val versions: YtDlpVersions,
+) : NativeEngine,
     YtDlpRuntimeProvider {
 
     private val nativeDir get() = File(context.applicationInfo.nativeLibraryDir)
@@ -48,7 +51,8 @@ internal class YoutubeDlNativeEngine @Inject constructor(@ApplicationContext pri
         }
         return YtDlpRuntime(
             python = File(nativeDir, "libpython.so"),
-            ytDlp = File(context.noBackupFilesDir, "youtubedl-android/yt-dlp/yt-dlp"),
+            // La versión actualizada y verificada (T3.7), o la que vino con el APK.
+            ytDlp = versions.active()?.file ?: bundledYtDlp(),
             ffmpeg = File(nativeDir, "libffmpeg.so"),
             quickJs = File(nativeDir, "libqjs.so"),
             cacheDir = File(context.cacheDir, "yt-dlp").apply { mkdirs() },
@@ -62,6 +66,9 @@ internal class YoutubeDlNativeEngine @Inject constructor(@ApplicationContext pri
             ),
         )
     }
+
+    /** Copia de yt-dlp que la librería deja al inicializar. Nunca la modifica la app. */
+    fun bundledYtDlp() = File(context.noBackupFilesDir, "youtubedl-android/yt-dlp/yt-dlp")
 
     private companion object {
         const val PREFS = "media_engine"

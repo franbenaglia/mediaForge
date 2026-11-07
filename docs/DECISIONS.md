@@ -138,3 +138,17 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 **Fecha:** 2026-11-06 · **Estado:** aceptada
 
 **Decisión:** ktlint 14.2.0 (plugin Gradle) en todos los subproyectos, con estilo `android_studio`, líneas de 120 y comas finales permitidas. `./gradlew ktlintFormat` corrige el formato. Es parte de `verify.sh`.
+
+---
+
+## ADR-014 · Verificación de firmas OpenPGP sin Bouncy Castle
+
+**Fecha:** 2026-11-07 · **Estado:** aceptada
+
+**Contexto:** el actualizador (T3.7) tiene que verificar `SHA2-256SUMS.sig` de yt-dlp, una firma OpenPGP v4 con RSA y SHA-512. Bouncy Castle (bcpg + bcprov) suma ~8 MB para una sola verificación.
+
+**Decisión:** un verificador mínimo propio (`OpenPgp`), que parsea solo clave RSA v4 y firma v4 binaria y verifica con `java.security.Signature`. Todo lo que no entiende lo rechaza. La clave de yt-dlp se embebe y se fija por huella (`AC0C BBE6 848D 6A87 3464 AF4E 57CF 6593 3B5A 7581`). Está probado con la firma real del release 2026.10.26, verificada antes con `gpg`, y con una clave de prueba para los casos de falla.
+
+**Descartadas:** Bouncy Castle (tamaño); confiar solo en el SHA-256 de GitHub (no protege si se compromete el release); el actualizador de youtubedl-android (no verifica nada y borra la versión anterior).
+
+**Riesgo:** si yt-dlp rota su clave, las actualizaciones fallan con un error explícito hasta publicar un APK con la clave nueva. Es el comportamiento seguro.

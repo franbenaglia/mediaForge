@@ -1,17 +1,28 @@
 package com.fabapps.mediaforge.media.di
 
+import android.content.Context
+import androidx.core.content.edit
+import com.fabapps.mediaforge.domain.engine.ExtractorEngine
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
+import com.fabapps.mediaforge.media.engine.EngineInitializer
 import com.fabapps.mediaforge.media.engine.IoDispatcher
 import com.fabapps.mediaforge.media.engine.NativeEngine
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
 import com.fabapps.mediaforge.media.process.ProcessRunner
+import com.fabapps.mediaforge.media.update.AndroidVersionProbe
+import com.fabapps.mediaforge.media.update.KeyValueStore
+import com.fabapps.mediaforge.media.update.UrlConnectionFetcher
+import com.fabapps.mediaforge.media.update.YtDlpUpdater
+import com.fabapps.mediaforge.media.update.YtDlpVersions
 import com.fabapps.mediaforge.media.ytdlp.YtDlpExtractor
 import com.fabapps.mediaforge.media.ytdlp.YtDlpRuntimeProvider
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.io.File
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -36,5 +47,31 @@ internal abstract class MediaModule {
         @Provides
         @Singleton
         fun processRunner(@IoDispatcher io: CoroutineDispatcher): ProcessRunner = ProcessRunner(io)
+
+        @Provides
+        @Singleton
+        fun ytDlpVersions(@ApplicationContext context: Context): YtDlpVersions {
+            val prefs = context.getSharedPreferences("ytdlp_versions", Context.MODE_PRIVATE)
+            val store = object : KeyValueStore {
+                override fun get(key: String): String? = prefs.getString(key, null)
+                override fun set(key: String, value: String?) = prefs.edit { putString(key, value) }
+            }
+            return YtDlpVersions(File(context.noBackupFilesDir, "mediaforge/yt-dlp"), store)
+        }
+
+        @Provides
+        @Singleton
+        fun extractorEngine(
+            versions: YtDlpVersions,
+            engine: EngineInitializer,
+            native: YoutubeDlNativeEngine,
+            runner: ProcessRunner,
+            @IoDispatcher io: CoroutineDispatcher,
+        ): ExtractorEngine = YtDlpUpdater(
+            http = UrlConnectionFetcher(),
+            versions = versions,
+            probe = AndroidVersionProbe(engine, native, runner, native.bundledYtDlp()),
+            io = io,
+        )
     }
 }

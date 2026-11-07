@@ -4,14 +4,14 @@
 
 ## Próximo paso
 
-Tarea **T3.7** (actualizador verificado de yt-dlp). Después, volver a correr `EngineDeviceTest` en el teléfono (Dailymotion y cancelación con ffmpeg) y probar la app a mano (T3.8).
+Correr `EngineDeviceTest` en el teléfono (actualización real, Dailymotion, cancelación con ffmpeg). Después **T3.9** (botón "Actualizar motor" en Inicio).
 
 ## Etapas
 
 - [x] 0. Investigación técnica → [docs/FEASIBILITY.md](../docs/FEASIBILITY.md)
 - [x] 1. Harness y estructura
 - [x] 2. Interfaz base
-- [ ] 3. Motor de extracción (en curso: T3.1–T3.6 y T3.8 hechas; T3.3, T3.5, T3.6 y T3.8 sin validar en el teléfono; falta T3.7)
+- [ ] 3. Motor de extracción (en curso: T3.1–T3.8 hechas; faltan validar en el teléfono T3.3 (Dailymotion), T3.5, T3.6 (Dailymotion) y T3.7; falta T3.9)
 - [ ] 4. Descarga de video
 - [ ] 5. Extracción de audio
 - [ ] 6. Conversor multimedia
@@ -36,13 +36,14 @@ Tarea **T3.7** (actualizador verificado de yt-dlp). Después, volver a correr `E
 - `YtDlpErrorClassifier`: stderr → `MediaError` (login, acceso denegado, bot check, DRM, red, espacio, sitio no soportado, motor desactualizado). Un 403 con el aviso de "versión de más de 90 días" sugiere actualizar. El detalle se guarda sin query strings. 17 pruebas.
 - `ProcessRunner`: argumentos en lista vía `sh -c 'echo $$; exec "$@"'` (PID real, sin interpretar argumentos), stdout/stderr en streaming, timeout, y al cancelar mata hijos y proceso (buscados en `/proc`). 9 pruebas en la JVM con procesos reales.
 - `YtDlpExtractor` (implementa `MediaExtractor`, registrado en Hilt): valida URL → `ensureReady` → `yt-dlp --dump-json` con `ProcessRunner` → parser o clasificador. Usa el mismo entorno que la librería, armado en `YoutubeDlNativeEngine.runtime()`. 9 pruebas.
+- `YtDlpUpdater` (implementa `ExtractorEngine`): última versión permitida por `_update_spec` → `SHA2-256SUMS` con firma OpenPGP de la clave fijada de yt-dlp (`OpenPgp`, sin Bouncy Castle) → SHA-256 del zipapp → prueba de `--version` → activa y conserva la anterior (`YtDlpVersions`). El motor usa la versión activa o la del APK. 22 pruebas.
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
 ## Última verificación
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 120 pruebas (34 dominio + 30 app + 56 media) + 4 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 142 pruebas (34 dominio + 30 app + 78 media) + 5 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | init 2,7 s (primera vez) / 20 ms; YouTube OK 5,4 s, 35 formatos; Dailymotion 403 (yt-dlp viejo); cancelación sin validar | 2026-11-07 |
 

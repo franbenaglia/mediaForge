@@ -10,6 +10,11 @@ import com.fabapps.mediaforge.media.engine.EngineState
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
 import com.fabapps.mediaforge.media.process.ProcessEvent
 import com.fabapps.mediaforge.media.process.ProcessRunner
+import com.fabapps.mediaforge.media.update.AndroidVersionProbe
+import com.fabapps.mediaforge.media.update.KeyValueStore
+import com.fabapps.mediaforge.media.update.UrlConnectionFetcher
+import com.fabapps.mediaforge.media.update.YtDlpUpdater
+import com.fabapps.mediaforge.media.update.YtDlpVersions
 import com.fabapps.mediaforge.media.ytdlp.YtDlpCommand
 import com.fabapps.mediaforge.media.ytdlp.YtDlpExtractor
 import com.fabapps.mediaforge.media.ytdlp.YtDlpInfoParser
@@ -40,9 +45,23 @@ import org.junit.runners.MethodSorters
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class EngineDeviceTest {
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val native = YoutubeDlNativeEngine(context)
+    private val prefs = context.getSharedPreferences("ytdlp_versions", Context.MODE_PRIVATE)
+    private val versions = YtDlpVersions(
+        File(context.noBackupFilesDir, "mediaforge/yt-dlp"),
+        object : KeyValueStore {
+            override fun get(key: String): String? = prefs.getString(key, null)
+            override fun set(key: String, value: String?) = prefs.edit().putString(key, value).apply()
+        },
+    )
+    private val native = YoutubeDlNativeEngine(context, versions)
     private val engine = EngineInitializer(native, Dispatchers.IO)
     private val runner = ProcessRunner(Dispatchers.IO)
+    private val updater = YtDlpUpdater(
+        http = UrlConnectionFetcher(),
+        versions = versions,
+        probe = AndroidVersionProbe(engine, native, runner, native.bundledYtDlp()),
+        io = Dispatchers.IO,
+    )
     private val fixtures = File(context.filesDir, "fixtures").apply { mkdirs() }
 
     private fun log(msg: String) = Log.i(TAG, msg)
@@ -63,6 +82,20 @@ class EngineDeviceTest {
         runner.run(YtDlpCommand.version(native.runtime()), native.runtime().environment).collect { events += it }
         log("yt-dlp version events=$events")
         assertEquals(ProcessEvent.Exited(0), events.last())
+    }
+
+    /** T3.7: actualización real desde GitHub, con firma y hash verificados. */
+    @Test
+    fun t1b_updateYtDlp() = runBlocking {
+        engine.ensureReady()
+        val before = updater.installedVersion()
+        val start = System.currentTimeMillis()
+        val result = updater.update()
+        log("update before=$before result=$result ms=${System.currentTimeMillis() - start}")
+        log("update active=${versions.active()} previous=${versions.previous()}")
+        assertTrue("update failed: $result", result is Outcome.Success)
+        assertEquals((result as Outcome.Success).value, updater.installedVersion())
+        assertEquals(versions.active()?.file?.absolutePath, native.runtime().ytDlp.absolutePath)
     }
 
     @Test
