@@ -29,7 +29,7 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
   *Depende de:* T2.1
   *Acepta:* previews en claro y oscuro; sin textos incrustados.
 
-## Etapa 3 · Motor de extracción
+## Etapa 3 · Motor de extracción ✅
 
 - [x] **T3.1** · P1 · `UrlValidator` en el dominio: solo `http`/`https`, host obligatorio, largo máximo, rechazo de URLs que empiecen con `-`, extracción de URL desde texto compartido.
   *Depende de:* —
@@ -62,13 +62,15 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
   *Depende de:* T3.5
   *Acepta:* pruebas con un release falso (hash incorrecto → rechazo; firma inválida → rechazo; versión rota → rollback).
   *Hecho:* verificación OpenPGP propia (sin Bouncy Castle) probada con la firma real de 2026.10.26 y con una clave de prueba; respeta `_update_spec`; 22 pruebas. *Validado en el teléfono (2026-11-07):* 2025.11.12 → 2026.10.26 en 7,7 s con firma y hash verificados; YouTube pasa de 35 a 57 formatos.
-- [~] **T3.9** · P1 · Inicio ofrece "Actualizar motor" cuando el error es `EngineOutdated`, y reintenta el análisis al terminar.
+- [x] **T3.9** · P1 · Inicio ofrece "Actualizar motor" cuando el error es `EngineOutdated`, y reintenta el análisis al terminar.
   *Depende de:* T3.7
   *Acepta:* pruebas de `HomeViewModel` (actualiza → reintenta; falla la actualización → error explicado); `[~]` hasta el teléfono.
+  *Validado por el usuario en el teléfono (2026-11-07):* Dailymotion → "motor desactualizado" → "Actualizar motor" → reanaliza solo y muestra la tarjeta. La tarjeta no tiene miniatura (falta la librería de imágenes, T4.1).
 
 ## Etapa 4 · Descarga de video (resumen)
 
 Selección de formato desde los formatos reales, opción "mejor calidad", `YtDlpDownloader` con parseo de progreso, merge sin recodificar, guardado en MediaStore, cancelación y parciales. Criterio del MVP: punto 6 de main.md §15.
+Pendiente que entra en esta etapa: **T4.1** · P2 · miniatura en `MediaCard` (librería de imágenes; hoy la tarjeta muestra solo título y duración). Las demás tareas se detallan al empezar la etapa.
 
 ## Etapa 5 · Extracción de audio (resumen)
 

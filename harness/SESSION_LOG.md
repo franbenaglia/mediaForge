@@ -4,6 +4,18 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-07 · Etapa 3
+
+**Hecho:** T3.2–T3.9. `:core:media` con youtubedl-android 0.18.1, parser de `--dump-json`, clasificador de errores, `ProcessRunner` con cancelación del árbol de procesos, `YtDlpExtractor`, actualizador de yt-dlp con firma OpenPGP verificada (ADR-014) y botón "Actualizar motor" en Inicio. 146 pruebas en la JVM + 5 instrumentadas.
+
+**Teléfono (24115RA8EG, Android 15):** `EngineDeviceTest` 5/5; el usuario validó T3.8 y T3.9 a mano. Fixtures reales de YouTube y Dailymotion.
+
+**Problemas:** faltaba el permiso `INTERNET` (DNS fallaba en el teléfono). El yt-dlp del APK da 403 en Dailymotion hasta actualizar. La tarjeta no muestra miniatura (T4.1).
+
+**Verificación:** `./scripts/verify.sh` OK.
+
+---
+
 ## 2026-11-07 · Etapa 2
 
 **Hecho:** T2.1 (navegación tipada con barra inferior), T2.3 (componentes y formateadores), T3.1 (`UrlValidator`, adelantada porque la necesita T2.2) y T2.2 (pantalla Inicio). 61 pruebas.
