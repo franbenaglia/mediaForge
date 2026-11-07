@@ -44,6 +44,7 @@ import com.fabapps.mediaforge.domain.model.SourceSite
 import com.fabapps.mediaforge.domain.url.UrlCheck
 import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.MediaCard
+import com.fabapps.mediaforge.ui.common.RemoteThumbnail
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 import kotlinx.coroutines.launch
 
@@ -177,6 +178,7 @@ private fun AnalysisResult(analysis: AnalysisState, onRetry: () -> Unit) {
                 siteName = info.site.displayName,
                 uploader = info.uploader,
                 durationSeconds = info.durationSeconds,
+                thumbnail = info.thumbnailUrl?.let { url -> { RemoteThumbnail(url) } },
             )
             Text(
                 pluralStringResource(R.plurals.home_formats_count, info.formats.size, info.formats.size),

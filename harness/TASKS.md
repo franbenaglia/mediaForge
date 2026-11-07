@@ -67,10 +67,35 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
   *Acepta:* pruebas de `HomeViewModel` (actualiza → reintenta; falla la actualización → error explicado); `[~]` hasta el teléfono.
   *Validado por el usuario en el teléfono (2026-11-07):* Dailymotion → "motor desactualizado" → "Actualizar motor" → reanaliza solo y muestra la tarjeta. La tarjeta no tiene miniatura (falta la librería de imágenes, T4.1).
 
-## Etapa 4 · Descarga de video (resumen)
+## Etapa 4 · Descarga de video
 
-Selección de formato desde los formatos reales, opción "mejor calidad", `YtDlpDownloader` con parseo de progreso, merge sin recodificar, guardado en MediaStore, cancelación y parciales. Criterio del MVP: punto 6 de main.md §15.
-Pendiente que entra en esta etapa: **T4.1** · P2 · miniatura en `MediaCard` (librería de imágenes; hoy la tarjeta muestra solo título y duración). Las demás tareas se detallan al empezar la etapa.
+Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelScope` (si se cierra la app, se cancela); el servicio en primer plano y la cola llegan en la Etapa 7.
+
+- [~] **T4.1** · P2 · Miniatura en `MediaCard` con Coil 3 (solo `https`; sin miniatura o con error, fondo neutro).
+  *Depende de:* T3.8
+  *Acepta:* `verify.sh` OK; `[~]` hasta ver la miniatura de YouTube y Dailymotion en el teléfono.
+  *Hecho:* `RemoteThumbnail` (Coil 3.6.3 + OkHttp), usado en la tarjeta de Inicio.
+- [ ] **T4.2** · P1 · Opciones de calidad en el dominio (`VideoOptions`): "mejor calidad" más una opción por altura disponible (video+audio o video solo + mejor audio), con tamaño estimado y sin duplicados.
+  *Depende de:* —
+  *Acepta:* pruebas con los fixtures reales de YouTube (formatos separados) y Dailymotion (HLS combinado).
+- [ ] **T4.3** · P1 · Comando de descarga (`YtDlpCommand.download`): selector `-f` desde `DownloadSelection.Video`, merge a MP4 sin recodificar, salida en una carpeta temporal por trabajo, plantilla de progreso propia, `--` antes de la URL.
+  *Depende de:* T4.2
+  *Acepta:* pruebas de los argumentos (mejor calidad, altura máxima, formatos explícitos, URL que parece opción).
+- [ ] **T4.4** · P1 · Parser de progreso: líneas de la plantilla → `JobState.Downloading` (bytes, total o estimado, velocidad), varias partes (video y audio) como un solo avance, `[Merger]` → `Processing(MERGE)`.
+  *Depende de:* T4.3
+  *Acepta:* pruebas con salida real o reconstruida (tamaños desconocidos, `NA`, dos partes, merge).
+- [ ] **T4.5** · P1 · `YtDlpDownloader` implementa `MediaDownloader`: espacio libre, ejecución con `ProcessRunner`, errores clasificados, y al cancelar o fallar borra la carpeta temporal.
+  *Depende de:* T4.3, T4.4
+  *Acepta:* pruebas en la JVM con un yt-dlp falso (éxito, error, cancelación sin parciales).
+- [ ] **T4.6** · P1 · Guardado en `Movies/MediaForge` por MediaStore (API 29+: `RELATIVE_PATH` + `IS_PENDING`; API 26–28: permiso `WRITE_EXTERNAL_STORAGE` limitado a 28), con `FileNames.sanitize`/`unique`.
+  *Depende de:* T4.5
+  *Acepta:* prueba instrumentada en el teléfono (archivo visible en la galería, nombre repetido → sufijo).
+- [ ] **T4.7** · P1 · Inicio: elegir calidad, nombre editable, descargar, progreso (`JobRow`), cancelar y, al terminar, abrir o compartir.
+  *Depende de:* T4.2, T4.5, T4.6
+  *Acepta:* pruebas de `HomeViewModel` con un `MediaDownloader` falso; `[~]` hasta probarlo en el teléfono.
+- [ ] **T4.8** · P1 · Prueba en el teléfono: descargar un video corto de YouTube (merge) y uno de Dailymotion, y cancelar a mitad sin dejar parciales.
+  *Depende de:* T4.7
+  *Acepta:* `EngineDeviceTest` o validación manual registrada en STATE.md.
 
 ## Etapa 5 · Extracción de audio (resumen)
 

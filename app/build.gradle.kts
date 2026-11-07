@@ -75,6 +75,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.hilt.android)

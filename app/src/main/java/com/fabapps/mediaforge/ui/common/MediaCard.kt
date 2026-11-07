@@ -23,8 +23,8 @@ import com.fabapps.mediaforge.ui.format.Formatters
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 
 /**
- * Tarjeta con los datos básicos de un recurso. La miniatura llega como slot: la carga de
- * imágenes se agrega con la Etapa 3. Sin miniatura se muestra un fondo neutro.
+ * Tarjeta con los datos básicos de un recurso. La miniatura llega como slot (ver [RemoteThumbnail]).
+ * Sin miniatura se muestra un fondo neutro.
  */
 @Composable
 fun MediaCard(

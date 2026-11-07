@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 4 (descarga de video): detallar las tareas en `TASKS.md` y empezar por la selección de formato y `YtDlpDownloader`. Incluye T4.1 (miniatura en la tarjeta). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
+Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.2 (opciones de calidad). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
 
 ## Etapas
 
@@ -30,7 +30,7 @@ Etapa 4 (descarga de video): detallar las tareas en `TASKS.md` y empezar por la 
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
-- Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Todavía sin miniatura: falta la librería de imágenes (T4.1). Si el error es "motor desactualizado", ofrece "Actualizar motor" y reintenta solo (T3.9, validado en el teléfono).
+- Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Miniatura con Coil (T4.1, falta verla en el teléfono). Si el error es "motor desactualizado", ofrece "Actualizar motor" y reintenta solo (T3.9, validado en el teléfono).
 - `:core:media`: youtubedl-android 0.18.1 (Python, FFmpeg, QuickJS), un APK por ABI y `EngineInitializer` (una sola vez, fuera del hilo principal, chequea antes el espacio libre; estado observable). Todavía nadie lo llama: lo usa T3.6.
 - `YtDlpInfoParser`: `--dump-json` → `MediaInfo` con la lista completa de formatos (descarta storyboards), tamaños exactos o aproximados, playlists rechazadas, JSON inválido como error. 13 pruebas.
 - `YtDlpErrorClassifier`: stderr → `MediaError` (login, acceso denegado, bot check, DRM, red, espacio, sitio no soportado, motor desactualizado). Un 403 con el aviso de "versión de más de 90 días" sugiere actualizar. El detalle se guarda sin query strings. 17 pruebas.
@@ -52,7 +52,7 @@ Etapa 4 (descarga de video): detallar las tareas en `TASKS.md` y empezar por la 
 ## Dependencias importantes
 
 AGP 9.4.1 · Gradle 9.8.1 · Kotlin 2.4.21 · Compose BOM 2026.09.00 · Hilt 2.60.1 · ktlint plugin 14.2.0.
-youtubedl-android 0.18.1 (ADR-001).
+youtubedl-android 0.18.1 (ADR-001) · Coil 3.6.3 (miniaturas).
 
 ## Bloqueos
 
