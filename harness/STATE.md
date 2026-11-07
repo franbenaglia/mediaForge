@@ -4,14 +4,14 @@
 
 ## Próximo paso
 
-Correr `EngineDeviceTest` en el teléfono (actualización real, Dailymotion, cancelación con ffmpeg) y probar a mano "Actualizar motor" en la app. **El permiso de instalación en el teléfono quedó bloqueado por la política de la sesión el 2026-11-07: pedir autorización al usuario.** Con eso validado, cierra la Etapa 3.
+Confirmación del usuario de "Actualizar motor" en la app (T3.9). Con eso cierra la Etapa 3 y sigue la Etapa 4 (descarga de video). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
 
 ## Etapas
 
 - [x] 0. Investigación técnica → [docs/FEASIBILITY.md](../docs/FEASIBILITY.md)
 - [x] 1. Harness y estructura
 - [x] 2. Interfaz base
-- [ ] 3. Motor de extracción (en curso: T3.1–T3.8 hechas; faltan validar en el teléfono T3.3 (Dailymotion), T3.5, T3.6 (Dailymotion) y T3.7; T3.9 hecha sin validar)
+- [ ] 3. Motor de extracción (en curso: T3.1–T3.8 validadas; T3.9 esperando prueba manual)
 - [ ] 4. Descarga de video
 - [ ] 5. Extracción de audio
 - [ ] 6. Conversor multimedia
@@ -43,9 +43,9 @@ Correr `EngineDeviceTest` en el teléfono (actualización real, Dailymotion, can
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 145 pruebas (34 dominio + 33 app + 78 media) + 5 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 146 pruebas (34 dominio + 33 app + 79 media) + 5 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
-| `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | init 2,7 s (primera vez) / 20 ms; YouTube OK 5,4 s, 35 formatos; Dailymotion 403 (yt-dlp viejo); cancelación sin validar | 2026-11-07 |
+| `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
 Último commit validado: ver `git log -1` (commit de cierre de la Etapa 2).
 
@@ -60,8 +60,7 @@ Ninguno.
 
 ## Problemas conocidos
 
-- El yt-dlp incluido en el APK (2025.11.12) ya falla con Dailymotion (403). T3.7 es prioritaria.
-- Fixtures de yt-dlp: YouTube ya es real; Dailymotion sigue reconstruido hasta T3.7.
+- El yt-dlp incluido en el APK (2025.11.12) falla con Dailymotion (403) hasta que se actualiza. Con T3.9 la app lo ofrece sola; evaluar actualizar automáticamente en el primer arranque (Etapa 9, ajustes).
 
 - El APK de release (R8) todavía no se probó con youtubedl-android. Hay reglas en `core/media/consumer-rules.pro` (Jackson), pero se validan en el teléfono antes del primer release.
 

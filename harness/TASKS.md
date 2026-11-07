@@ -37,31 +37,31 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
 - [x] **T3.2** · P1 · Módulo `:core:media` con youtubedl-android 0.18.1, splits por ABI e inicialización en segundo plano con verificación de espacio.
   *Depende de:* —
   *Acepta:* `verify.sh` OK; tamaño del APK por ABI registrado en STATE.md.
-- [~] **T3.3** · P1 · Parser propio de `--dump-json` → `MediaInfo` (kotlinx.serialization), tolerante a campos faltantes.
+- [x] **T3.3** · P1 · Parser propio de `--dump-json` → `MediaInfo` (kotlinx.serialization), tolerante a campos faltantes.
   *Hecho en el teléfono (2026-11-07):* fixture real de YouTube (`youtube-real.json`) con prueba.
-  *Falta:* fixture real de Dailymotion: con el yt-dlp del APK devuelve 403; se captura después de T3.7.
+  *Hecho en el teléfono (2026-11-07, después de T3.7):* fixture real de Dailymotion (`dailymotion-real.json`) con prueba.
   *Depende de:* T3.2
   *Acepta:* pruebas con fixtures JSON reales de YouTube y Dailymotion (guardados en `core/media/src/test/resources`).
 - [x] **T3.4** · P1 · Clasificador de errores: stderr de yt-dlp → `MediaError`.
   *Depende de:* T3.2
   *Acepta:* pruebas con los mensajes reales de la Etapa 0 (`HTTP Error 403`, "only works when logged-in", `Unsupported URL`, errores de red).
-- [~] **T3.5** · P1 · `ProcessRunner`: lanza un binario con argumentos en lista, lee stdout/stderr en streaming y, al cancelar la corrutina, mata el árbol de procesos por PID.
+- [x] **T3.5** · P1 · `ProcessRunner`: lanza un binario con argumentos en lista, lee stdout/stderr en streaming y, al cancelar la corrutina, mata el árbol de procesos por PID.
   *Depende de:* T3.2
   *Acepta:* pruebas en la JVM con `sleep`/`sh` (cancelación, timeout, código de salida, hijos muertos).
-  *Falta:* confirmar en el teléfono que la cancelación mata un ffmpeg hijo real (`EngineDeviceTest.t4`). En el primer intento no arrancó ffmpeg porque Dailymotion falló: revalidar después de T3.7. `/system/bin/sh` y el wrapper sí funcionan (todas las ejecuciones del teléfono pasan por ProcessRunner).
-- [~] **T3.6** · P1 · `YtDlpExtractor` implementa `MediaExtractor`, con `--cache-dir` propio, `--no-playlist` y `--` antes de la URL.
+  *Validado en el teléfono (2026-11-07):* `EngineDeviceTest.t4` vio un `libffmpeg.so` real descargando HLS y, al cancelar, no quedó ningún proceso de ffmpeg ni de Python.
+- [x] **T3.6** · P1 · `YtDlpExtractor` implementa `MediaExtractor`, con `--cache-dir` propio, `--no-playlist` y `--` antes de la URL.
   *Depende de:* T3.3, T3.4, T3.5
   *Acepta:* prueba unitaria de los argumentos construidos; `[~]` hasta probar YouTube y Dailymotion en el teléfono.
   *Hecho:* comando y extractor probados en la JVM con un yt-dlp falso (éxito, error clasificado, timeout, URL inválida).
-  *Teléfono (2026-11-07):* YouTube OK (5,4 s, 35 formatos). Dailymotion falla con 403 por el yt-dlp viejo (clasificado bien como `EngineOutdated`): revalidar después de T3.7.
+  *Teléfono (2026-11-07):* YouTube OK (5,4 s, 35 formatos). Dailymotion falló con 403 con el yt-dlp viejo (clasificado bien como `EngineOutdated`); con 2026.10.26, OK (4,5 s).
 - [x] **T3.8** · P1 · Inicio muestra el resultado del análisis: cargando (incluida la primera inicialización del motor), `MediaCard` con datos y cantidad de formatos, o `ErrorState`.
   *Depende de:* T3.6, T2.2
   *Acepta:* pruebas de `HomeViewModel` con un `MediaExtractor` falso (cargando → éxito / error / cancelar al cambiar el enlace); `[~]` hasta probarlo en el teléfono.
   *Validado por el usuario en el teléfono (2026-11-07):* pegar, analizar YouTube (tarjeta con 35 formatos) y error de Dailymotion.
-- [~] **T3.7** · P1 · Actualizador de yt-dlp (`ExtractorEngine`): descarga, verificación de firma y SHA-256, prueba de `--version`, activación y conservación de la versión anterior.
+- [x] **T3.7** · P1 · Actualizador de yt-dlp (`ExtractorEngine`): descarga, verificación de firma y SHA-256, prueba de `--version`, activación y conservación de la versión anterior.
   *Depende de:* T3.5
   *Acepta:* pruebas con un release falso (hash incorrecto → rechazo; firma inválida → rechazo; versión rota → rollback).
-  *Hecho:* verificación OpenPGP propia (sin Bouncy Castle) probada con la firma real de 2026.10.26 y con una clave de prueba; respeta `_update_spec`; 22 pruebas. Falta: correr la actualización real en el teléfono (`EngineDeviceTest.t1b`).
+  *Hecho:* verificación OpenPGP propia (sin Bouncy Castle) probada con la firma real de 2026.10.26 y con una clave de prueba; respeta `_update_spec`; 22 pruebas. *Validado en el teléfono (2026-11-07):* 2025.11.12 → 2026.10.26 en 7,7 s con firma y hash verificados; YouTube pasa de 35 a 57 formatos.
 - [~] **T3.9** · P1 · Inicio ofrece "Actualizar motor" cuando el error es `EngineOutdated`, y reintenta el análisis al terminar.
   *Depende de:* T3.7
   *Acepta:* pruebas de `HomeViewModel` (actualiza → reintenta; falla la actualización → error explicado); `[~]` hasta el teléfono.

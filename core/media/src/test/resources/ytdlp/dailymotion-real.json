@@ -1,0 +1,32 @@
+{
+  "_type": "video",
+  "id": "x2kdx9f",
+  "title": "Big Buck Bunny",
+  "fulltitle": "Big Buck Bunny",
+  "webpage_url": "https:\/\/www.dailymotion.com\/video\/x2kdx9f",
+  "original_url": "https:\/\/www.dailymotion.com\/video\/x2kdx9f",
+  "extractor": "dailymotion",
+  "extractor_key": "Dailymotion",
+  "uploader": "Philou",
+  "duration": 596,
+  "thumbnail": "https:\/\/s1.dmcdn.net\/v\/9FyMZ1gYJdKl_DhHU\/x1080",
+  "upload_date": "20150323",
+  "description": "EN : Big Buck Bunny (code-named Peach) is a short computer-animated comedy film by the Blender Institute, part of the Blender Foundation. Like the foundation's previous film Elephants Dream, the film was made using Blender, a free software application for animation made by the same foundation. It wa",
+  "subtitles": {},
+  "formats": [
+    {
+      "format_id": "hls-380",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "avc1.42001e",
+      "acodec": "mp4a.40.2",
+      "width": 416,
+      "height": 240,
+      "fps": null,
+      "tbr": 460.56,
+      "abr": null,
+      "vbr": null,
+      "url": "https:\/\/example.invalid\/hls-380"
+    }
+  ]
+}

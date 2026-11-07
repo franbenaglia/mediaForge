@@ -163,4 +163,22 @@ class YtDlpInfoParserTest {
         assertTrue(info.formats.any { it.hasAudio && !it.hasVideo })
         assertTrue(info.formats.any { it.videoCodec?.startsWith("av01") == true })
     }
+
+    // Salida real de yt-dlp 2026.10.26 en el teléfono (2026-11-07).
+
+    @Test
+    fun realDailymotionOutputFromPhone() {
+        val info = parseOk("dailymotion-real.json")
+        assertEquals("x2kdx9f", info.id)
+        assertEquals("Dailymotion", info.site.displayName)
+        assertEquals("Philou", info.uploader)
+        assertEquals(596L, info.durationSeconds)
+        assertEquals(LocalDate.of(2015, 3, 23), info.uploadDate)
+        val format = info.formats.single()
+        assertEquals("hls-380", format.formatId)
+        assertEquals(240, format.height)
+        assertTrue(format.hasVideo && format.hasAudio)
+        assertNull(format.fps)
+        assertNull(format.fileSizeBytes)
+    }
 }
