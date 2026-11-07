@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.3 (comando de descarga). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
+Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.4 (parser de progreso). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
 
 ## Etapas
 

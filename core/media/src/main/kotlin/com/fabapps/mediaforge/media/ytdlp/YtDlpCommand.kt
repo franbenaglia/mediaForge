@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.media.ytdlp
 
+import com.fabapps.mediaforge.domain.model.DownloadSelection
 import java.io.File
 
 /** Dónde están los binarios y con qué entorno se ejecutan. Lo provee la implementación nativa. */
@@ -42,6 +43,60 @@ object YtDlpCommand {
         require(!url.startsWith("-")) { "url looks like an option" }
         return base(runtime) + listOf("--dump-json", "--no-progress", "--", url)
     }
+
+    /** Prefijo de las líneas de progreso (ver [YtDlpProgressParser]). */
+    const val PROGRESS_PREFIX = "MFPROG"
+
+    /** Nombre base del archivo dentro de la carpeta del trabajo. El nombre visible se pone al guardar. */
+    const val OUTPUT_BASENAME = "media"
+
+    /**
+     * Descarga de video a [workDir], una carpeta vacía y propia del trabajo. El nombre elegido por el
+     * usuario no pasa por yt-dlp: se aplica al guardar, con `FileNames`.
+     * - Plantilla de progreso propia, una línea por actualización (`--newline`).
+     * - `--merge-output-format`: video y audio se unen sin recodificar.
+     */
+    fun download(
+        runtime: YtDlpRuntime,
+        url: String,
+        selection: DownloadSelection.Video,
+        workDir: File,
+        embedMetadata: Boolean,
+    ): List<String> {
+        require(!url.startsWith("-")) { "url looks like an option" }
+        val args = base(runtime) + listOf(
+            "-f",
+            formatSelector(selection),
+            "--merge-output-format",
+            selection.container.extension,
+            "-o",
+            File(workDir, "$OUTPUT_BASENAME.%(ext)s").absolutePath,
+            "--no-mtime",
+            "--newline",
+            "--progress-template",
+            "download:$PROGRESS_PREFIX %(progress.status)s %(progress.downloaded_bytes)s " +
+                "%(progress.total_bytes)s %(progress.total_bytes_estimate)s %(progress.speed)s",
+        )
+        val metadata = if (embedMetadata) listOf("--embed-metadata") else emptyList()
+        return args + metadata + listOf("--", url)
+    }
+
+    /**
+     * Selector de `-f`. Con formatos concretos (`299+258`) se baja exactamente lo que se mostró; si el
+     * sitio ya no los ofrece, sigue con lo mejor hasta la altura elegida.
+     */
+    internal fun formatSelector(selection: DownloadSelection.Video): String {
+        selection.formatIds.forEach { id -> require(FORMAT_ID.matches(id)) { "invalid format id: $id" } }
+        val byHeight = selection.maxHeight?.let { h -> "bv*[height<=$h]+ba/b[height<=$h]" } ?: "bv*+ba/b"
+        return if (selection.formatIds.isEmpty()) {
+            byHeight
+        } else {
+            selection.formatIds.joinToString("+") + "/" + byHeight
+        }
+    }
+
+    /** Los IDs vienen del sitio: solo caracteres que no cambian la sintaxis del selector. */
+    private val FORMAT_ID = Regex("[A-Za-z0-9][A-Za-z0-9_.-]{0,63}")
 
     fun version(runtime: YtDlpRuntime): List<String> =
         listOf(runtime.python.absolutePath, runtime.ytDlp.absolutePath, "--ignore-config", "--version")

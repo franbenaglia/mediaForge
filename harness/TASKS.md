@@ -79,9 +79,10 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Depende de:* —
   *Acepta:* pruebas con los fixtures reales de YouTube (formatos separados) y Dailymotion (HLS combinado).
   *Hecho:* formatos concretos por opción (tamaño exacto cuando el sitio lo da), H.264 > VP9 > AV1, AAC sin DRC, audio ≤ 160 kbps debajo de 720p. 13 pruebas.
-- [ ] **T4.3** · P1 · Comando de descarga (`YtDlpCommand.download`): selector `-f` desde `DownloadSelection.Video`, merge a MP4 sin recodificar, salida en una carpeta temporal por trabajo, plantilla de progreso propia, `--` antes de la URL.
+- [x] **T4.3** · P1 · Comando de descarga (`YtDlpCommand.download`): selector `-f` desde `DownloadSelection.Video`, merge a MP4 sin recodificar, salida en una carpeta temporal por trabajo, plantilla de progreso propia, `--` antes de la URL.
   *Depende de:* T4.2
   *Acepta:* pruebas de los argumentos (mejor calidad, altura máxima, formatos explícitos, URL que parece opción).
+  *Hecho:* formatos concretos con respaldo por altura (`299+258/bv*[height<=1080]+ba/b[height<=1080]`); los IDs se validan para que no cambien la sintaxis del selector. 6 pruebas nuevas.
 - [ ] **T4.4** · P1 · Parser de progreso: líneas de la plantilla → `JobState.Downloading` (bytes, total o estimado, velocidad), varias partes (video y audio) como un solo avance, `[Merger]` → `Processing(MERGE)`.
   *Depende de:* T4.3
   *Acepta:* pruebas con salida real o reconstruida (tamaños desconocidos, `NA`, dos partes, merge).
