@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.media.ytdlp
 
+import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import java.io.File
 
@@ -51,24 +52,21 @@ object YtDlpCommand {
     const val OUTPUT_BASENAME = "media"
 
     /**
-     * Descarga de video a [workDir], una carpeta vacía y propia del trabajo. El nombre elegido por el
-     * usuario no pasa por yt-dlp: se aplica al guardar, con `FileNames`.
+     * Descarga a [workDir], una carpeta vacía y propia del trabajo. El nombre elegido por el usuario no
+     * pasa por yt-dlp: se aplica al guardar, con `FileNames`.
      * - Plantilla de progreso propia, una línea por actualización (`--newline`).
-     * - `--merge-output-format`: video y audio se unen sin recodificar.
+     * - Video: `--merge-output-format`, video y audio se unen sin recodificar.
+     * - Audio: `-x`; yt-dlp copia sin recodificar si el códec ya es el de salida (ADR-015).
      */
     fun download(
         runtime: YtDlpRuntime,
         url: String,
-        selection: DownloadSelection.Video,
+        selection: DownloadSelection,
         workDir: File,
         embedMetadata: Boolean,
     ): List<String> {
         require(!url.startsWith("-")) { "url looks like an option" }
-        val args = base(runtime) + listOf(
-            "-f",
-            formatSelector(selection),
-            "--merge-output-format",
-            selection.container.extension,
+        val common = listOf(
             "-o",
             File(workDir, "$OUTPUT_BASENAME.%(ext)s").absolutePath,
             "--no-mtime",
@@ -77,8 +75,43 @@ object YtDlpCommand {
             "download:$PROGRESS_PREFIX %(progress.status)s %(progress.downloaded_bytes)s " +
                 "%(progress.total_bytes)s %(progress.total_bytes_estimate)s %(progress.speed)s",
         )
+        val specific = when (selection) {
+            is DownloadSelection.Video -> listOf(
+                "-f",
+                formatSelector(selection),
+                "--merge-output-format",
+                selection.container.extension,
+            )
+            is DownloadSelection.Audio -> audioOptions(selection)
+        }
         val metadata = if (embedMetadata) listOf("--embed-metadata") else emptyList()
-        return args + metadata + listOf("--", url)
+        // WAV no tiene dónde guardar una portada.
+        val cover = if (embedMetadata && selection is DownloadSelection.Audio && selection.format != AudioFormat.WAV) {
+            listOf("--embed-thumbnail")
+        } else {
+            emptyList()
+        }
+        return base(runtime) + specific + common + metadata + cover + listOf("--", url)
+    }
+
+    private fun audioOptions(selection: DownloadSelection.Audio): List<String> {
+        selection.formatIds.forEach { id -> require(FORMAT_ID.matches(id)) { "invalid format id: $id" } }
+        val source = (selection.formatIds + listOf("bestaudio", "best")).joinToString("/")
+        val quality = selection.bitrateKbps?.let { kbps ->
+            require(kbps in 8..512) { "invalid bitrate: $kbps" }
+            listOf("--audio-quality", "${kbps}K")
+        } ?: emptyList()
+        return listOf("-f", source, "-x", "--audio-format", ytDlpAudioFormat(selection.format)) + quality
+    }
+
+    /** Nombre de `--audio-format`. OGG es Vorbis; yt-dlp lo guarda como `.ogg`. */
+    internal fun ytDlpAudioFormat(format: AudioFormat): String = when (format) {
+        AudioFormat.MP3 -> "mp3"
+        AudioFormat.M4A -> "m4a"
+        AudioFormat.OPUS -> "opus"
+        AudioFormat.OGG -> "vorbis"
+        AudioFormat.WAV -> "wav"
+        AudioFormat.FLAC -> "flac"
     }
 
     /**

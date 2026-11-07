@@ -113,4 +113,34 @@ class YtDlpProgressParserTest {
         )
         assertEquals(0.5f, states.single().progress)
     }
+
+    @Test
+    fun audioSteps() {
+        val parser = YtDlpProgressParser(audioStep = ProcessingStep.TRANSCODE)
+        val states = listOf(
+            "[info] Writing video thumbnail 41 to: /w/media.webp",
+            "[download] Destination: /w/media.webm",
+            "MFPROG finished 100 100 NA NA",
+            "[ExtractAudio] Destination: /w/media.mp3",
+            "Deleting original file /w/media.webm (pass -k to keep)",
+            "[ThumbnailsConvertor] Converting thumbnail \"/w/media.webp\" to png",
+            "[EmbedThumbnail] ffmpeg: Adding thumbnail to \"/w/media.mp3\"",
+            "[Metadata] Adding metadata to \"/w/media.mp3\"",
+        ).mapNotNull { parser.feed(it) }
+        assertEquals(
+            listOf(
+                JobState.Downloading(1f, 100, 100, null),
+                JobState.Processing(ProcessingStep.TRANSCODE, null),
+                JobState.Processing(ProcessingStep.METADATA, null),
+            ),
+            states,
+        )
+    }
+
+    @Test
+    fun audioCopyIsExtraction() {
+        val parser = YtDlpProgressParser(audioStep = ProcessingStep.TRANSCODE)
+        val line = "[ExtractAudio] Not converting audio /w/media.m4a; file is already in target format m4a"
+        assertEquals(JobState.Processing(ProcessingStep.EXTRACT_AUDIO, null), parser.feed(line))
+    }
 }

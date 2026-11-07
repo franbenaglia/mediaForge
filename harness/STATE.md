@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 5: sigue T5.2 (comando de audio y pasos en el parser). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
+Etapa 5: sigue T5.3 (`YtDlpDownloader` con audio). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
 
 ## Etapas
 

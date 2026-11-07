@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.media.ytdlp
 
+import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import java.io.File
@@ -46,7 +47,7 @@ class YtDlpCommandTest {
     }
 
     private fun download(
-        selection: DownloadSelection.Video,
+        selection: DownloadSelection,
         url: String = "https://example.com/v",
         metadata: Boolean = true,
     ) = YtDlpCommand.download(runtime, url, selection, File("/w/job1"), metadata)
@@ -104,5 +105,39 @@ class YtDlpCommandTest {
     @Test(expected = IllegalArgumentException::class)
     fun formatIdCannotLookLikeAnOption() {
         download(DownloadSelection.Video(listOf("-x")))
+    }
+
+    @Test
+    fun audioTranscodeCommand() {
+        val args = download(DownloadSelection.Audio(AudioFormat.MP3, bitrateKbps = 320, formatIds = listOf("251")))
+        val from = args.indexOf("-f")
+        assertEquals(
+            listOf("-f", "251/bestaudio/best", "-x", "--audio-format", "mp3", "--audio-quality", "320K"),
+            args.subList(from, from + 7),
+        )
+        assertEquals(listOf("--embed-metadata", "--embed-thumbnail", "--", "https://example.com/v"), args.takeLast(4))
+        assertEquals(false, "--merge-output-format" in args)
+    }
+
+    @Test
+    fun audioCopyHasNoQualityAndWavHasNoCover() {
+        val m4a = download(DownloadSelection.Audio(AudioFormat.M4A, formatIds = listOf("140")))
+        assertEquals(false, "--audio-quality" in m4a)
+        assertEquals("m4a", m4a[m4a.indexOf("--audio-format") + 1])
+
+        val wav = download(DownloadSelection.Audio(AudioFormat.WAV))
+        assertEquals("bestaudio/best", wav[wav.indexOf("-f") + 1])
+        assertEquals(false, "--embed-thumbnail" in wav)
+        assertEquals(true, "--embed-metadata" in wav)
+    }
+
+    @Test
+    fun oggIsVorbis() {
+        assertEquals("vorbis", YtDlpCommand.ytDlpAudioFormat(AudioFormat.OGG))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun audioFormatIdIsValidated() {
+        download(DownloadSelection.Audio(AudioFormat.MP3, formatIds = listOf("251/worst")))
     }
 }

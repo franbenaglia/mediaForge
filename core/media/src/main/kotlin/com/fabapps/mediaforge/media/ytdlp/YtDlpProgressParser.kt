@@ -14,9 +14,11 @@ import com.fabapps.mediaforge.domain.model.ProcessingStep
  * - `[info] <id>: Downloading 1 format(s): 299+258` → cantidad de partes.
  * - `[download] Destination: ...` → empieza una parte.
  * - `MFPROG <status> <bajados> <total> <estimado> <velocidad>` (plantilla de [YtDlpCommand.download]).
- * - Líneas `Merger` y `Fixup` → unión o ajuste sin recodificar; `Metadata` → metadatos.
+ * - Líneas `Merger` y `Fixup` → unión o ajuste sin recodificar; `Metadata`, `EmbedThumbnail` y
+ *   `ThumbnailsConvertor` → metadatos.
+ * - `ExtractAudio` → [audioStep] (recodificar), o extraer sin recodificar si yt-dlp dice "Not converting".
  */
-class YtDlpProgressParser {
+class YtDlpProgressParser(private val audioStep: ProcessingStep = ProcessingStep.EXTRACT_AUDIO) {
     private var parts = 1
     private var partIndex = -1
     private var finishedBytes = 0L
@@ -44,7 +46,14 @@ class YtDlpProgressParser {
         }
         line.startsWith(YtDlpCommand.PROGRESS_PREFIX + " ") -> progress(line)
         line.startsWith("[Merger]") || line.startsWith("[Fixup") -> JobState.Processing(ProcessingStep.MERGE, null)
-        line.startsWith("[Metadata]") -> JobState.Processing(ProcessingStep.METADATA, null)
+        line.startsWith("[ExtractAudio] Not converting") -> JobState.Processing(ProcessingStep.EXTRACT_AUDIO, null)
+        line.startsWith("[ExtractAudio]") -> JobState.Processing(audioStep, null)
+        line.startsWith(
+            "[Metadata]",
+        ) ||
+            line.startsWith("[EmbedThumbnail]") ||
+            line.startsWith("[ThumbnailsConvertor]") ->
+            JobState.Processing(ProcessingStep.METADATA, null)
         else -> null
     }
 

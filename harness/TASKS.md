@@ -112,9 +112,10 @@ Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Pyth
   *Depende de:* —
   *Acepta:* pruebas con formatos armados y con los fixtures reales de YouTube y Dailymotion.
   *Hecho:* `AudioOptions` + `DownloadSelection.Audio.formatIds`. 11 pruebas + 2 con fixtures reales.
-- [ ] **T5.2** · P1 · `YtDlpCommand.download` para audio (`-x`, `--audio-format`, `--audio-quality`, `--embed-thumbnail` salvo WAV) y pasos de audio en el parser (`ExtractAudio`, `EmbedThumbnail`).
+- [x] **T5.2** · P1 · `YtDlpCommand.download` para audio (`-x`, `--audio-format`, `--audio-quality`, `--embed-thumbnail` salvo WAV) y pasos de audio en el parser (`ExtractAudio`, `EmbedThumbnail`).
   *Depende de:* T5.1
   *Acepta:* pruebas de argumentos y de líneas de salida.
+  *Hecho:* origen `<id>/bestaudio/best`, `--audio-quality <k>K` solo al recodificar, OGG = `vorbis`; parser con `ExtractAudio` ("Not converting" = extracción sin recodificar), `EmbedThumbnail` y `ThumbnailsConvertor`. 6 pruebas nuevas.
 - [ ] **T5.3** · P1 · `YtDlpDownloader` acepta `DownloadSelection.Audio`: salida por extensión esperada (no la portada ni el original) y MIME que MediaStore acepta.
   *Depende de:* T5.2
   *Acepta:* pruebas con yt-dlp falso; `MediaLibraryDeviceTest` guarda MP3, M4A, Opus, OGG, WAV y FLAC en `Music/MediaForge` sin cambiar el nombre.
