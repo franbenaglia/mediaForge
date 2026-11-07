@@ -83,9 +83,10 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Depende de:* T4.2
   *Acepta:* pruebas de los argumentos (mejor calidad, altura máxima, formatos explícitos, URL que parece opción).
   *Hecho:* formatos concretos con respaldo por altura (`299+258/bv*[height<=1080]+ba/b[height<=1080]`); los IDs se validan para que no cambien la sintaxis del selector. 6 pruebas nuevas.
-- [ ] **T4.4** · P1 · Parser de progreso: líneas de la plantilla → `JobState.Downloading` (bytes, total o estimado, velocidad), varias partes (video y audio) como un solo avance, `[Merger]` → `Processing(MERGE)`.
+- [x] **T4.4** · P1 · Parser de progreso: líneas de la plantilla → `JobState.Downloading` (bytes, total o estimado, velocidad), varias partes (video y audio) como un solo avance, `[Merger]` → `Processing(MERGE)`.
   *Depende de:* T4.3
   *Acepta:* pruebas con salida real o reconstruida (tamaños desconocidos, `NA`, dos partes, merge).
+  *Hecho:* `YtDlpProgressParser` con salida reconstruida (6 pruebas); se valida con salida real en T4.8.
 - [ ] **T4.5** · P1 · `YtDlpDownloader` implementa `MediaDownloader`: espacio libre, ejecución con `ProcessRunner`, errores clasificados, y al cancelar o fallar borra la carpeta temporal.
   *Depende de:* T4.3, T4.4
   *Acepta:* pruebas en la JVM con un yt-dlp falso (éxito, error, cancelación sin parciales).
