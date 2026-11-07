@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">MediaForge</string>
-    <string name="home_placeholder">Download, extract and convert media on your device.</string>
+
+    <!-- Navegación -->
+    <string name="nav_home">Home</string>
+    <string name="nav_downloads">Downloads</string>
+    <string name="nav_converter">Converter</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Pantallas que todavía no están implementadas -->
+    <string name="screen_not_implemented">This section is not available yet.</string>
 </resources>

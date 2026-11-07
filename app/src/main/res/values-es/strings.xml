@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_placeholder">Descargá, extraé y convertí archivos multimedia en tu dispositivo.</string>
+    <!-- Navegación -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_downloads">Descargas</string>
+    <string name="nav_converter">Conversor</string>
+    <string name="nav_history">Historial</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Pantallas que todavía no están implementadas -->
+    <string name="screen_not_implemented">Esta sección todavía no está disponible.</string>
 </resources>

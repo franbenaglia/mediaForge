@@ -1,16 +1,16 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-06
+**Última actualización:** 2026-11-07
 
 ## Próximo paso
 
-Etapa 2, tarea **T2.1** en [TASKS.md](TASKS.md).
+Etapa 2, tarea **T2.3** en [TASKS.md](TASKS.md). Después, T3.1 (lo necesita T2.2) y T2.2.
 
 ## Etapas
 
 - [x] 0. Investigación técnica → [docs/FEASIBILITY.md](../docs/FEASIBILITY.md)
 - [x] 1. Harness y estructura
-- [ ] 2. Interfaz base
+- [ ] 2. Interfaz base (en curso)
 - [ ] 3. Motor de extracción
 - [ ] 4. Descarga de video
 - [ ] 5. Extracción de audio
@@ -24,7 +24,8 @@ Etapa 2, tarea **T2.1** en [TASKS.md](TASKS.md).
 
 ## Implementado
 
-- Proyecto Gradle (`:app`, `:core:domain`), Hilt, tema Material 3 claro/oscuro, pantalla provisoria.
+- Proyecto Gradle (`:app`, `:core:domain`), Hilt, tema Material 3 claro/oscuro.
+- Navegación tipada con barra inferior (Inicio, Descargas, Conversor, Historial, Ajustes). Las cinco pantallas muestran "todavía no disponible".
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
@@ -33,7 +34,7 @@ Etapa 2, tarea **T2.1** en [TASKS.md](TASKS.md).
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 14 pruebas, lint sin errores, ktlint OK | 2026-11-06 |
+| `./scripts/verify.sh` | OK: 19 pruebas (14 dominio + 5 app), lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug (sin motores) | 12 MB | 2026-11-06 |
 | Pruebas en dispositivo | No hay todavía | — |
 
