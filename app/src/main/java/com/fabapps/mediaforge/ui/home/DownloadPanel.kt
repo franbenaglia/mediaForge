@@ -17,6 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,17 +52,25 @@ internal fun DownloadPanel(
     onFileNameChange: (String) -> Unit,
     onDownload: () -> Unit,
     onCancel: () -> Unit,
+    onModeChange: (DownloadMode) -> Unit = {},
+    onSelectAudioFormat: (Int) -> Unit = {},
+    onSelectBitrate: (Int?) -> Unit = {},
 ) {
     val editable = !state.download.isActive && state.download !is DownloadState.Saved
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (editable) {
-            Text(stringResource(R.string.download_quality), style = MaterialTheme.typography.titleSmall)
-            Column(Modifier.selectableGroup()) {
-                state.options.forEachIndexed { index, option ->
-                    OptionRow(option, isBest = index == 0, selected = index == state.selectedOption) {
-                        onSelectOption(index)
+            ModeSelector(state.mode, onModeChange)
+            if (state.mode == DownloadMode.VIDEO) {
+                Text(stringResource(R.string.download_quality), style = MaterialTheme.typography.titleSmall)
+                Column(Modifier.selectableGroup()) {
+                    state.options.forEachIndexed { index, option ->
+                        OptionRow(option, isBest = index == 0, selected = index == state.selectedOption) {
+                            onSelectOption(index)
+                        }
                     }
                 }
+            } else {
+                AudioSection(state, onSelectAudioFormat, onSelectBitrate)
             }
             OutlinedTextField(
                 value = state.fileName,
@@ -106,6 +117,23 @@ internal fun DownloadPanel(
 }
 
 @Composable
+private fun ModeSelector(mode: DownloadMode, onModeChange: (DownloadMode) -> Unit) {
+    val modes = listOf(
+        DownloadMode.VIDEO to R.string.download_mode_video,
+        DownloadMode.AUDIO to R.string.download_mode_audio,
+    )
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        modes.forEachIndexed { index, (value, label) ->
+            SegmentedButton(
+                selected = mode == value,
+                onClick = { onModeChange(value) },
+                shape = SegmentedButtonDefaults.itemShape(index, modes.size),
+            ) { Text(stringResource(label)) }
+        }
+    }
+}
+
+@Composable
 private fun OptionRow(option: VideoOption, isBest: Boolean, selected: Boolean, onClick: () -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val quality = option.height?.let { Formatters.quality(it, option.fps) }
@@ -147,7 +175,11 @@ private fun Saved(file: OutputFile) {
     val context = LocalContext.current
     val noApp = stringResource(R.string.download_no_app)
     Text(file.displayName, style = MaterialTheme.typography.bodyLarge)
-    Hint(stringResource(R.string.download_saved))
+    Hint(
+        stringResource(
+            if (file.mimeType.startsWith("audio/")) R.string.download_saved_music else R.string.download_saved,
+        ),
+    )
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(onClick = {
             val intent = Intent(Intent.ACTION_VIEW).setDataAndType(file.location.toUri(), file.mimeType)

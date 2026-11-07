@@ -2,6 +2,8 @@ package com.fabapps.mediaforge.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fabapps.mediaforge.domain.download.AudioOption
+import com.fabapps.mediaforge.domain.download.AudioOptions
 import com.fabapps.mediaforge.domain.download.VideoOption
 import com.fabapps.mediaforge.domain.download.VideoOptions
 import com.fabapps.mediaforge.domain.engine.ExtractorEngine
@@ -35,6 +37,14 @@ data class HomeUiState(
     /** Calidades del recurso analizado; la primera es la mejor. */
     val options: List<VideoOption> = emptyList(),
     val selectedOption: Int = 0,
+    val mode: DownloadMode = DownloadMode.VIDEO,
+    /** Formatos de audio (MP3, M4A y Opus primero). */
+    val audioOptions: List<AudioOption> = emptyList(),
+    val selectedAudio: Int = 0,
+    /** Bitrate elegido; nulo = automático. */
+    val audioBitrate: Int? = null,
+    /** Tamaño del audio de origen, para estimar una copia sin recodificar. */
+    val audioSourceBytes: Long? = null,
     /** Nombre del archivo sin extensión; arranca con el título. */
     val fileName: String = "",
     val download: DownloadState = DownloadState.None,
@@ -49,7 +59,19 @@ data class HomeUiState(
             analysis !is AnalysisState.UpdatingEngine
 
     val canDownload: Boolean
-        get() = analysis is AnalysisState.Loaded && options.isNotEmpty() && !download.isActive
+        get() = analysis is AnalysisState.Loaded &&
+            !download.isActive &&
+            (if (mode == DownloadMode.VIDEO) options.isNotEmpty() else audioOptions.isNotEmpty())
+
+    val audioOption: AudioOption? get() = audioOptions.getOrNull(selectedAudio)
+
+    /** Bitrate que se va a usar: el elegido o el automático; nulo si se copia o es sin pérdida. */
+    val effectiveBitrate: Int? get() = audioOption?.selection(audioBitrate)?.bitrateKbps
+
+    /** El bitrate elegido supera al del original: avisar que no mejora la calidad (main.md §4.2). */
+    val bitrateExceedsSource: Boolean get() = effectiveBitrate?.let { audioOption?.exceedsSource(it) } == true
+
+    val audioEstimatedBytes: Long? get() = audioOption?.estimatedBytes(audioBitrate, audioSourceBytes)
 
     val canCancelDownload: Boolean get() = download is DownloadState.Running
 
@@ -58,6 +80,8 @@ data class HomeUiState(
         get() = (analysis as? AnalysisState.Failed)?.error is MediaError.EngineOutdated ||
             analysis is AnalysisState.UpdateFailed
 }
+
+enum class DownloadMode { VIDEO, AUDIO }
 
 sealed interface DownloadState {
     val isActive: Boolean get() = this is Running || this is Saving
@@ -161,13 +185,23 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(input = url, analysis = AnalysisState.Loading, download = DownloadState.None) }
         analysisJob = viewModelScope.launch {
             when (val result = extractor.extract(url)) {
-                is Outcome.Success -> _state.update {
-                    it.copy(
-                        analysis = AnalysisState.Loaded(result.value),
-                        options = VideoOptions.from(result.value),
-                        selectedOption = 0,
-                        fileName = result.value.title,
-                    )
+                is Outcome.Success -> {
+                    val info = result.value
+                    val audio = AudioOptions.from(info)
+                    _state.update {
+                        it.copy(
+                            analysis = AnalysisState.Loaded(info),
+                            options = VideoOptions.from(info),
+                            selectedOption = 0,
+                            audioOptions = audio,
+                            selectedAudio = 0,
+                            audioBitrate = null,
+                            audioSourceBytes = audio.firstOrNull()?.let { option ->
+                                AudioOptions.sourceBytes(info, option)
+                            },
+                            fileName = info.title,
+                        )
+                    }
                 }
                 is Outcome.Failure -> _state.update { it.copy(analysis = AnalysisState.Failed(result.error)) }
             }
@@ -202,6 +236,31 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onModeChange(mode: DownloadMode) {
+        if (!_state.value.download.isActive) _state.update { it.copy(mode = mode, download = DownloadState.None) }
+    }
+
+    fun onSelectAudioFormat(index: Int) {
+        val current = _state.value
+        if (index !in current.audioOptions.indices || current.download.isActive) return
+        val info = (current.analysis as? AnalysisState.Loaded)?.info
+        val option = current.audioOptions[index]
+        _state.update {
+            it.copy(
+                selectedAudio = index,
+                audioBitrate = null,
+                audioSourceBytes = info?.let { data -> AudioOptions.sourceBytes(data, option) },
+            )
+        }
+    }
+
+    /** `null` vuelve a "Automático". Solo valores que el formato ofrece. */
+    fun onSelectBitrate(kbps: Int?) {
+        val option = _state.value.audioOption ?: return
+        if (_state.value.download.isActive || (kbps != null && kbps !in option.bitrates)) return
+        _state.update { it.copy(audioBitrate = kbps) }
+    }
+
     fun onFileNameChange(name: String) {
         if (!_state.value.download.isActive) _state.update { it.copy(fileName = name) }
     }
@@ -211,13 +270,16 @@ class HomeViewModel @Inject constructor(
         val current = _state.value
         if (!current.canDownload) return
         val info = (current.analysis as AnalysisState.Loaded).info
-        val option = current.options[current.selectedOption]
+        val (selection, expected) = when (current.mode) {
+            DownloadMode.VIDEO -> current.options[current.selectedOption].let { it.selection to it.estimatedBytes }
+            DownloadMode.AUDIO -> current.audioOption!!.selection(current.audioBitrate) to current.audioEstimatedBytes
+        }
         val request = DownloadRequest(
             jobId = UUID.randomUUID().toString(),
             sourceUrl = info.sourceUrl,
-            selection = option.selection,
+            selection = selection,
             fileName = current.fileName.ifBlank { info.title },
-            expectedBytes = option.estimatedBytes,
+            expectedBytes = expected,
         )
         _state.update { it.copy(download = DownloadState.Running(JobState.Pending)) }
         downloadJob = viewModelScope.launch {

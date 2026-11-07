@@ -4,6 +4,7 @@ import com.fabapps.mediaforge.domain.engine.ExtractorEngine
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.JobState
@@ -106,6 +107,7 @@ class HomeViewModelTest {
             MediaFormat("134", "mp4", videoCodec = "avc1", height = 360, fileSizeBytes = 100),
             MediaFormat("140", "m4a", audioCodec = "mp4a.40.2", bitrateKbps = 129.0, fileSizeBytes = 50),
         ),
+        durationSeconds = 100,
     )
 
     @Before
@@ -441,5 +443,79 @@ class HomeViewModelTest {
         extractor.pending = CompletableDeferred()
         vm.onAnalyze()
         assertEquals(DownloadState.None, state.download)
+    }
+
+    // Audio (T5.4)
+
+    private suspend fun TestScope.audioMode() {
+        analyzed()
+        vm.onModeChange(DownloadMode.AUDIO)
+    }
+
+    @Test
+    fun audioStartsWithMp3AtAutoBitrate() = test {
+        audioMode()
+        assertEquals(AudioFormat.MP3, state.audioOption?.format)
+        assertEquals(null, state.audioBitrate)
+        // Origen AAC de 129 kbps: automático = 128, el menor ≥ al original (con 8 kbps de tolerancia).
+        assertEquals(128, state.effectiveBitrate)
+        assertFalse(state.bitrateExceedsSource)
+        assertTrue(state.canDownload)
+    }
+
+    @Test
+    fun higherBitrateThanSourceWarns() = test {
+        audioMode()
+        vm.onSelectBitrate(320)
+        assertEquals(320, state.effectiveBitrate)
+        assertTrue(state.bitrateExceedsSource)
+        // 320 kbps × 100 s / 8
+        assertEquals(4_000_000L, state.audioEstimatedBytes)
+        vm.onSelectBitrate(null)
+        assertFalse(state.bitrateExceedsSource)
+    }
+
+    @Test
+    fun bitrateNotOfferedIsIgnored() = test {
+        audioMode()
+        vm.onSelectBitrate(999)
+        assertEquals(null, state.audioBitrate)
+    }
+
+    @Test
+    fun m4aCopiesAndEstimatesWithTheSourceSize() = test {
+        audioMode()
+        vm.onSelectAudioFormat(state.audioOptions.indexOfFirst { it.format == AudioFormat.M4A })
+        assertTrue(state.audioOption!!.copiesWithoutReencoding)
+        assertEquals(null, state.effectiveBitrate)
+        assertEquals(50L, state.audioEstimatedBytes)
+    }
+
+    @Test
+    fun audioDownloadSendsTheAudioSelection() = test {
+        audioMode()
+        vm.onSelectBitrate(320)
+        vm.onDownload()
+        advanceUntilIdle()
+        val request = downloader.requests.single()
+        assertEquals(DownloadSelection.Audio(AudioFormat.MP3, 320, listOf("140")), request.selection)
+        assertEquals(4_000_000L, request.expectedBytes)
+    }
+
+    @Test
+    fun changingFormatResetsBitrate() = test {
+        audioMode()
+        vm.onSelectBitrate(320)
+        vm.onSelectAudioFormat(state.audioOptions.indexOfFirst { it.format == AudioFormat.OGG })
+        assertEquals(null, state.audioBitrate)
+    }
+
+    @Test
+    fun modeCannotChangeWhileDownloading() = test {
+        analyzed()
+        vm.onDownload()
+        advanceUntilIdle()
+        vm.onModeChange(DownloadMode.AUDIO)
+        assertEquals(DownloadMode.VIDEO, state.mode)
     }
 }

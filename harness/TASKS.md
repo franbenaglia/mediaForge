@@ -120,7 +120,7 @@ Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Pyth
   *Depende de:* T5.2
   *Acepta:* pruebas con yt-dlp falso; `MediaLibraryDeviceTest` guarda MP3, M4A, Opus, OGG, WAV y FLAC en `Music/MediaForge` sin cambiar el nombre.
   *Hecho:* salida por extensión esperada (ignora portadas sueltas), MIME por formato (WAV = `audio/x-wav`). Prueba con yt-dlp falso OK; falta `savesEveryAudioFormatIntoMusic` en el teléfono.
-- [ ] **T5.4** · P1 · Inicio: elegir Video o Audio; en audio, formato, bitrate (con "Automático"), avisos de calidad y tamaño.
+- [~] **T5.4** · P1 · Inicio: elegir Video o Audio; en audio, formato, bitrate (con "Automático"), avisos de calidad y tamaño.
   *Depende de:* T5.1, T5.3
   *Acepta:* pruebas de `HomeViewModel`; `[~]` hasta probarlo en el teléfono.
 - [ ] **T5.5** · P1 · Prueba en el teléfono: MP3 320 kbps con portada y título, M4A sin recodificar, Opus.

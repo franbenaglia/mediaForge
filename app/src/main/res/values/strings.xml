@@ -89,4 +89,22 @@
     <string name="download_permission_denied">MediaForge needs storage permission to save the video.</string>
     <string name="error_show_details">Technical details</string>
     <string name="error_hide_details">Hide details</string>
+    <string name="download_mode_video">Video</string>
+    <string name="download_mode_audio">Audio only</string>
+    <string name="audio_format">Format</string>
+    <string name="audio_bitrate">Bitrate</string>
+    <string name="audio_bitrate_auto">Auto (%1$d kbps)</string>
+    <string name="audio_kbps">%1$d kbps</string>
+    <string name="audio_copy_note">No re-encoding: the original audio is kept as is.</string>
+    <string name="audio_lossless_note">Lossless from a compressed original: the file is bigger but does not sound better.</string>
+    <string name="audio_wav_no_cover">WAV files cannot store a cover image.</string>
+    <string name="audio_exceeds_note">The original has about %1$d kbps. A higher bitrate does not improve quality.</string>
+    <string name="audio_estimated_size">Estimated size: %1$s</string>
+    <string name="download_saved_music">Saved in Music/MediaForge</string>
+    <string name="audio_name_mp3" translatable="false">MP3</string>
+    <string name="audio_name_m4a" translatable="false">M4A</string>
+    <string name="audio_name_opus" translatable="false">Opus</string>
+    <string name="audio_name_ogg" translatable="false">OGG</string>
+    <string name="audio_name_wav" translatable="false">WAV</string>
+    <string name="audio_name_flac" translatable="false">FLAC</string>
 </resources>

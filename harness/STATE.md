@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 5: sigue T5.4 (pantalla de audio). Pendiente en el teléfono: `MediaLibraryDeviceTest.savesEveryAudioFormatIntoMusic` (T5.3). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
+Etapa 5: código completo. Pendiente en el teléfono: `MediaLibraryDeviceTest.savesEveryAudioFormatIntoMusic` (T5.3) y prueba manual de audio (T5.4, T5.5). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
 
 ## Etapas
 

@@ -84,4 +84,16 @@
     <string name="download_permission_denied">MediaForge necesita permiso de almacenamiento para guardar el video.</string>
     <string name="error_show_details">Detalles técnicos</string>
     <string name="error_hide_details">Ocultar detalles</string>
+    <string name="download_mode_video">Video</string>
+    <string name="download_mode_audio">Solo audio</string>
+    <string name="audio_format">Formato</string>
+    <string name="audio_bitrate">Bitrate</string>
+    <string name="audio_bitrate_auto">Automático (%1$d kbps)</string>
+    <string name="audio_kbps">%1$d kbps</string>
+    <string name="audio_copy_note">Sin recodificar: se guarda el audio original.</string>
+    <string name="audio_lossless_note">Sin pérdida a partir de un original comprimido: el archivo es más grande, pero no suena mejor.</string>
+    <string name="audio_wav_no_cover">WAV no guarda la imagen de portada.</string>
+    <string name="audio_exceeds_note">El original tiene unos %1$d kbps: un bitrate mayor no mejora la calidad.</string>
+    <string name="audio_estimated_size">Tamaño estimado: %1$s</string>
+    <string name="download_saved_music">Guardado en Music/MediaForge</string>
 </resources>
