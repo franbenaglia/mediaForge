@@ -9,4 +9,31 @@
 
     <!-- Pantallas que todavía no están implementadas -->
     <string name="screen_not_implemented">Esta sección todavía no está disponible.</string>
+
+    <!-- Estado de un trabajo -->
+    <string name="job_status_pending">Pendiente</string>
+    <string name="job_status_analyzing">Analizando</string>
+    <string name="job_status_downloading">Descargando</string>
+    <string name="job_status_processing_merge">Uniendo pistas</string>
+    <string name="job_status_processing_extract">Extrayendo audio</string>
+    <string name="job_status_processing_transcode">Convirtiendo</string>
+    <string name="job_status_processing_metadata">Escribiendo metadatos</string>
+    <string name="job_status_completed">Completado</string>
+    <string name="job_status_failed">Falló</string>
+    <string name="job_status_cancelled">Cancelado</string>
+    <string name="job_progress_of">%1$s de %2$s</string>
+    <string name="job_speed">%1$s/s</string>
+
+    <!-- Errores -->
+    <string name="error_invalid_url">El enlace no es válido.</string>
+    <string name="error_unsupported_site">Este sitio no es compatible.</string>
+    <string name="error_login_required">Este contenido requiere iniciar sesión. MediaForge no descarga contenido que necesite una cuenta.</string>
+    <string name="error_access_denied">El sitio no permite acceder a este contenido.</string>
+    <string name="error_network">Error de red. Revisá la conexión y probá de nuevo.</string>
+    <string name="error_insufficient_storage">No hay suficiente espacio de almacenamiento.</string>
+    <string name="error_engine_outdated">Puede que el sitio haya cambiado. Actualizar el motor de extracción puede solucionarlo.</string>
+    <string name="error_unknown">Algo salió mal.</string>
+
+    <!-- Acciones -->
+    <string name="action_retry">Reintentar</string>
 </resources>

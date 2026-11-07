@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 2, tarea **T2.3** en [TASKS.md](TASKS.md). Después, T3.1 (lo necesita T2.2) y T2.2.
+Tarea **T3.1** (`UrlValidator`), que necesita T2.2. Después T2.2, que cierra la Etapa 2.
 
 ## Etapas
 
@@ -26,6 +26,7 @@ Etapa 2, tarea **T2.3** en [TASKS.md](TASKS.md). Después, T3.1 (lo necesita T2.
 
 - Proyecto Gradle (`:app`, `:core:domain`), Hilt, tema Material 3 claro/oscuro.
 - Navegación tipada con barra inferior (Inicio, Descargas, Conversor, Historial, Ajustes). Las cinco pantallas muestran "todavía no disponible".
+- Componentes: `MediaCard` (miniatura como slot), `JobRow` (estado, progreso, tamaño y velocidad), `EmptyState`, `ErrorState`; textos de estados y errores; `Formatters` (bytes, duración).
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
@@ -34,7 +35,7 @@ Etapa 2, tarea **T2.3** en [TASKS.md](TASKS.md). Después, T3.1 (lo necesita T2.
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 19 pruebas (14 dominio + 5 app), lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 30 pruebas (14 dominio + 16 app), lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug (sin motores) | 12 MB | 2026-11-06 |
 | Pruebas en dispositivo | No hay todavía | — |
 
@@ -51,7 +52,7 @@ Ninguno.
 
 ## Problemas conocidos
 
-- Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004) y `AndroidGradlePluginVersion` (hay AGP 9.5.1 y Gradle 9.8.2; se actualizan en una tarea propia, no a mitad de etapa).
+- Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004); `AndroidGradlePluginVersion` y `NewerVersionAvailable` (hay versiones nuevas; se actualizan en una tarea propia, no a mitad de etapa); `DataExtractionRules` (`allowBackup=false` sigue haciendo falta para Android ≤ 11).
 - Pendientes de validar en el teléfono (FEASIBILITY §12): descarga de YouTube con yt-dlp actualizado, Dailymotion y TikTok, cancelación con ffmpeg como proceso hijo, tiempos de conversión en arm64 y primer arranque.
 - Verificación de desarrolladores de Google (global en 2027): decidir cuenta y clave de firma antes de la Etapa 12.
 - El disco de la máquina de desarrollo tiene poco espacio (~21 GB libres al 2026-11-06).

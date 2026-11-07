@@ -11,4 +11,34 @@
 
     <!-- Pantallas que todavía no están implementadas -->
     <string name="screen_not_implemented">This section is not available yet.</string>
+
+    <!-- Estado de un trabajo -->
+    <string name="job_status_pending">Pending</string>
+    <string name="job_status_analyzing">Analyzing</string>
+    <string name="job_status_downloading">Downloading</string>
+    <string name="job_status_processing_merge">Merging tracks</string>
+    <string name="job_status_processing_extract">Extracting audio</string>
+    <string name="job_status_processing_transcode">Converting</string>
+    <string name="job_status_processing_metadata">Writing metadata</string>
+    <string name="job_status_completed">Completed</string>
+    <string name="job_status_failed">Failed</string>
+    <string name="job_status_cancelled">Cancelled</string>
+    <!-- 12.3 MB of 45.6 MB -->
+    <string name="job_progress_of">%1$s of %2$s</string>
+    <!-- 2.1 MB/s -->
+    <string name="job_speed">%1$s/s</string>
+    <string name="detail_separator" translatable="false">" · "</string>
+
+    <!-- Errores -->
+    <string name="error_invalid_url">This link is not valid.</string>
+    <string name="error_unsupported_site">This site is not supported.</string>
+    <string name="error_login_required">This content requires signing in. MediaForge does not download content that requires an account.</string>
+    <string name="error_access_denied">The site does not allow access to this content.</string>
+    <string name="error_network">Network error. Check your connection and try again.</string>
+    <string name="error_insufficient_storage">There is not enough storage space.</string>
+    <string name="error_engine_outdated">The site may have changed. Updating the extraction engine may fix it.</string>
+    <string name="error_unknown">Something went wrong.</string>
+
+    <!-- Acciones -->
+    <string name="action_retry">Retry</string>
 </resources>

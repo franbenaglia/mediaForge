@@ -25,7 +25,7 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
 - [ ] **T2.2** · P1 · Pantalla Inicio (solo UI): campo URL, botón pegar, botón analizar, `HomeViewModel` con `UiState` (vacío / escribiendo / inválida / lista).
   *Depende de:* T2.1, T3.1
   *Acepta:* prueba de ViewModel: pegar y escribir actualizan el estado; con una URL inválida el botón queda deshabilitado.
-- [ ] **T2.3** · P2 · Componentes reutilizables: tarjeta de medio, fila de trabajo con progreso, estado vacío, estado de error.
+- [x] **T2.3** · P2 · Componentes reutilizables: tarjeta de medio, fila de trabajo con progreso, estado vacío, estado de error.
   *Depende de:* T2.1
   *Acepta:* previews en claro y oscuro; sin textos incrustados.
 
