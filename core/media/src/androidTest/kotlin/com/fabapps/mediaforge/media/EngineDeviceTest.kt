@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.model.DownloadRequest
+import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.media.engine.EngineInitializer
 import com.fabapps.mediaforge.media.engine.EngineState
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
@@ -16,12 +19,14 @@ import com.fabapps.mediaforge.media.update.UrlConnectionFetcher
 import com.fabapps.mediaforge.media.update.YtDlpUpdater
 import com.fabapps.mediaforge.media.update.YtDlpVersions
 import com.fabapps.mediaforge.media.ytdlp.YtDlpCommand
+import com.fabapps.mediaforge.media.ytdlp.YtDlpDownloader
 import com.fabapps.mediaforge.media.ytdlp.YtDlpExtractor
 import com.fabapps.mediaforge.media.ytdlp.YtDlpInfoParser
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -180,6 +185,45 @@ class EngineDeviceTest {
         assertTrue("ffmpeg never started", sawFfmpeg)
         assertTrue("leftover processes: $leftovers", leftovers.isEmpty())
     }
+
+    /** T4.8: descarga real de Dailymotion (HLS) con el camino de la app. Registra la salida sin query strings. */
+    @Test
+    fun t5_downloadDailymotion() = download("dailymotion", DAILYMOTION, listOf("hls-380"), 240)
+
+    private fun download(name: String, url: String, formatIds: List<String>, height: Int) = runBlocking {
+        engine.ensureReady()
+        log("$name ytdlp=${updater.installedVersion()}")
+        val runtime = native.runtime()
+        val work = File(context.cacheDir, "download-test").apply {
+            deleteRecursively()
+            mkdirs()
+        }
+        val selection = DownloadSelection.Video(formatIds, maxHeight = height)
+        val command = YtDlpCommand.download(runtime, url, selection, work, embedMetadata = true)
+        var end: ProcessEvent? = null
+        val start = System.currentTimeMillis()
+        runner.run(command, runtime.environment, workingDir = work).collect {
+            when (it) {
+                is ProcessEvent.Stdout -> if (!it.line.startsWith(YtDlpCommand.PROGRESS_PREFIX)) {
+                    log("$name out: ${redact(it.line)}")
+                }
+                is ProcessEvent.Stderr -> log("$name err: ${redact(it.line)}")
+                else -> end = it
+            }
+        }
+        log("$name raw end=$end ms=${System.currentTimeMillis() - start} files=${work.list()?.toList()}")
+
+        val downloader =
+            YtDlpDownloader(engine, native, runner, File(context.noBackupFilesDir, "mediaforge/jobs"), Dispatchers.IO)
+        val request = DownloadRequest("device-$name", url, selection, "MediaForge device test")
+        val last = downloader.download(request).toList().last()
+        log("$name downloader last=$last")
+        work.deleteRecursively()
+        (last as? JobState.Completed)?.outputs?.forEach { File(it.location).parentFile?.deleteRecursively() }
+        assertTrue("$name: $last", last is JobState.Completed)
+    }
+
+    private fun redact(line: String) = line.replace(Regex("\\?[^\\s\"']*"), "?…").take(400)
 
     /** Procesos de esta app, como "PID NOMBRE ARGS". El nombre es el binario (no los argumentos). */
     private fun ownProcesses(): List<String> = ProcessBuilder("ps", "-A", "-o", "PID,NAME,ARGS")

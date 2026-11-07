@@ -82,4 +82,6 @@
     <string name="download_failed">La descarga falló.</string>
     <string name="download_again">Descargar de nuevo</string>
     <string name="download_permission_denied">MediaForge necesita permiso de almacenamiento para guardar el video.</string>
+    <string name="error_show_details">Detalles técnicos</string>
+    <string name="error_hide_details">Ocultar detalles</string>
 </resources>
