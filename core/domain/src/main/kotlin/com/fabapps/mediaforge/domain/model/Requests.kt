@@ -23,6 +23,8 @@ data class DownloadRequest(
     /** Nombre elegido por el usuario, sin extensión. Se sanea antes de usarlo. */
     val fileName: String,
     val embedMetadata: Boolean = true,
+    /** Tamaño estimado (de `VideoOptions`), para chequear el espacio antes de empezar. */
+    val expectedBytes: Long? = null,
 )
 
 data class ConversionRequest(

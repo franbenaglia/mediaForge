@@ -87,9 +87,10 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Depende de:* T4.3
   *Acepta:* pruebas con salida real o reconstruida (tamaños desconocidos, `NA`, dos partes, merge).
   *Hecho:* `YtDlpProgressParser` con salida reconstruida (6 pruebas); se valida con salida real en T4.8.
-- [ ] **T4.5** · P1 · `YtDlpDownloader` implementa `MediaDownloader`: espacio libre, ejecución con `ProcessRunner`, errores clasificados, y al cancelar o fallar borra la carpeta temporal.
+- [x] **T4.5** · P1 · `YtDlpDownloader` implementa `MediaDownloader`: espacio libre, ejecución con `ProcessRunner`, errores clasificados, y al cancelar o fallar borra la carpeta temporal.
   *Depende de:* T4.3, T4.4
   *Acepta:* pruebas en la JVM con un yt-dlp falso (éxito, error, cancelación sin parciales).
+  *Hecho:* carpeta por trabajo en `noBackupFilesDir/mediaforge/jobs`; espacio = 2 × estimado + 100 MB; `DownloadRequest.expectedBytes`. 7 pruebas. Sin timeout total (descargas largas).
 - [ ] **T4.6** · P1 · Guardado en `Movies/MediaForge` por MediaStore (API 29+: `RELATIVE_PATH` + `IS_PENDING`; API 26–28: permiso `WRITE_EXTERNAL_STORAGE` limitado a 28), con `FileNames.sanitize`/`unique`.
   *Depende de:* T4.5
   *Acepta:* prueba instrumentada en el teléfono (archivo visible en la galería, nombre repetido → sufijo).
