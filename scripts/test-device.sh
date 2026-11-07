@@ -14,4 +14,6 @@ if grep -q '^emulator-' <<<"$devices"; then
     exit 1
 fi
 
-timeout 1800 ./gradlew connectedDebugAndroidTest "$@"
+# Motor (core:media): un solo APK de prueba. Mediciones en logcat con la etiqueta MFDEVICE y
+# fixtures en files/fixtures (ver EngineDeviceTest).
+timeout 1800 ./gradlew :core:media:connectedDebugAndroidTest "$@"

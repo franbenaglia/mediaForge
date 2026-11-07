@@ -145,4 +145,22 @@ class YtDlpInfoParserTest {
         val info = (YtDlpInfoParser.parse("""{"id": "a", "description": "$long"}""") as Outcome.Success).value
         assertEquals(YtDlpInfoParser.MAX_DESCRIPTION_CHARS, info.description?.length)
     }
+
+    // Salida real de yt-dlp 2025.11.12 en el teléfono (2026-11-07), recortada por EngineDeviceTest.
+
+    @Test
+    fun realYoutubeOutputFromPhone() {
+        val info = parseOk("youtube-real.json")
+        assertEquals("aqz-KE-bpKQ", info.id)
+        assertEquals("YouTube", info.site.displayName)
+        assertEquals(635L, info.durationSeconds)
+        // 39 formatos menos 4 storyboards: los mismos 35 que contó la app en el teléfono.
+        assertEquals(35, info.formats.size)
+        assertEquals(
+            listOf(144, 240, 360, 480, 720, 1080, 1440, 2160),
+            info.formats.mapNotNull { it.height }.distinct().sorted(),
+        )
+        assertTrue(info.formats.any { it.hasAudio && !it.hasVideo })
+        assertTrue(info.formats.any { it.videoCodec?.startsWith("av01") == true })
+    }
 }

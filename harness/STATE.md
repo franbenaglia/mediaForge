@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-**Prueba en el teléfono** de T3.3/T3.5/T3.6/T3.8 (pedir permiso antes de instalar) y, en paralelo o después, T3.7 (actualizador de yt-dlp).
+Tarea **T3.7** (actualizador verificado de yt-dlp). Después, volver a correr `EngineDeviceTest` en el teléfono (Dailymotion y cancelación con ffmpeg) y probar la app a mano (T3.8).
 
 ## Etapas
 
@@ -42,9 +42,9 @@
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 119 pruebas (34 dominio + 30 app + 55 media), lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 120 pruebas (34 dominio + 30 app + 56 media) + 4 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
-| Pruebas en dispositivo | No hay todavía | — |
+| `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | init 2,7 s (primera vez) / 20 ms; YouTube OK 5,4 s, 35 formatos; Dailymotion 403 (yt-dlp viejo); cancelación sin validar | 2026-11-07 |
 
 Último commit validado: ver `git log -1` (commit de cierre de la Etapa 2).
 
@@ -59,7 +59,8 @@ Ninguno.
 
 ## Problemas conocidos
 
-- Los fixtures de yt-dlp (`core/media/src/test/resources/ytdlp`) son reconstruidos a partir de lo observado en la Etapa 0: la política de seguridad de la sesión no permitió ejecutar yt-dlp en la PC. Reemplazarlos con salida real del teléfono (T3.6).
+- El yt-dlp incluido en el APK (2025.11.12) ya falla con Dailymotion (403). T3.7 es prioritaria.
+- Fixtures de yt-dlp: YouTube ya es real; Dailymotion sigue reconstruido hasta T3.7.
 
 - El APK de release (R8) todavía no se probó con youtubedl-android. Hay reglas en `core/media/consumer-rules.pro` (Jackson), pero se validan en el teléfono antes del primer release.
 

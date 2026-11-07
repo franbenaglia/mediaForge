@@ -38,7 +38,8 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
   *Depende de:* —
   *Acepta:* `verify.sh` OK; tamaño del APK por ABI registrado en STATE.md.
 - [~] **T3.3** · P1 · Parser propio de `--dump-json` → `MediaInfo` (kotlinx.serialization), tolerante a campos faltantes.
-  *Falta:* los fixtures son reconstruidos (no se permitió ejecutar yt-dlp en la PC); reemplazarlos por salida real capturada en el teléfono durante T3.6.
+  *Hecho en el teléfono (2026-11-07):* fixture real de YouTube (`youtube-real.json`) con prueba.
+  *Falta:* fixture real de Dailymotion: con el yt-dlp del APK devuelve 403; se captura después de T3.7.
   *Depende de:* T3.2
   *Acepta:* pruebas con fixtures JSON reales de YouTube y Dailymotion (guardados en `core/media/src/test/resources`).
 - [x] **T3.4** · P1 · Clasificador de errores: stderr de yt-dlp → `MediaError`.
@@ -47,11 +48,12 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
 - [~] **T3.5** · P1 · `ProcessRunner`: lanza un binario con argumentos en lista, lee stdout/stderr en streaming y, al cancelar la corrutina, mata el árbol de procesos por PID.
   *Depende de:* T3.2
   *Acepta:* pruebas en la JVM con `sleep`/`sh` (cancelación, timeout, código de salida, hijos muertos).
-  *Falta:* confirmar en el teléfono que `/system/bin/sh`, `kill` y la lectura de `/proc` se comportan igual (con yt-dlp + ffmpeg reales, en T3.6).
+  *Falta:* confirmar en el teléfono que la cancelación mata un ffmpeg hijo real (`EngineDeviceTest.t4`). En el primer intento no arrancó ffmpeg porque Dailymotion falló: revalidar después de T3.7. `/system/bin/sh` y el wrapper sí funcionan (todas las ejecuciones del teléfono pasan por ProcessRunner).
 - [~] **T3.6** · P1 · `YtDlpExtractor` implementa `MediaExtractor`, con `--cache-dir` propio, `--no-playlist` y `--` antes de la URL.
   *Depende de:* T3.3, T3.4, T3.5
   *Acepta:* prueba unitaria de los argumentos construidos; `[~]` hasta probar YouTube y Dailymotion en el teléfono.
   *Hecho:* comando y extractor probados en la JVM con un yt-dlp falso (éxito, error clasificado, timeout, URL inválida).
+  *Teléfono (2026-11-07):* YouTube OK (5,4 s, 35 formatos). Dailymotion falla con 403 por el yt-dlp viejo (clasificado bien como `EngineOutdated`): revalidar después de T3.7.
 - [~] **T3.8** · P1 · Inicio muestra el resultado del análisis: cargando (incluida la primera inicialización del motor), `MediaCard` con datos y cantidad de formatos, o `ErrorState`.
   *Depende de:* T3.6, T2.2
   *Acepta:* pruebas de `HomeViewModel` con un `MediaExtractor` falso (cargando → éxito / error / cancelar al cambiar el enlace); `[~]` hasta probarlo en el teléfono.

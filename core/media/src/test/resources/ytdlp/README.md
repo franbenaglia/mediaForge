@@ -5,4 +5,8 @@ Etapa 0 (Big Buck Bunny, Blender Foundation, CC BY), recortados a los campos que
 Las URLs firmadas de los formatos se reemplazaron por `https://example.invalid/…`: nunca se
 guardan URLs con tokens (CLAUDE.md).
 
-Pendiente (T3.6): reemplazarlos por salida real capturada en el teléfono, con el mismo recorte.
+- `youtube-real.json`: salida **real** de yt-dlp 2025.11.12 en el teléfono (2026-11-07), recortada
+  por `EngineDeviceTest.trimForFixture` (sin URLs, descripción corta).
+- `youtube.json`, `dailymotion.json`, `minimal.json`, `playlist.json`: reconstruidos, para casos borde
+  (notación científica, tamaños faltantes, playlists). Falta un `dailymotion-real.json`: con el
+  yt-dlp incluido en el APK Dailymotion devuelve 403 (se captura después de T3.7).
