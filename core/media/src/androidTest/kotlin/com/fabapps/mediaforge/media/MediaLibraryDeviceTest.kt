@@ -6,6 +6,7 @@ import android.provider.MediaStore
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.media.storage.MediaStoreLibrary
 import java.io.File
@@ -30,10 +31,15 @@ class MediaLibraryDeviceTest {
         created.forEach { context.contentResolver.delete(it, null, null) }
     }
 
-    private fun privateFile(content: String): OutputFile {
+    private fun privateFile(
+        content: String,
+        extension: String = "mp4",
+        mime: String = "video/mp4",
+        name: String = "MediaForge test: video",
+    ): OutputFile {
         val dir = File(context.noBackupFilesDir, "mediaforge/jobs/device-test").apply { mkdirs() }
-        val file = File(dir, "media.mp4").apply { writeText(content) }
-        return OutputFile(file.absolutePath, "MediaForge test: video.mp4", "video/mp4", file.length())
+        val file = File(dir, "media.$extension").apply { writeText(content) }
+        return OutputFile(file.absolutePath, "$name.$extension", mime, file.length())
     }
 
     private fun save(file: OutputFile): OutputFile {
@@ -68,5 +74,24 @@ class MediaLibraryDeviceTest {
         }
         val content = context.contentResolver.openInputStream(uri)!!.use { it.readBytes().decodeToString() }
         assertEquals("first", content)
+    }
+
+    /** T5.3: MediaStore acepta cada formato de audio sin cambiar el nombre ni la extensión. */
+    @Test
+    fun savesEveryAudioFormatIntoMusic() {
+        for (format in AudioFormat.entries) {
+            val saved = save(privateFile("audio", format.extension, format.mimeType, "MediaForge test audio"))
+            assertEquals("MediaForge test audio.${format.extension}", saved.displayName)
+            context.contentResolver.query(
+                Uri.parse(saved.location),
+                arrayOf(MediaStore.MediaColumns.RELATIVE_PATH),
+                null,
+                null,
+                null,
+            )!!.use {
+                assertTrue(it.moveToFirst())
+                assertEquals("Music/MediaForge/", it.getString(0))
+            }
+        }
     }
 }

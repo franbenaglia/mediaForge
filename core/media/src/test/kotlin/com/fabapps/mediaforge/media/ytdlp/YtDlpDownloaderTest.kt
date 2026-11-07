@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.media.ytdlp
 
+import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.JobState
@@ -63,6 +64,16 @@ class YtDlpDownloaderTest {
                     echo "MFPROG downloading 10 1000 NA NA"
                     sleep 30 ;;
                   nofile) echo "[info] nothing" ;;
+                  audio)
+                    echo "[info] Writing video thumbnail 41 to: ${'$'}PWD/media.webp"
+                    printf 'a-much-bigger-thumbnail-than-the-audio' > media.webp
+                    echo "[download] Destination: ${'$'}PWD/media.webm"
+                    printf 'opus' > media.webm
+                    echo "MFPROG finished 4 4 NA NA"
+                    echo "[ExtractAudio] Destination: ${'$'}PWD/media.mp3"
+                    printf 'mp3' > media.mp3
+                    rm media.webm
+                    echo "[EmbedThumbnail] ffmpeg: Adding thumbnail to \"${'$'}PWD/media.mp3\"" ;;
                 esac
                 """.trimIndent(),
             )
@@ -167,5 +178,20 @@ class YtDlpDownloaderTest {
         assertTrue(run("ok", request(jobId = "../evil")).last() is JobState.Failed)
         assertFalse(argsFile.exists())
         assertFalse(File(tmp.root, "evil").exists())
+    }
+
+    @Test
+    fun audioOutputIsTheConvertedFileNotTheCover() {
+        val audio = request().copy(selection = DownloadSelection.Audio(AudioFormat.MP3, 320, listOf("251")))
+        val states = run("audio", audio)
+        assertTrue(JobState.Processing(ProcessingStep.TRANSCODE, null) in states)
+        assertTrue(JobState.Processing(ProcessingStep.METADATA, null) in states)
+        val output = (states.last() as JobState.Completed).outputs.single()
+        assertEquals(File(root, "job1/media.mp3").absolutePath, output.location)
+        assertEquals("Big Buck Bunny 4K 60fps.mp3", output.displayName)
+        assertEquals("audio/mpeg", output.mimeType)
+        val args = argsFile.readLines()
+        assertEquals("320K", args[args.indexOf("--audio-quality") + 1])
+        assertTrue("--embed-thumbnail" in args)
     }
 }

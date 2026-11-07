@@ -8,6 +8,7 @@ import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
+import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.url.UrlCheck
 import com.fabapps.mediaforge.domain.url.UrlValidator
 import com.fabapps.mediaforge.media.engine.EngineInitializer
@@ -45,7 +46,7 @@ class YtDlpDownloader(
             return@flow
         }
         val url = (UrlValidator.validate(request.sourceUrl) as UrlCheck.Valid).url
-        val selection = request.selection as DownloadSelection.Video
+        val selection = request.selection
 
         val workDir = File(workRoot, request.jobId)
         workDir.deleteRecursively()
@@ -54,7 +55,7 @@ class YtDlpDownloader(
         try {
             val runtime = runtimeProvider.runtime()
             val command = YtDlpCommand.download(runtime, url, selection, workDir, request.embedMetadata)
-            val parser = YtDlpProgressParser()
+            val parser = YtDlpProgressParser(audioStep = audioStep(selection))
             val stderr = ArrayDeque<String>()
             var exit: ProcessEvent? = null
             emit(JobState.Downloading(null, null, null, null))
@@ -73,7 +74,7 @@ class YtDlpDownloader(
                 emit(JobState.Failed(YtDlpErrorClassifier.classify(stderr.joinToString("\n"))))
                 return@flow
             }
-            val output = findOutput(workDir)
+            val output = findOutput(workDir, expectedExtension(selection))
             if (output == null) {
                 emit(JobState.Failed(MediaError.Unknown(detail = "yt-dlp finished without an output file")))
                 return@flow
@@ -87,9 +88,6 @@ class YtDlpDownloader(
 
     private suspend fun precheck(request: DownloadRequest): MediaError? {
         if (!JOB_ID.matches(request.jobId)) return MediaError.Unknown(detail = "invalid job id")
-        if (request.selection !is DownloadSelection.Video) {
-            return MediaError.Unknown(detail = "audio downloads are not implemented yet")
-        }
         val check = UrlValidator.validate(request.sourceUrl)
         if (check is UrlCheck.Invalid) return MediaError.InvalidUrl(detail = check.reason.name)
         val ready = engine.ensureReady()
@@ -104,17 +102,36 @@ class YtDlpDownloader(
         return if (free < required) MediaError.InsufficientStorage(required, free) else null
     }
 
-    private fun findOutput(workDir: File): File? = workDir.listFiles().orEmpty()
-        .filter { it.isFile && it.name.startsWith("${YtDlpCommand.OUTPUT_BASENAME}.") }
-        .filterNot { it.name.endsWith(".part") || it.name.endsWith(".ytdl") || PART_FILE.matches(it.name) }
-        .maxByOrNull { it.length() }
+    /** Con la extensión esperada si existe; si no, el archivo más grande (no una portada suelta). */
+    private fun findOutput(workDir: File, extension: String): File? {
+        val candidates = workDir.listFiles().orEmpty()
+            .filter { it.isFile && it.name.startsWith("${YtDlpCommand.OUTPUT_BASENAME}.") }
+            .filterNot { it.name.endsWith(".part") || it.name.endsWith(".ytdl") || PART_FILE.matches(it.name) }
+            .filterNot { it.extension.lowercase() in IMAGE_EXTENSIONS }
+        return candidates.firstOrNull { it.extension.equals(extension, ignoreCase = true) }
+            ?: candidates.maxByOrNull { it.length() }
+    }
 
-    private fun describe(file: File, request: DownloadRequest, selection: DownloadSelection.Video): OutputFile {
+    private fun expectedExtension(selection: DownloadSelection) = when (selection) {
+        is DownloadSelection.Video -> selection.container.extension
+        is DownloadSelection.Audio -> selection.format.extension
+    }
+
+    /** Recodificar (bitrate fijo o sin pérdida) o copiar; el parser corrige si yt-dlp copia igual. */
+    private fun audioStep(selection: DownloadSelection) = when {
+        selection is DownloadSelection.Audio && (selection.bitrateKbps != null || selection.format.lossless) ->
+            ProcessingStep.TRANSCODE
+        else -> ProcessingStep.EXTRACT_AUDIO
+    }
+
+    private fun describe(file: File, request: DownloadRequest, selection: DownloadSelection): OutputFile {
         val extension = file.extension.lowercase()
-        val mime = if (extension == selection.container.extension) {
-            selection.container.mimeType
-        } else {
-            "video/$extension"
+        val mime = when {
+            selection is DownloadSelection.Video && extension == selection.container.extension ->
+                selection.container.mimeType
+            selection is DownloadSelection.Audio && extension == selection.format.extension -> selection.format.mimeType
+            selection is DownloadSelection.Audio -> "audio/$extension"
+            else -> "video/$extension"
         }
         return OutputFile(
             location = file.absolutePath,
@@ -130,6 +147,8 @@ class YtDlpDownloader(
 
         /** El ID forma una ruta: sin separadores ni puntos al inicio. */
         private val JOB_ID = Regex("[A-Za-z0-9_-]{1,64}")
+
+        private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
 
         /** Partes antes del merge: `media.f299.mp4`, `media.fhls-380.mp4`. */
         private val PART_FILE = Regex("""${YtDlpCommand.OUTPUT_BASENAME}\.f[^.]+\..+""")

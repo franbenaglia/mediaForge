@@ -55,6 +55,8 @@ enum class AudioFormat(val extension: String, val mimeType: String, val lossless
     M4A("m4a", "audio/mp4", lossless = false),
     OPUS("opus", "audio/ogg", lossless = false),
     OGG("ogg", "audio/ogg", lossless = false),
-    WAV("wav", "audio/wav", lossless = true),
+
+    /** `audio/x-wav`: es el tipo que Android asocia a `.wav` (con `audio/wav` MediaStore puede cambiar el nombre). */
+    WAV("wav", "audio/x-wav", lossless = true),
     FLAC("flac", "audio/flac", lossless = true),
 }

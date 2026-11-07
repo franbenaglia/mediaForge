@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 5: sigue T5.3 (`YtDlpDownloader` con audio). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
+Etapa 5: sigue T5.4 (pantalla de audio). Pendiente en el teléfono: `MediaLibraryDeviceTest.savesEveryAudioFormatIntoMusic` (T5.3). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
 
 ## Etapas
 
