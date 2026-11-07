@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Código de la Etapa 4 completo. Falta todo lo del teléfono: `MediaLibraryDeviceTest` (T4.6), instalar la app y probar a mano miniatura (T4.1), descarga y cancelación (T4.7, T4.8). El clasificador de permisos bloqueó la instalación: hay que pedir permiso al usuario. El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
+Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Código de la Etapa 4 completo. T4.6 validada en el teléfono. App instalada (2026-11-07); falta la prueba manual del usuario: miniatura (T4.1), descarga y cancelación (T4.7, T4.8). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
 
 ## Etapas
 
