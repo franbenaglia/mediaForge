@@ -66,6 +66,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
         },
         onClear = viewModel::onClear,
         onAnalyze = viewModel::onAnalyze,
+        onUpdateEngine = viewModel::onUpdateEngine,
     )
 }
 
@@ -76,6 +77,7 @@ private fun HomeContent(
     onPaste: () -> Unit,
     onClear: () -> Unit,
     onAnalyze: () -> Unit,
+    onUpdateEngine: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -122,6 +124,11 @@ private fun HomeContent(
             }
         }
         AnalysisResult(state.analysis, onRetry = onAnalyze)
+        if (state.canUpdateEngine) {
+            Button(onClick = onUpdateEngine, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text(stringResource(R.string.home_update_engine))
+            }
+        }
     }
 }
 
@@ -129,6 +136,26 @@ private fun HomeContent(
 private fun AnalysisResult(analysis: AnalysisState, onRetry: () -> Unit) {
     when (analysis) {
         AnalysisState.Idle -> Unit
+        AnalysisState.UpdatingEngine -> Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            CircularProgressIndicator()
+            Text(stringResource(R.string.home_updating_engine), style = MaterialTheme.typography.bodyMedium)
+        }
+        is AnalysisState.UpdateFailed -> Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                stringResource(R.string.home_update_failed),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error,
+            )
+            ErrorMessage(error = analysis.error)
+        }
         AnalysisState.Loading -> Column(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

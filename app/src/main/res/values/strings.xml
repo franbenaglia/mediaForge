@@ -52,6 +52,9 @@
     <string name="home_analyze">Analyze</string>
     <string name="home_analyzing">Analyzing link…</string>
     <string name="home_first_run_hint">The first analysis prepares the engine and can take a few seconds.</string>
+    <string name="home_update_engine">Update engine</string>
+    <string name="home_updating_engine">Updating the extraction engine…</string>
+    <string name="home_update_failed">The engine could not be updated.</string>
     <plurals name="home_formats_count">
         <item quantity="one">%d format available</item>
         <item quantity="other">%d formats available</item>

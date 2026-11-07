@@ -4,14 +4,14 @@
 
 ## Próximo paso
 
-Correr `EngineDeviceTest` en el teléfono (actualización real, Dailymotion, cancelación con ffmpeg). Después **T3.9** (botón "Actualizar motor" en Inicio).
+Correr `EngineDeviceTest` en el teléfono (actualización real, Dailymotion, cancelación con ffmpeg) y probar a mano "Actualizar motor" en la app. **El permiso de instalación en el teléfono quedó bloqueado por la política de la sesión el 2026-11-07: pedir autorización al usuario.** Con eso validado, cierra la Etapa 3.
 
 ## Etapas
 
 - [x] 0. Investigación técnica → [docs/FEASIBILITY.md](../docs/FEASIBILITY.md)
 - [x] 1. Harness y estructura
 - [x] 2. Interfaz base
-- [ ] 3. Motor de extracción (en curso: T3.1–T3.8 hechas; faltan validar en el teléfono T3.3 (Dailymotion), T3.5, T3.6 (Dailymotion) y T3.7; falta T3.9)
+- [ ] 3. Motor de extracción (en curso: T3.1–T3.8 hechas; faltan validar en el teléfono T3.3 (Dailymotion), T3.5, T3.6 (Dailymotion) y T3.7; T3.9 hecha sin validar)
 - [ ] 4. Descarga de video
 - [ ] 5. Extracción de audio
 - [ ] 6. Conversor multimedia
@@ -30,7 +30,7 @@ Correr `EngineDeviceTest` en el teléfono (actualización real, Dailymotion, can
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
-- Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Todavía sin miniatura: falta la librería de imágenes.
+- Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Todavía sin miniatura: falta la librería de imágenes. Si el error es "motor desactualizado", ofrece "Actualizar motor" y reintenta solo (T3.9).
 - `:core:media`: youtubedl-android 0.18.1 (Python, FFmpeg, QuickJS), un APK por ABI y `EngineInitializer` (una sola vez, fuera del hilo principal, chequea antes el espacio libre; estado observable). Todavía nadie lo llama: lo usa T3.6.
 - `YtDlpInfoParser`: `--dump-json` → `MediaInfo` con la lista completa de formatos (descarta storyboards), tamaños exactos o aproximados, playlists rechazadas, JSON inválido como error. 13 pruebas.
 - `YtDlpErrorClassifier`: stderr → `MediaError` (login, acceso denegado, bot check, DRM, red, espacio, sitio no soportado, motor desactualizado). Un 403 con el aviso de "versión de más de 90 días" sugiere actualizar. El detalle se guarda sin query strings. 17 pruebas.
@@ -43,7 +43,7 @@ Correr `EngineDeviceTest` en el teléfono (actualización real, Dailymotion, can
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 142 pruebas (34 dominio + 30 app + 78 media) + 5 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 145 pruebas (34 dominio + 33 app + 78 media) + 5 instrumentadas del motor, lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | init 2,7 s (primera vez) / 20 ms; YouTube OK 5,4 s, 35 formatos; Dailymotion 403 (yt-dlp viejo); cancelación sin validar | 2026-11-07 |
 

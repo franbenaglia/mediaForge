@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.ui.home
 
+import com.fabapps.mediaforge.domain.engine.ExtractorEngine
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.MediaError
@@ -42,7 +43,19 @@ class HomeViewModelTest {
         }
     }
 
+    private class FakeEngine : ExtractorEngine {
+        var pending = CompletableDeferred<Outcome<String>>()
+        var updates = 0
+        override suspend fun installedVersion() = "2025.11.12"
+        override suspend fun checkForUpdate(): Outcome<String?> = Outcome.Success(null)
+        override suspend fun update(): Outcome<String> {
+            updates++
+            return pending.await()
+        }
+    }
+
     private val extractor = FakeExtractor()
+    private val engine = FakeEngine()
     private lateinit var vm: HomeViewModel
     private val state get() = vm.state.value
 
@@ -56,7 +69,7 @@ class HomeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = HomeViewModel(extractor)
+        vm = HomeViewModel(extractor, engine)
     }
 
     @After
@@ -201,5 +214,56 @@ class HomeViewModelTest {
         advanceUntilIdle()
         assertEquals(2, extractor.calls.size)
         assertEquals(AnalysisState.Loaded(info), state.analysis)
+    }
+
+    // Actualización del motor (T3.9)
+
+    private suspend fun TestScope.failWithOutdatedEngine() {
+        vm.onInputChange("https://www.dailymotion.com/video/x2kdx9f")
+        vm.onAnalyze()
+        extractor.pending.complete(Outcome.Failure(MediaError.EngineOutdated()))
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun updateIsOfferedOnlyForOutdatedEngine() = test {
+        vm.onInputChange("https://example.com/v")
+        vm.onAnalyze()
+        extractor.pending.complete(Outcome.Failure(MediaError.Network()))
+        advanceUntilIdle()
+        assertFalse(state.canUpdateEngine)
+        vm.onUpdateEngine()
+        assertEquals(0, engine.updates)
+    }
+
+    @Test
+    fun successfulUpdateRetriesTheAnalysis() = test {
+        failWithOutdatedEngine()
+        assertTrue(state.canUpdateEngine)
+
+        extractor.pending = CompletableDeferred()
+        vm.onUpdateEngine()
+        assertEquals(AnalysisState.UpdatingEngine, state.analysis)
+        assertFalse(state.canAnalyze)
+
+        engine.pending.complete(Outcome.Success("2026.10.26"))
+        advanceUntilIdle()
+        assertEquals(AnalysisState.Loading, state.analysis)
+        assertEquals(2, extractor.calls.size)
+
+        extractor.pending.complete(Outcome.Success(info))
+        advanceUntilIdle()
+        assertEquals(AnalysisState.Loaded(info), state.analysis)
+    }
+
+    @Test
+    fun failedUpdateIsShownAndCanBeRetried() = test {
+        failWithOutdatedEngine()
+        vm.onUpdateEngine()
+        engine.pending.complete(Outcome.Failure(MediaError.Network()))
+        advanceUntilIdle()
+        assertEquals(AnalysisState.UpdateFailed(MediaError.Network()), state.analysis)
+        assertTrue(state.canUpdateEngine)
+        assertEquals(1, extractor.calls.size)
     }
 }

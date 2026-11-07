@@ -62,7 +62,7 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
   *Depende de:* T3.5
   *Acepta:* pruebas con un release falso (hash incorrecto → rechazo; firma inválida → rechazo; versión rota → rollback).
   *Hecho:* verificación OpenPGP propia (sin Bouncy Castle) probada con la firma real de 2026.10.26 y con una clave de prueba; respeta `_update_spec`; 22 pruebas. Falta: correr la actualización real en el teléfono (`EngineDeviceTest.t1b`).
-- [ ] **T3.9** · P1 · Inicio ofrece "Actualizar motor" cuando el error es `EngineOutdated`, y reintenta el análisis al terminar.
+- [~] **T3.9** · P1 · Inicio ofrece "Actualizar motor" cuando el error es `EngineOutdated`, y reintenta el análisis al terminar.
   *Depende de:* T3.7
   *Acepta:* pruebas de `HomeViewModel` (actualiza → reintenta; falla la actualización → error explicado); `[~]` hasta el teléfono.
 

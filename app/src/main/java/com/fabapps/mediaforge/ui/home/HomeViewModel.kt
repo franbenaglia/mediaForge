@@ -2,6 +2,7 @@ package com.fabapps.mediaforge.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fabapps.mediaforge.domain.engine.ExtractorEngine
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.MediaError
@@ -24,7 +25,15 @@ data class HomeUiState(
     val invalidReason: UrlCheck.Reason? = null,
     val analysis: AnalysisState = AnalysisState.Idle,
 ) {
-    val canAnalyze: Boolean get() = status == InputStatus.READY && analysis !is AnalysisState.Loading
+    val canAnalyze: Boolean
+        get() = status == InputStatus.READY &&
+            analysis !is AnalysisState.Loading &&
+            analysis !is AnalysisState.UpdatingEngine
+
+    /** Se ofrece actualizar solo cuando el error lo sugiere. */
+    val canUpdateEngine: Boolean
+        get() = (analysis as? AnalysisState.Failed)?.error is MediaError.EngineOutdated ||
+            analysis is AnalysisState.UpdateFailed
 }
 
 enum class InputStatus {
@@ -46,10 +55,17 @@ sealed interface AnalysisState {
     data class Loaded(val info: MediaInfo) : AnalysisState
 
     data class Failed(val error: MediaError) : AnalysisState
+
+    /** Bajando y verificando una versión nueva de yt-dlp. */
+    data object UpdatingEngine : AnalysisState
+
+    /** No se pudo actualizar el motor. El análisis anterior había fallado con [MediaError.EngineOutdated]. */
+    data class UpdateFailed(val error: MediaError) : AnalysisState
 }
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val extractor: MediaExtractor) : ViewModel() {
+class HomeViewModel @Inject constructor(private val extractor: MediaExtractor, private val engine: ExtractorEngine) :
+    ViewModel() {
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
@@ -88,7 +104,7 @@ class HomeViewModel @Inject constructor(private val extractor: MediaExtractor) :
             return
         }
         val url = (check as UrlCheck.Valid).url
-        if (_state.value.analysis is AnalysisState.Loading) return
+        if (!_state.value.canAnalyze) return
 
         _state.update { it.copy(input = url, analysis = AnalysisState.Loading) }
         analysisJob = viewModelScope.launch {
@@ -97,6 +113,22 @@ class HomeViewModel @Inject constructor(private val extractor: MediaExtractor) :
                 is Outcome.Failure -> AnalysisState.Failed(result.error)
             }
             _state.update { it.copy(analysis = analysis) }
+        }
+    }
+
+    /** Actualiza yt-dlp (con firma y hash verificados) y, si sale bien, vuelve a analizar. */
+    fun onUpdateEngine() {
+        if (!_state.value.canUpdateEngine) return
+        cancelAnalysis()
+        _state.update { it.copy(analysis = AnalysisState.UpdatingEngine) }
+        analysisJob = viewModelScope.launch {
+            when (val result = engine.update()) {
+                is Outcome.Success -> {
+                    _state.update { it.copy(analysis = AnalysisState.Idle) }
+                    onAnalyze()
+                }
+                is Outcome.Failure -> _state.update { it.copy(analysis = AnalysisState.UpdateFailed(result.error)) }
+            }
         }
     }
 
