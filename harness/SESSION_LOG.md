@@ -4,6 +4,18 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-07 · Etapa 4
+
+**Hecho:** T4.1–T4.8. Miniatura (Coil), `VideoOptions`, comando y parser de progreso, `YtDlpDownloader`, `MediaStoreLibrary`, panel de descarga en Inicio y "Detalles técnicos" en los errores. 189 pruebas en la JVM.
+
+**Teléfono:** `MediaLibraryDeviceTest` OK. El usuario descargó YouTube y Dailymotion, los reprodujo y canceló sin parciales.
+
+**Problemas:** el clasificador de permisos bloqueó una instalación hasta que el usuario la autorizó. Reinstalar el APK de prueba borra el yt-dlp actualizado. `run-as` no tiene red. El teclado se abría solo al terminar una descarga (arreglado, falta confirmar).
+
+**Verificación:** `./scripts/verify.sh` OK.
+
+---
+
 ## 2026-11-07 · Etapa 3
 
 **Hecho:** T3.2–T3.9. `:core:media` con youtubedl-android 0.18.1, parser de `--dump-json`, clasificador de errores, `ProcessRunner` con cancelación del árbol de procesos, `YtDlpExtractor`, actualizador de yt-dlp con firma OpenPGP verificada (ADR-014) y botón "Actualizar motor" en Inicio. 146 pruebas en la JVM + 5 instrumentadas.

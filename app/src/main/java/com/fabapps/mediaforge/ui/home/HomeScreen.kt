@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -57,6 +58,9 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Sin esto, el campo del enlace conserva el foco mientras está bloqueado y, al desbloquearse
+    // cuando termina la descarga, Android abre el teclado solo.
+    val focus = LocalFocusManager.current
     // Solo Android 8–9: guardar en la galería pide permiso de escritura.
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) viewModel.onDownload() else viewModel.onStoragePermissionDenied()
@@ -73,12 +77,16 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             }
         },
         onClear = viewModel::onClear,
-        onAnalyze = viewModel::onAnalyze,
+        onAnalyze = {
+            focus.clearFocus()
+            viewModel.onAnalyze()
+        },
         onUpdateEngine = viewModel::onUpdateEngine,
         download = DownloadActions(
             onSelectOption = viewModel::onSelectOption,
             onFileNameChange = viewModel::onFileNameChange,
             onDownload = {
+                focus.clearFocus()
                 if (viewModel.needsStoragePermission) {
                     permission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 } else {

@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Código de la Etapa 4 completo. T4.6 validada en el teléfono. App instalada (2026-11-07); falta la prueba manual del usuario: miniatura (T4.1), descarga y cancelación (T4.7, T4.8). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
+Etapa 5 (extracción de audio): detallar las tareas en `TASKS.md`. Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
 
 ## Etapas
 
@@ -12,7 +12,7 @@ Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Código de la Etap
 - [x] 1. Harness y estructura
 - [x] 2. Interfaz base
 - [x] 3. Motor de extracción (todo validado en el teléfono)
-- [ ] 4. Descarga de video
+- [x] 4. Descarga de video (validada en el teléfono: YouTube y Dailymotion)
 - [ ] 5. Extracción de audio
 - [ ] 6. Conversor multimedia
 - [ ] 7. Gestor de trabajos
@@ -31,7 +31,7 @@ Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Código de la Etap
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
 - Pantalla Inicio (descarga, T4.7): elegir calidad, nombre, descargar con progreso, cancelar, guardar en la galería y abrir/compartir. Corre en el `viewModelScope`: cerrar la app cancela la descarga hasta la Etapa 7.
-- Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Miniatura con Coil (T4.1, falta verla en el teléfono). Si el error es "motor desactualizado", ofrece "Actualizar motor" y reintenta solo (T3.9, validado en el teléfono).
+- Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Miniatura con Coil (T4.1). Si el error es "motor desactualizado", ofrece "Actualizar motor" y reintenta solo (T3.9, validado en el teléfono).
 - `:core:media`: youtubedl-android 0.18.1 (Python, FFmpeg, QuickJS), un APK por ABI y `EngineInitializer` (una sola vez, fuera del hilo principal, chequea antes el espacio libre; estado observable). Todavía nadie lo llama: lo usa T3.6.
 - `YtDlpInfoParser`: `--dump-json` → `MediaInfo` con la lista completa de formatos (descarta storyboards), tamaños exactos o aproximados, playlists rechazadas, JSON inválido como error. 13 pruebas.
 - `YtDlpErrorClassifier`: stderr → `MediaError` (login, acceso denegado, bot check, DRM, red, espacio, sitio no soportado, motor desactualizado). Un 403 con el aviso de "versión de más de 90 días" sugiere actualizar. El detalle se guarda sin query strings. 17 pruebas.
@@ -51,7 +51,7 @@ Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Código de la Etap
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
-Último commit validado: ver `git log -1` (commit de cierre de la Etapa 3).
+Último commit validado: ver `git log -1` (commit de cierre de la Etapa 4).
 
 ## Dependencias importantes
 
@@ -69,7 +69,9 @@ Ninguno.
 - El APK de release (R8) todavía no se probó con youtubedl-android. Hay reglas en `core/media/consumer-rules.pro` (Jackson), pero se validan en el teléfono antes del primer release.
 
 - Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004); `AndroidGradlePluginVersion` y `NewerVersionAvailable` (hay versiones nuevas; se actualizan en una tarea propia, no a mitad de etapa); `DataExtractionRules` (`allowBackup=false` sigue haciendo falta para Android ≤ 11).
-- Pendientes de validar en el teléfono (FEASIBILITY §12): descarga completa de YouTube, TikTok, tiempos de conversión en arm64 y primer arranque. (Análisis de Dailymotion y cancelación con ffmpeg hijo ya validados.)
+- Errores con "Detalles técnicos" (texto del motor sin query strings, seleccionable).
+- Un primer intento de descarga de Dailymotion falló con `Unknown` y no se volvió a reproducir (2026-11-07). Si reaparece, pedir el detalle técnico.
+- Pendientes de validar en el teléfono (FEASIBILITY §12): TikTok, tiempos de conversión en arm64 y primer arranque. (Análisis de Dailymotion y cancelación con ffmpeg hijo ya validados.)
 - Verificación de desarrolladores de Google (global en 2027): decidir cuenta y clave de firma antes de la Etapa 12.
 - La máquina se colgó durante un build (2026-11-07). Se limitó Gradle (2 workers, heap de 1,5 GB, daemon de Kotlin de 1 GB) y `verify.sh` corre en dos pasos. Pico medido después del cambio: 8,9 GB usados en total.
 - El disco de la máquina de desarrollo tiene poco espacio (~21 GB libres al 2026-11-06).

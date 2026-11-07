@@ -67,14 +67,14 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
   *Acepta:* pruebas de `HomeViewModel` (actualiza → reintenta; falla la actualización → error explicado); `[~]` hasta el teléfono.
   *Validado por el usuario en el teléfono (2026-11-07):* Dailymotion → "motor desactualizado" → "Actualizar motor" → reanaliza solo y muestra la tarjeta. La tarjeta no tiene miniatura (falta la librería de imágenes, T4.1).
 
-## Etapa 4 · Descarga de video
+## Etapa 4 · Descarga de video ✅
 
 Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelScope` (si se cierra la app, se cancela); el servicio en primer plano y la cola llegan en la Etapa 7.
 
-- [~] **T4.1** · P2 · Miniatura en `MediaCard` con Coil 3 (solo `https`; sin miniatura o con error, fondo neutro).
+- [x] **T4.1** · P2 · Miniatura en `MediaCard` con Coil 3 (solo `https`; sin miniatura o con error, fondo neutro).
   *Depende de:* T3.8
   *Acepta:* `verify.sh` OK; `[~]` hasta ver la miniatura de YouTube y Dailymotion en el teléfono.
-  *Hecho:* `RemoteThumbnail` (Coil 3.6.3 + OkHttp), usado en la tarjeta de Inicio.
+  *Hecho:* `RemoteThumbnail` (Coil 3.6.3 + OkHttp), usado en la tarjeta de Inicio. Validada por el usuario en el teléfono (2026-11-07).
 - [x] **T4.2** · P1 · Opciones de calidad en el dominio (`VideoOptions`): "mejor calidad" más una opción por altura disponible (video+audio o video solo + mejor audio), con tamaño estimado y sin duplicados.
   *Depende de:* —
   *Acepta:* pruebas con los fixtures reales de YouTube (formatos separados) y Dailymotion (HLS combinado).
@@ -95,13 +95,14 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Depende de:* T4.5
   *Acepta:* prueba instrumentada en el teléfono (archivo visible en la galería, nombre repetido → sufijo).
   *Hecho:* `MediaLibrary` (dominio) y `MediaStoreLibrary`; `MediaLibraryDeviceTest` OK en el teléfono (2026-11-07): `Movies/MediaForge/`, `IS_PENDING` en 0, nombre repetido → ` (1)`, copia privada borrada. La ruta de Android 8–9 no se puede validar con el teléfono actual (Android 15).
-- [~] **T4.7** · P1 · Inicio: elegir calidad, nombre editable, descargar, progreso (`JobRow`), cancelar y, al terminar, abrir o compartir.
+- [x] **T4.7** · P1 · Inicio: elegir calidad, nombre editable, descargar, progreso (`JobRow`), cancelar y, al terminar, abrir o compartir.
   *Depende de:* T4.2, T4.5, T4.6
   *Acepta:* pruebas de `HomeViewModel` con un `MediaDownloader` falso; `[~]` hasta probarlo en el teléfono.
-  *Hecho:* `DownloadPanel` (calidades con tamaño, nombre, progreso con `JobRow`, cancelar, abrir/compartir, aviso de dejar la app abierta), enlace bloqueado mientras descarga, permiso en Android 8–9. 9 pruebas nuevas del ViewModel.
-- [ ] **T4.8** · P1 · Prueba en el teléfono: descargar un video corto de YouTube (merge) y uno de Dailymotion, y cancelar a mitad sin dejar parciales.
+  *Hecho:* `DownloadPanel` (calidades con tamaño, nombre, progreso con `JobRow`, cancelar, abrir/compartir, aviso de dejar la app abierta), enlace bloqueado mientras descarga, permiso en Android 8–9. 9 pruebas nuevas del ViewModel. *Validada por el usuario (2026-11-07):* YouTube 360p descargado, reproducido con audio, cancelación OK. Arreglado: el teclado se abría solo al terminar (el campo bloqueado conservaba el foco); falta confirmar el arreglo.
+- [x] **T4.8** · P1 · Prueba en el teléfono: descargar un video corto de YouTube (merge) y uno de Dailymotion, y cancelar a mitad sin dejar parciales.
   *Depende de:* T4.7
   *Acepta:* `EngineDeviceTest` o validación manual registrada en STATE.md.
+  *Validada a mano por el usuario (2026-11-07):* YouTube (merge) y Dailymotion (HLS) descargados y reproducidos; cancelar sin parciales. Un primer intento de Dailymotion falló con `Unknown` sin detalle visible y no se pudo reproducir; desde entonces los errores muestran "Detalles técnicos". `EngineDeviceTest.t5` descarga Dailymotion (necesita correr antes `t1b`, porque reinstalar el APK de prueba borra el yt-dlp actualizado).
 
 ## Etapa 5 · Extracción de audio (resumen)
 
