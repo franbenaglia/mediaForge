@@ -19,6 +19,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Un APK por arquitectura: los binarios nativos (Python, FFmpeg, QuickJS) pesan ~50 MB por ABI
+    // y un APK universal superaría los 200 MB (ADR-004).
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            isUniversalApk = false
+        }
+    }
+
+    // Los binarios se ejecutan desde nativeLibraryDir: tienen que extraerse al instalar.
+    packaging {
+        jniLibs { useLegacyPackaging = true }
+    }
+
     buildTypes {
         debug {
             // La versión de desarrollo convive con la de uso.
@@ -48,6 +64,7 @@ android {
 
 dependencies {
     implementation(project(":core:domain"))
+    implementation(project(":core:media"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

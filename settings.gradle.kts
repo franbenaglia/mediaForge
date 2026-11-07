@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "MediaForge"
 include(":app")
 include(":core:domain")
+include(":core:media")

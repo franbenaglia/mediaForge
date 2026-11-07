@@ -34,7 +34,7 @@ Las etapas futuras se detallan al empezarlas: una tarea tiene que entrar en una 
 - [x] **T3.1** · P1 · `UrlValidator` en el dominio: solo `http`/`https`, host obligatorio, largo máximo, rechazo de URLs que empiecen con `-`, extracción de URL desde texto compartido.
   *Depende de:* —
   *Acepta:* pruebas unitarias (esquemas inválidos, `javascript:`, `file:`, espacios, texto con URL embebida).
-- [ ] **T3.2** · P1 · Módulo `:core:media` con youtubedl-android 0.18.1, splits por ABI e inicialización en segundo plano con verificación de espacio.
+- [x] **T3.2** · P1 · Módulo `:core:media` con youtubedl-android 0.18.1, splits por ABI e inicialización en segundo plano con verificación de espacio.
   *Depende de:* —
   *Acepta:* `verify.sh` OK; tamaño del APK por ABI registrado en STATE.md.
 - [ ] **T3.3** · P1 · Parser propio de `--dump-json` → `MediaInfo` (kotlinx.serialization), tolerante a campos faltantes.

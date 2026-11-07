@@ -8,7 +8,7 @@ Clean Architecture pragmática: el dominio no conoce Android, yt-dlp ni FFmpeg. 
 |---|---|---|---|
 | `:app` | ✅ navegación | Compose + Material 3, navegación, ViewModels, foreground service, notificaciones, Sharesheet, Hilt | todos |
 | `:core:domain` | ✅ contratos | Modelos (`MediaInfo`, `MediaFormat`, `JobState`, `MediaError`), contratos de motores, `FileNames` | coroutines |
-| `:core:media` | Etapa 3 | `YtDlpExtractor`, `YtDlpDownloader`, `FfmpegConverter`, `ProcessRunner`, actualizador de yt-dlp | domain, youtubedl-android |
+| `:core:media` | 🟡 inicializador | `YtDlpExtractor`, `YtDlpDownloader`, `FfmpegConverter`, `ProcessRunner`, actualizador de yt-dlp | domain, youtubedl-android |
 | `:core:data` | Etapa 7/9 | Room (trabajos, historial), DataStore (preferencias), repositorios | domain |
 
 Las capas de main.md §6.4 se mapean así: Presentation y Platform → `:app`; Domain → `:core:domain`; Media Engine → `:core:media`; Data y Download Engine → `:core:data` (o `:core:jobs`, según la Etapa 7).

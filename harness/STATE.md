@@ -4,14 +4,14 @@
 
 ## Próximo paso
 
-Etapa 3, tarea **T3.2** (módulo `:core:media` con youtubedl-android). T3.1 ya está hecha.
+Etapa 3, tarea **T3.3** (parser de `--dump-json`).
 
 ## Etapas
 
 - [x] 0. Investigación técnica → [docs/FEASIBILITY.md](../docs/FEASIBILITY.md)
 - [x] 1. Harness y estructura
 - [x] 2. Interfaz base
-- [ ] 3. Motor de extracción (en curso: T3.1 hecha)
+- [ ] 3. Motor de extracción (en curso: T3.1 y T3.2 hechas)
 - [ ] 4. Descarga de video
 - [ ] 5. Extracción de audio
 - [ ] 6. Conversor multimedia
@@ -31,14 +31,15 @@ Etapa 3, tarea **T3.2** (módulo `:core:media` con youtubedl-android). T3.1 ya e
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
 - Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" avisa que el análisis todavía no está disponible (llega con T3.6).
+- `:core:media`: youtubedl-android 0.18.1 (Python, FFmpeg, QuickJS), un APK por ABI y `EngineInitializer` (una sola vez, fuera del hilo principal, chequea antes el espacio libre; estado observable). Todavía nadie lo llama: lo usa T3.6.
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
 ## Última verificación
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 61 pruebas (34 dominio + 27 app), lint sin errores, ktlint OK | 2026-11-07 |
-| APK debug (sin motores) | 12 MB | 2026-11-06 |
+| `./scripts/verify.sh` | OK: 68 pruebas (34 dominio + 27 app + 7 media), lint sin errores, ktlint OK | 2026-11-07 |
+| APK debug arm64-v8a / x86_64 (con motores) | 64,6 MB / 67,5 MB | 2026-11-07 |
 | Pruebas en dispositivo | No hay todavía | — |
 
 Último commit validado: ver `git log -1` (commit de cierre de la Etapa 2).
@@ -46,13 +47,15 @@ Etapa 3, tarea **T3.2** (módulo `:core:media` con youtubedl-android). T3.1 ya e
 ## Dependencias importantes
 
 AGP 9.4.1 · Gradle 9.8.1 · Kotlin 2.4.21 · Compose BOM 2026.09.00 · Hilt 2.60.1 · ktlint plugin 14.2.0.
-A partir de la Etapa 3: youtubedl-android 0.18.1 (ADR-001).
+youtubedl-android 0.18.1 (ADR-001).
 
 ## Bloqueos
 
 Ninguno.
 
 ## Problemas conocidos
+
+- El APK de release (R8) todavía no se probó con youtubedl-android. Hay reglas en `core/media/consumer-rules.pro` (Jackson), pero se validan en el teléfono antes del primer release.
 
 - Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004); `AndroidGradlePluginVersion` y `NewerVersionAvailable` (hay versiones nuevas; se actualizan en una tarea propia, no a mitad de etapa); `DataExtractionRules` (`allowBackup=false` sigue haciendo falta para Android ≤ 11).
 - Pendientes de validar en el teléfono (FEASIBILITY §12): descarga de YouTube con yt-dlp actualizado, Dailymotion y TikTok, cancelación con ffmpeg como proceso hijo, tiempos de conversión en arm64 y primer arranque.
