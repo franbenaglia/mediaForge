@@ -5,11 +5,13 @@ import androidx.core.content.edit
 import com.fabapps.mediaforge.domain.engine.ExtractorEngine
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
+import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.media.engine.EngineInitializer
 import com.fabapps.mediaforge.media.engine.IoDispatcher
 import com.fabapps.mediaforge.media.engine.NativeEngine
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
 import com.fabapps.mediaforge.media.process.ProcessRunner
+import com.fabapps.mediaforge.media.storage.MediaStoreLibrary
 import com.fabapps.mediaforge.media.update.AndroidVersionProbe
 import com.fabapps.mediaforge.media.update.KeyValueStore
 import com.fabapps.mediaforge.media.update.UrlConnectionFetcher
@@ -60,6 +62,11 @@ internal abstract class MediaModule {
             }
             return YtDlpVersions(File(context.noBackupFilesDir, "mediaforge/yt-dlp"), store)
         }
+
+        @Provides
+        @Singleton
+        fun mediaLibrary(@ApplicationContext context: Context, @IoDispatcher io: CoroutineDispatcher): MediaLibrary =
+            MediaStoreLibrary(context, io)
 
         /** Carpeta privada para los trabajos en curso (no entra en backups ni la limpia el sistema). */
         @Provides

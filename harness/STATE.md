@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.6 (guardado en MediaStore). El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
+Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.7 (pantalla de descarga). Pendiente en el teléfono: T4.1 (miniatura) y `MediaLibraryDeviceTest` (T4.6); el clasificador de permisos bloqueó la instalación, hay que pedir permiso al usuario. El usuario autorizó instalar y correr pruebas en el teléfono (2026-11-07).
 
 ## Etapas
 
@@ -38,6 +38,7 @@ Etapa 4 (descarga de video): tareas detalladas en `TASKS.md`. Sigue T4.6 (guarda
 - `YtDlpExtractor` (implementa `MediaExtractor`, registrado en Hilt): valida URL → `ensureReady` → `yt-dlp --dump-json` con `ProcessRunner` → parser o clasificador. Usa el mismo entorno que la librería, armado en `YoutubeDlNativeEngine.runtime()`. 9 pruebas.
 - `YtDlpUpdater` (implementa `ExtractorEngine`): última versión permitida por `_update_spec` → `SHA2-256SUMS` con firma OpenPGP de la clave fijada de yt-dlp (`OpenPgp`, sin Bouncy Castle) → SHA-256 del zipapp → prueba de `--version` → activa y conserva la anterior (`YtDlpVersions`). El motor usa la versión activa o la del APK. 22 pruebas.
 - Descarga de video (T4.3–T4.5): comando con formatos concretos, `YtDlpProgressParser` (varias partes como un avance, merge, metadatos) y `YtDlpDownloader` (registrado en Hilt; carpeta privada por trabajo que se borra al fallar o cancelar).
+- `MediaLibrary` / `MediaStoreLibrary` (T4.6): copia a `Movies/MediaForge` o `Music/MediaForge` con `IS_PENDING` (Android 10+) o permiso de escritura (8–9), nombre único, y borra la copia privada.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 

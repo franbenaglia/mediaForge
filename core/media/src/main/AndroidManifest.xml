@@ -3,4 +3,8 @@
      ("[Errno 7] No address associated with hostname"), visto en el teléfono el 2026-11-07. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Guardar en Movies/ y Music/ en Android 8–9. Desde Android 10, MediaStore no pide permisos. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 </manifest>

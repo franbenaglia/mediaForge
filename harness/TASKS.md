@@ -91,9 +91,10 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Depende de:* T4.3, T4.4
   *Acepta:* pruebas en la JVM con un yt-dlp falso (éxito, error, cancelación sin parciales).
   *Hecho:* carpeta por trabajo en `noBackupFilesDir/mediaforge/jobs`; espacio = 2 × estimado + 100 MB; `DownloadRequest.expectedBytes`. 7 pruebas. Sin timeout total (descargas largas).
-- [ ] **T4.6** · P1 · Guardado en `Movies/MediaForge` por MediaStore (API 29+: `RELATIVE_PATH` + `IS_PENDING`; API 26–28: permiso `WRITE_EXTERNAL_STORAGE` limitado a 28), con `FileNames.sanitize`/`unique`.
+- [~] **T4.6** · P1 · Guardado en `Movies/MediaForge` por MediaStore (API 29+: `RELATIVE_PATH` + `IS_PENDING`; API 26–28: permiso `WRITE_EXTERNAL_STORAGE` limitado a 28), con `FileNames.sanitize`/`unique`.
   *Depende de:* T4.5
   *Acepta:* prueba instrumentada en el teléfono (archivo visible en la galería, nombre repetido → sufijo).
+  *Hecho:* `MediaLibrary` (dominio) y `MediaStoreLibrary`; `MediaLibraryDeviceTest` escrita, falta correrla en el teléfono. La ruta de Android 8–9 no se puede validar con el teléfono actual (Android 15).
 - [ ] **T4.7** · P1 · Inicio: elegir calidad, nombre editable, descargar, progreso (`JobRow`), cancelar y, al terminar, abrir o compartir.
   *Depende de:* T4.2, T4.5, T4.6
   *Acepta:* pruebas de `HomeViewModel` con un `MediaDownloader` falso; `[~]` hasta probarlo en el teléfono.
