@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Tarea **T3.1** (`UrlValidator`), que necesita T2.2. Después T2.2, que cierra la Etapa 2.
+Tarea **T2.2** (pantalla Inicio), que cierra la Etapa 2.
 
 ## Etapas
 
@@ -29,13 +29,14 @@ Tarea **T3.1** (`UrlValidator`), que necesita T2.2. Después T2.2, que cierra la
 - Componentes: `MediaCard` (miniatura como slot), `JobRow` (estado, progreso, tamaño y velocidad), `EmptyState`, `ErrorState`; textos de estados y errores; `Formatters` (bytes, duración).
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
+- `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
 ## Última verificación
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 30 pruebas (14 dominio + 16 app), lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 50 pruebas (34 dominio + 16 app), lint sin errores, ktlint OK | 2026-11-07 |
 | APK debug (sin motores) | 12 MB | 2026-11-06 |
 | Pruebas en dispositivo | No hay todavía | — |
 
