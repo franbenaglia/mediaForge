@@ -4,6 +4,18 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-08 · Etapa 6
+
+**Hecho:** T6.1–T6.6. `LocalMedia` y `ConversionPlanner` (ADR-016), `ffprobe` y comando de FFmpeg, `FfmpegConverter`, `ExtractorInspector`, pantalla Conversor.
+
+**Teléfono:** `ConverterDeviceTest` OK con todos los casos de §5.1 y cancelación. El usuario validó la pantalla: MP4 → MP3, remux, recodificar y cancelar, audio a WAV/FLAC.
+
+**Problemas:** FFmpeg no arrancaba (`libc++_shared.so` está en la carpeta de Python); se agregaron las tres carpetas de librerías a `LD_LIBRARY_PATH`. Las extensiones de Java de VS Code levantaban su propio Gradle y colgaban la máquina; el usuario las desactivó para este proyecto.
+
+**Verificación:** `./scripts/verify.sh` OK.
+
+---
+
 ## 2026-11-08 · Etapa 5
 
 **Hecho:** T5.1–T5.5. `AudioOptions` (ADR-015), comando de audio con portada y metadatos, pasos de audio en el parser, descargador con audio, modo "Solo audio" en Inicio.

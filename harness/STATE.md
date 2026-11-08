@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 6: código completo. `ConverterDeviceTest` OK en el teléfono. Falta la prueba manual de la pantalla (T6.5, T6.6).
+Etapa 7 (gestor de trabajos): detallar las tareas en `TASKS.md` antes de empezar. T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
 
 ## Etapas
 
@@ -14,7 +14,7 @@ Etapa 6: código completo. `ConverterDeviceTest` OK en el teléfono. Falta la pr
 - [x] 3. Motor de extracción (todo validado en el teléfono)
 - [x] 4. Descarga de video (validada en el teléfono: YouTube y Dailymotion)
 - [x] 5. Extracción de audio (validada en el teléfono: MP3, M4A, Opus)
-- [ ] 6. Conversor multimedia (en curso)
+- [x] 6. Conversor multimedia (validado en el teléfono: MP4 → MP3, remux, recodificar y cancelar, WAV/FLAC)
 - [ ] 7. Gestor de trabajos
 - [ ] 8. Android Sharesheet
 - [ ] 9. Historial y configuración
@@ -41,6 +41,7 @@ Etapa 6: código completo. `ConverterDeviceTest` OK en el teléfono. Falta la pr
 - Descarga de video (T4.3–T4.5): comando con formatos concretos, `YtDlpProgressParser` (varias partes como un avance, merge, metadatos) y `YtDlpDownloader` (registrado en Hilt; carpeta privada por trabajo que se borra al fallar o cancelar).
 - `MediaLibrary` / `MediaStoreLibrary` (T4.6): copia a `Movies/MediaForge` o `Music/MediaForge` con `IS_PENDING` (Android 10+) o permiso de escritura (8–9), nombre único, y borra la copia privada.
 - Audio (Etapa 5, ADR-015): `AudioOptions` (copia sin recodificar, bitrates, automático), comando `-x` con portada y metadatos (mutagen 1.47 en el APK), modo "Solo audio" en Inicio con avisos de calidad. Se guarda en `Music/MediaForge`.
+- Conversor (Etapa 6, ADR-016): `ConversionPlanner` (copia o recodifica por pista), `FfmpegConverter` (copia la entrada a una carpeta privada, `ffprobe`, FFmpeg con progreso y cancelación), `ExtractorInspector` (análisis rápido con `MediaExtractor`) y pantalla Conversor. FFmpeg usa las librerías de Python, FFmpeg y aria2c en `LD_LIBRARY_PATH`.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
@@ -48,11 +49,12 @@ Etapa 6: código completo. `ConverterDeviceTest` OK en el teléfono. Falta la pr
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 189 pruebas (45 dominio + 44 app + 100 media), lint sin errores, ktlint OK | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 268 pruebas (72 dominio + 63 app + 133 media), lint sin errores, ktlint OK | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
+| `ConverterDeviceTest` en 24115RA8EG | OK: análisis y casos de main.md §5.1, cancelación sin procesos ni archivos | 2026-11-08 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
-Último commit validado: ver `git log -1` (commit de cierre de la Etapa 5).
+Último commit validado: ver `git log -1` (commit de cierre de la Etapa 6).
 
 ## Dependencias importantes
 
@@ -72,7 +74,7 @@ Ninguno.
 - Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004); `AndroidGradlePluginVersion` y `NewerVersionAvailable` (hay versiones nuevas; se actualizan en una tarea propia, no a mitad de etapa); `DataExtractionRules` (`allowBackup=false` sigue haciendo falta para Android ≤ 11).
 - Errores con "Detalles técnicos" (texto del motor sin query strings, seleccionable).
 - Un primer intento de descarga de Dailymotion falló con `Unknown` y no se volvió a reproducir (2026-11-07). Si reaparece, pedir el detalle técnico.
-- Pendientes de validar en el teléfono (FEASIBILITY §12): TikTok, tiempos de conversión en arm64 y primer arranque. (Análisis de Dailymotion y cancelación con ffmpeg hijo ya validados.)
+- Pendientes de validar en el teléfono (FEASIBILITY §12): TikTok y primer arranque. (Tiempos de conversión en arm64 medidos en la Etapa 6.) (Análisis de Dailymotion y cancelación con ffmpeg hijo ya validados.)
 - Verificación de desarrolladores de Google (global en 2027): decidir cuenta y clave de firma antes de la Etapa 12.
 - La máquina se volvió a colgar (2026-11-08) con un build y las extensiones de Java de VS Code corriendo su propio Gradle (~1 GB cada uno) aunque la importación estaba desactivada. El usuario desactivó para este proyecto "Gradle for Java" y "Language Support for Java (Red Hat)". Antes de compilar, chequear `pgrep -fa GradleDaemon`.
 - La máquina se colgó durante un build (2026-11-07). Se limitó Gradle (2 workers, heap de 1,5 GB, daemon de Kotlin de 1 GB) y `verify.sh` corre en dos pasos. Pico medido después del cambio: 8,9 GB usados en total.

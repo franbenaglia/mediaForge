@@ -128,7 +128,7 @@ Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Pyth
   *Acepta:* validación manual registrada (el archivo se reproduce y muestra portada en la app de música).
   *Validada por el usuario (2026-11-08):* MP3 320 kbps con aviso de bitrate, portada y título; M4A sin recodificar; Opus. Todo se reproduce.
 
-## Etapa 6 · Conversor (en curso)
+## Etapa 6 · Conversor (hecha)
 
 Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y `libffprobe.so` del APK (ADR-002, ADR-016). Mediciones en el teléfono (2026-11-08, 20 s de 720p30): remux 0,03 s; MP3 0,15 s; libx264 `veryfast` 3,8 s y 263 MB de RAM; VP9 `realtime` 4,6 s. `h264_mediacodec` no funciona desde el binario.
 
@@ -148,12 +148,14 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
   *Depende de:* T6.1
   *Acepta:* prueba instrumentada en el teléfono con archivos generados por FFmpeg.
   *Hecho:* `MediaInspector` (dominio), `ExtractorInspector` + `MimeCodecs`; `ConverterDeviceTest` OK en el teléfono (2026-11-08): análisis de MP4/WebM/WAV y los casos de §5.1 con URIs reales (MP4 → MP3 0,56 s; → M4A copia 0,40 s; → MKV remux 0,45 s; WebM → MP4 1,2 s; 480p 3,0 s; WAV → FLAC 0,43 s), cancelación sin procesos ni archivos. Encontró que FFmpeg necesita también las librerías de Python (`libc++_shared.so`): corregido.
-- [~] **T6.5** · P1 · Pantalla Conversor: elegir archivo (SAF), datos del archivo, destino (contenedor de video o formato de audio con bitrate, resolución opcional), qué se copia y qué se recodifica, progreso, cancelar, guardar y abrir/compartir.
+- [x] **T6.5** · P1 · Pantalla Conversor: elegir archivo (SAF), datos del archivo, destino (contenedor de video o formato de audio con bitrate, resolución opcional), qué se copia y qué se recodifica, progreso, cancelar, guardar y abrir/compartir.
   *Depende de:* T6.3, T6.4
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
-- [ ] **T6.6** · P1 · Prueba en el teléfono: MP4 → MP3 (MVP), MKV → MP4 sin recodificar, WebM → MP4, WAV → FLAC, cancelar a mitad.
+  *Hecho:* `ConverterViewModel` (11 pruebas) y `ConverterScreen`. Validada por el usuario junto con T6.6.
+- [x] **T6.6** · P1 · Prueba en el teléfono: MP4 → MP3 (MVP), MKV → MP4 sin recodificar, WebM → MP4, WAV → FLAC, cancelar a mitad.
   *Depende de:* T6.5
   *Acepta:* validación manual registrada.
+  *Validada por el usuario (2026-11-08):* MP4 → MP3, cambio de contenedor sin recodificar, recodificación con cancelación a mitad y audio a WAV/FLAC desde la pantalla Conversor. Todo OK.
 - [ ] **T6.7** · P3 · Leer la entrada sin copiarla (descriptor de archivo como stdin + protocolo `fd:` de FFmpeg) cuando sea buscable; copia como respaldo.
   *Depende de:* T6.3
   *Acepta:* prueba en el teléfono con un archivo grande; sin cambio de resultado.
