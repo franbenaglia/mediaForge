@@ -184,4 +184,36 @@
     <string name="history_delete_confirm">Delete</string>
     <string name="history_file_deleted">File deleted.</string>
     <string name="history_delete_failed">The file could not be deleted.</string>
+    <string name="settings_section_downloads">Downloads</string>
+    <string name="settings_default_mode">Default mode</string>
+    <string name="settings_default_quality">Preferred quality</string>
+    <string name="settings_quality_note">The highest available quality that does not exceed this one is chosen.</string>
+    <string name="settings_audio_format">Audio format</string>
+    <string name="settings_audio_bitrate">Audio bitrate</string>
+    <string name="settings_bitrate_auto">Auto</string>
+    <string name="settings_max_downloads">Simultaneous downloads</string>
+    <string name="settings_max_downloads_note">Conversions run one at a time.</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Wallpaper colors</string>
+    <string name="settings_language">App language</string>
+    <string name="settings_section_engine">Extraction engine</string>
+    <string name="settings_engine_version" translatable="false">yt-dlp %1$s</string>
+    <string name="settings_engine_unknown">Unknown version</string>
+    <string name="settings_engine_check">Check for updates</string>
+    <string name="settings_engine_checking">Checking…</string>
+    <string name="settings_engine_up_to_date">It is up to date.</string>
+    <string name="settings_engine_available">Version %1$s is available.</string>
+    <string name="settings_engine_install">Install</string>
+    <string name="settings_engine_updated">Updated to %1$s.</string>
+    <string name="settings_engine_note">Updates come from the yt-dlp project and are installed only if their signature and checksum are valid.</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_license">Free software under the GPL-3.0 license.</string>
+    <string name="settings_privacy">No ads, no analytics, no accounts. Everything runs on your device.</string>
+    <string name="settings_source">Source code</string>
+    <string name="settings_source_url" translatable="false">https://github.com/franbenaglia/mediaForge</string>
 </resources>

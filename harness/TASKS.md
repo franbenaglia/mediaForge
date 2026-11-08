@@ -237,9 +237,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.3
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `files/SavedFiles` (existe, borrar con MediaStore o documento; `createDeleteRequest` / `RecoverableSecurityException`), `HistoryViewModel` (10 pruebas) y `HistoryScreen` (búsqueda, filtros, tarjeta con miniatura, diálogo de borrado, revisa archivos al volver). "Descargar de nuevo" usa `ShareInbox`. En Descargas quedó "Quitar completados" (los fallidos y cancelados se quedan para reintentar; 1 prueba).
-- [ ] **T9.6** · P1 · Pantalla Ajustes: predeterminados de descarga, descargas simultáneas, tema y colores del sistema, motor (versión instalada, buscar e instalar actualización verificada), idioma de la app (ajuste del sistema, Android 13+), acerca de (versión, licencia GPL-3.0, código fuente, sin rastreo).
+- [~] **T9.6** · P1 · Pantalla Ajustes: predeterminados de descarga, descargas simultáneas, tema y colores del sistema, motor (versión instalada, buscar e instalar actualización verificada), idioma de la app (ajuste del sistema, Android 13+), acerca de (versión, licencia GPL-3.0, código fuente, sin rastreo).
   *Depende de:* T9.2
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+  *Hecho:* `SettingsViewModel` (7 pruebas) y `SettingsScreen`; `MainActivity` aplica tema y colores; `generateLocaleConfig` (en, es) y botón al ajuste de idioma de Android 13+. "Solo Wi‑Fi" y la carpeta de destino no se muestran hasta T9.7 y T9.8. Se borró `NotImplementedScreen`: ya no queda ninguna sección sin hacer.
 - [ ] **T9.7** · P2 · Política de conexión "Solo Wi‑Fi": con datos móviles las descargas nuevas esperan ("Esperando Wi‑Fi") y arrancan solas al volver el Wi‑Fi; las que ya corren siguen; las conversiones no dependen de la red.
   *Depende de:* T9.3
   *Acepta:* pruebas de `JobScheduler` con una red falsa; `[~]` hasta probarlo en el teléfono.

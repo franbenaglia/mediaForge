@@ -30,6 +30,11 @@ android {
         }
     }
 
+    // Idioma por app (Android 13+): la lista sale de las carpetas values-* (ADR-019).
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     // Los binarios se ejecutan desde nativeLibraryDir: tienen que extraerse al instalar.
     packaging {
         jniLibs { useLegacyPackaging = true }

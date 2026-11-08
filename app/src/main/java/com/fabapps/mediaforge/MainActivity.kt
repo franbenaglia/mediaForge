@@ -5,10 +5,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.fabapps.mediaforge.domain.jobs.JobScheduler
+import com.fabapps.mediaforge.domain.settings.SettingsStore
+import com.fabapps.mediaforge.domain.settings.ThemeMode
 import com.fabapps.mediaforge.share.ShareInbox
 import com.fabapps.mediaforge.share.ShareIntents
 import com.fabapps.mediaforge.ui.MediaForgeApp
@@ -25,6 +28,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var shareInbox: ShareInbox
 
+    @Inject lateinit var settingsStore: SettingsStore
+
     /** Sube con cada enlace recibido: la app pasa a Inicio. Arranca en 0 en cada instancia (al girar no repite). */
     private val shareCount = MutableStateFlow(0)
 
@@ -36,7 +41,14 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null && !fromHistory) receive(intent)
         setContent {
             val shares by shareCount.collectAsStateWithLifecycle()
-            MediaForgeTheme {
+            // Hasta leer los ajustes (milisegundos) rige el tema del sistema.
+            val settings by settingsStore.settings.collectAsStateWithLifecycle(initialValue = null)
+            val dark = when (settings?.theme) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                else -> isSystemInDarkTheme()
+            }
+            MediaForgeTheme(darkTheme = dark, dynamicColor = settings?.dynamicColor ?: true) {
                 MediaForgeApp(openHomeRequest = shares)
             }
         }

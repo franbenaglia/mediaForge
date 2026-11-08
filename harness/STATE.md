@@ -25,7 +25,7 @@ Etapa 9 (historial y configuración, ADR-019): tareas T9.1–T9.10 en `TASKS.md`
 ## Implementado
 
 - Proyecto Gradle (`:app`, `:core:domain`), Hilt, tema Material 3 claro/oscuro.
-- Navegación tipada con barra inferior (Inicio, Descargas, Conversor, Historial, Ajustes). Inicio, Descargas y Conversor funcionan; Historial y Ajustes muestran "todavía no disponible".
+- Navegación tipada con barra inferior (Inicio, Descargas, Conversor, Historial, Ajustes). Las cinco pantallas funcionan.
 - Componentes: `MediaCard` (miniatura como slot), `JobRow` (estado, progreso, tamaño y velocidad), `EmptyState`, `ErrorState`; textos de estados y errores; `Formatters` (bytes, duración).
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
