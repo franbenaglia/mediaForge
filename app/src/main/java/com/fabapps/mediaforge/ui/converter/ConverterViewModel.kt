@@ -17,6 +17,7 @@ import com.fabapps.mediaforge.domain.jobs.JobRequest
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
@@ -34,7 +35,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class TargetKind { VIDEO, AUDIO }
+enum class TargetKind {
+    VIDEO,
+    AUDIO,
+
+    /** Un fotograma del video. */
+    IMAGE,
+}
 
 /** Recorte tal como lo escribe el usuario. Inicio vacío = desde el principio; fin vacío = hasta el final. */
 data class TrimInput(
@@ -75,6 +82,9 @@ data class ConverterUiState(
     val audioBitrate: Int? = null,
     val fileName: String = "",
     val trim: TrimInput = TrimInput(),
+    /** Instante del fotograma, como lo escribe el usuario; vacío = el principio. */
+    val frameTime: String = "",
+    val imageFormat: ImageFormat = ImageFormat.JPG,
     val work: WorkState = WorkState.None,
 ) {
     val media: LocalMedia? get() = (input as? InputState.Ready)?.media
@@ -82,7 +92,7 @@ data class ConverterUiState(
     /** Lo escrito en el recorte, leído: un fragmento, un error o nada (el archivo entero). */
     private val trimResult: Pair<Clip?, TrimError?>
         get() {
-            if (!trim.enabled) return null to null
+            if (!trim.enabled || kind == TargetKind.IMAGE) return null to null
             val start = if (trim.start.isBlank()) 0.0 else TimeCodes.parse(trim.start) ?: return null to TrimError.START
             val end = if (trim.end.isBlank()) null else TimeCodes.parse(trim.end) ?: return null to TrimError.END
             val clip = Clip(start, end, trim.exact)
@@ -99,6 +109,18 @@ data class ConverterUiState(
 
     val trimError: TrimError? get() = trimResult.second
 
+    /** Instante del fotograma leído; nulo si no es un tiempo válido. */
+    private val frameAt: Double? get() = if (frameTime.isBlank()) 0.0 else TimeCodes.parse(frameTime)
+
+    /** Error del instante del fotograma (solo [TrimError.START] o [TrimError.BEYOND_END]). */
+    val frameError: TrimError?
+        get() {
+            if (kind != TargetKind.IMAGE) return null
+            val at = frameAt ?: return TrimError.START
+            val duration = media?.durationSeconds
+            return if (duration != null && at >= duration) TrimError.BEYOND_END else null
+        }
+
     /** Duración del fragmento, si se sabe. */
     val clipLength: Double? get() = clip?.lengthSeconds(media?.durationSeconds)
 
@@ -109,6 +131,8 @@ data class ConverterUiState(
         get() = when (kind) {
             TargetKind.VIDEO -> ConversionTarget.Video(container, maxHeight)
             TargetKind.AUDIO -> ConversionTarget.Audio(audioFormat, audioBitrate)
+            // Con un instante inválido se planea igual (para mostrar el resto); no se puede convertir.
+            TargetKind.IMAGE -> ConversionTarget.Image(if (frameError == null) frameAt ?: 0.0 else 0.0, imageFormat)
         }
 
     /** Plan con los datos del análisis rápido; el conversor lo vuelve a calcular con `ffprobe`. */
@@ -134,7 +158,8 @@ data class ConverterUiState(
             return kind == TargetKind.AUDIO && (encode.bitrateKbps ?: 0) > source + 8
         }
 
-    val canConvert: Boolean get() = readyPlan != null && trimError == null && !work.isActive
+    val canConvert: Boolean
+        get() = readyPlan != null && trimError == null && frameError == null && !work.isActive
 
     val canCancel: Boolean get() = work is WorkState.Running
 
@@ -208,6 +233,10 @@ class ConverterViewModel @Inject constructor(
     fun onTrimEndChange(text: String) = edit { it.copy(trim = it.trim.copy(end = text.take(TIME_CHARS))) }
 
     fun onExactCutChange(exact: Boolean) = edit { it.copy(trim = it.trim.copy(exact = exact)) }
+
+    fun onFrameTimeChange(text: String) = edit { it.copy(frameTime = text.take(TIME_CHARS)) }
+
+    fun onImageFormatChange(format: ImageFormat) = edit { it.copy(imageFormat = format) }
 
     fun onConvert() {
         val current = _state.value

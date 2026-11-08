@@ -14,6 +14,7 @@ import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.DownloadRequest
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
@@ -333,6 +334,49 @@ class ConverterViewModelTest {
         vm.onConvert()
         advanceUntilIdle()
         assertEquals(Clip(60.0, 90.0), converter.requests.single().clip)
+    }
+
+    @Test
+    fun imageTakesAFrameAtTheChosenTime() = test {
+        pick(video)
+        vm.onTrimEnabledChange(true)
+        vm.onTrimStartChange("10")
+        vm.onKindChange(TargetKind.IMAGE)
+        assertEquals(ConversionTarget.Image(0.0, ImageFormat.JPG), state.target)
+        // El recorte no aplica a una imagen.
+        assertEquals(null, state.clip)
+        vm.onFrameTimeChange("1:05.5")
+        vm.onImageFormatChange(ImageFormat.PNG)
+        assertEquals(ConversionTarget.Image(65.5, ImageFormat.PNG), state.target)
+        assertTrue(state.canConvert)
+        vm.onConvert()
+        advanceUntilIdle()
+        val request = converter.requests.single()
+        assertEquals(ConversionTarget.Image(65.5, ImageFormat.PNG), request.target)
+        assertEquals(null, request.clip)
+    }
+
+    @Test
+    fun imageTimeMustBeValidAndInsideTheFile() = test {
+        pick(video)
+        vm.onKindChange(TargetKind.IMAGE)
+        vm.onFrameTimeChange("abc")
+        assertEquals(TrimError.START, state.frameError)
+        assertFalse(state.canConvert)
+        vm.onFrameTimeChange("1:40")
+        assertEquals(TrimError.BEYOND_END, state.frameError)
+        assertFalse(state.canConvert)
+        vm.onFrameTimeChange("")
+        assertEquals(null, state.frameError)
+        assertTrue(state.canConvert)
+    }
+
+    @Test
+    fun audioFileCannotGiveAnImage() = test {
+        pick(song)
+        vm.onKindChange(TargetKind.IMAGE)
+        assertTrue((state.plan as Outcome.Failure).error is MediaError.UnsupportedConversion)
+        assertFalse(state.canConvert)
     }
 
     @Test

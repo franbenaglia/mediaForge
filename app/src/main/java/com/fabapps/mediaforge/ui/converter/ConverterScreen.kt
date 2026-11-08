@@ -50,6 +50,7 @@ import com.fabapps.mediaforge.domain.convert.TimeCodes
 import com.fabapps.mediaforge.domain.convert.VideoStream
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.AudioFormat
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.JobRow
@@ -88,6 +89,8 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
             onTrimStart = viewModel::onTrimStartChange,
             onTrimEnd = viewModel::onTrimEndChange,
             onExactCut = viewModel::onExactCutChange,
+            onFrameTime = viewModel::onFrameTimeChange,
+            onImageFormat = viewModel::onImageFormatChange,
             onConvert = {
                 focus.clearFocus()
                 if (viewModel.needsStoragePermission) {
@@ -114,6 +117,8 @@ internal data class ConverterActions(
     val onTrimStart: (String) -> Unit = {},
     val onTrimEnd: (String) -> Unit = {},
     val onExactCut: (Boolean) -> Unit = {},
+    val onFrameTime: (String) -> Unit = {},
+    val onImageFormat: (ImageFormat) -> Unit = {},
     val onConvert: () -> Unit = {},
     val onCancel: () -> Unit = {},
 )
@@ -191,6 +196,7 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
     val kinds = listOf(
         TargetKind.VIDEO to R.string.converter_target_video,
         TargetKind.AUDIO to R.string.converter_target_audio,
+        TargetKind.IMAGE to R.string.converter_target_image,
     )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         kinds.forEachIndexed { index, (kind, label) ->
@@ -204,7 +210,9 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
     }
     if (media.video == null) Note(stringResource(R.string.converter_no_video_track))
 
-    if (state.kind == TargetKind.VIDEO) {
+    if (state.kind == TargetKind.IMAGE) {
+        ImageOptions(state, media, actions)
+    } else if (state.kind == TargetKind.VIDEO) {
         Section(stringResource(R.string.converter_container)) {
             VideoContainer.entries.forEach { container ->
                 FilterChip(
@@ -260,7 +268,7 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
         }
     }
 
-    Trim(state, media, actions)
+    if (state.kind != TargetKind.IMAGE) Trim(state, media, actions)
 
     when (val plan = state.plan) {
         is Outcome.Success -> PlanNotes(state, plan.value, media)
@@ -274,6 +282,37 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+@Composable
+private fun ImageOptions(state: ConverterUiState, media: LocalMedia, actions: ConverterActions) {
+    Section(stringResource(R.string.converter_image_format)) {
+        ImageFormat.entries.forEach { format ->
+            FilterChip(
+                selected = state.imageFormat == format,
+                onClick = { actions.onImageFormat(format) },
+                label = { Text(format.extension.uppercase()) },
+            )
+        }
+    }
+    OutlinedTextField(
+        value = state.frameTime,
+        onValueChange = actions.onFrameTime,
+        label = { Text(stringResource(R.string.converter_frame_time)) },
+        placeholder = { Text("0:00") },
+        isError = state.frameError != null,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = Modifier.fillMaxWidth(),
+    )
+    when (state.frameError) {
+        TrimError.BEYOND_END -> ErrorNote(
+            media.durationSeconds?.let { stringResource(R.string.converter_trim_error_beyond, TimeCodes.format(it)) }
+                ?: stringResource(R.string.converter_trim_error_format),
+        )
+        null -> Note(stringResource(R.string.converter_frame_hint))
+        else -> ErrorNote(stringResource(R.string.converter_trim_error_format))
+    }
 }
 
 @Composable
@@ -340,6 +379,22 @@ private fun Trim(state: ConverterUiState, media: LocalMedia, actions: ConverterA
 private fun PlanNotes(state: ConverterUiState, plan: ConversionPlan, media: LocalMedia) {
     val locale = LocalConfiguration.current.locales[0]
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (plan.frameAtSeconds != null) {
+            val size = media.video?.let { v ->
+                if (v.width != null &&
+                    v.height != null
+                ) {
+                    "${v.width}×${v.height}"
+                } else {
+                    null
+                }
+            }
+            Note(
+                size?.let { stringResource(R.string.converter_frame_note_size, it) }
+                    ?: stringResource(R.string.converter_frame_note),
+            )
+            return@Column
+        }
         when (val video = plan.video) {
             StreamPlan.Copy -> Note(
                 stringResource(R.string.converter_video_copy, Formatters.codec(media.video!!.codec)),

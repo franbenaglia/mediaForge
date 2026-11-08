@@ -253,6 +253,7 @@ private fun requestSummary(request: JobRequest): String {
         is JobRequest.Conversion -> when (val target = request.request.target) {
             is ConversionTarget.Video -> Triple(target.container.name, target.maxHeight, null)
             is ConversionTarget.Audio -> Triple(target.format.name, null, target.bitrateKbps)
+            is ConversionTarget.Image -> Triple(target.format.name, null, null)
         }
     }
     return listOfNotNull(

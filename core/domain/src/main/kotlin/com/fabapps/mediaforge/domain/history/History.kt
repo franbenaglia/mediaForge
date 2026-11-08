@@ -66,6 +66,7 @@ data class HistoryEntry(
                         format = target.format.name,
                         bitrateKbps = target.bitrateKbps,
                     )
+                    is ConversionTarget.Image -> base.copy(format = target.format.name)
                 }.copy(sourceName = null)
             }
         }

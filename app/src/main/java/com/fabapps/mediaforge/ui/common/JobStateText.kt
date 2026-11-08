@@ -19,6 +19,7 @@ fun JobState.statusRes(): Int = when (this) {
         ProcessingStep.METADATA -> R.string.job_status_processing_metadata
         ProcessingStep.REMUX -> R.string.job_status_processing_remux
         ProcessingStep.PREPARE_INPUT -> R.string.job_status_processing_prepare
+        ProcessingStep.EXTRACT_FRAME -> R.string.job_status_processing_frame
     }
     is JobState.Completed -> R.string.job_status_completed
     is JobState.Failed -> R.string.job_status_failed

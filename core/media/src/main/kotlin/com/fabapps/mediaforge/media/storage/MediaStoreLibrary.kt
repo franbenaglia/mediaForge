@@ -137,18 +137,21 @@ class MediaStoreLibrary(private val context: Context, private val io: CoroutineD
     private enum class Kind(val directory: String) {
         VIDEO(Environment.DIRECTORY_MOVIES),
         AUDIO(Environment.DIRECTORY_MUSIC),
+        IMAGE(Environment.DIRECTORY_PICTURES),
         ;
 
         @RequiresApi(Build.VERSION_CODES.Q)
         fun collection(): Uri = when (this) {
             VIDEO -> MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
             AUDIO -> MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            IMAGE -> MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         }
 
         companion object {
             fun of(mime: String): Kind? = when {
                 mime.startsWith("video/") -> VIDEO
                 mime.startsWith("audio/") -> AUDIO
+                mime.startsWith("image/") -> IMAGE
                 else -> null
             }
         }

@@ -8,6 +8,7 @@ import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import org.junit.Assert.assertEquals
@@ -70,6 +71,9 @@ class HistoryTest {
         assertEquals(30L, entry.completedAt)
         val audio = HistoryEntry.from(conversion(ConversionTarget.Audio(AudioFormat.FLAC)))!!
         assertEquals("FLAC", audio.format)
+        val image = HistoryEntry.from(conversion(ConversionTarget.Image(3.0, ImageFormat.PNG)))!!
+        assertEquals(HistoryKind.CONVERSION, image.kind)
+        assertEquals("PNG", image.format)
     }
 
     @Test

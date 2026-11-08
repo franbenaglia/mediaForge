@@ -8,6 +8,7 @@ import com.fabapps.mediaforge.domain.convert.StreamPlan
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionTarget
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import java.io.File
@@ -154,6 +155,24 @@ class FfmpegTest {
         assertEquals("12.000", toEnd[toEnd.indexOf("-ss") + 1])
         assertFalse("-t" in toEnd)
         assertFalse("-ss" in command(target))
+    }
+
+    @Test
+    fun frameSeeksAndWritesOneImage() {
+        val jpg = command(plan(ConversionTarget.Image(3.5)))
+        assertEquals(
+            listOf(
+                "/n/libffmpeg.so", "-nostdin", "-hide_banner", "-nostats", "-loglevel", "error",
+                "-progress", "pipe:1", "-y", "-ss", "3.500", "-i", "/w/job/input",
+                "-map", "0:v:0", "-an", "-sn", "-frames:v", "1", "-c:v", "mjpeg", "-q:v", "2",
+                "-update", "1", "/w/job/output.jpg",
+            ),
+            jpg,
+        )
+        val png = command(plan(ConversionTarget.Image(0.0, ImageFormat.PNG)))
+        assertFalse("-ss" in png)
+        assertEquals("png", png[png.indexOf("-c:v") + 1])
+        assertFalse("-map_metadata" in png)
     }
 
     @Test

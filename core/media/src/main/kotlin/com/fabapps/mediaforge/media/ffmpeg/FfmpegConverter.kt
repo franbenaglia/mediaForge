@@ -136,7 +136,12 @@ class FfmpegConverter(
     ): Boolean {
         val step = stepFor(plan)
         // El progreso de FFmpeg cuenta desde el inicio del fragmento.
-        val progress = FfmpegProgressParser(clip?.lengthSeconds(media.durationSeconds) ?: media.durationSeconds)
+        // Un fotograma no tiene progreso intermedio.
+        val total = when {
+            plan.frameAtSeconds != null -> null
+            else -> clip?.lengthSeconds(media.durationSeconds) ?: media.durationSeconds
+        }
+        val progress = FfmpegProgressParser(total)
         val stderr = ArrayDeque<String>()
         var code: Int? = null
         emit(JobState.Processing(step, 0f))
@@ -158,6 +163,7 @@ class FfmpegConverter(
     }
 
     private fun stepFor(plan: ConversionPlan): ProcessingStep = when {
+        plan.frameAtSeconds != null -> ProcessingStep.EXTRACT_FRAME
         plan.reencodes -> ProcessingStep.TRANSCODE
         plan.video == StreamPlan.Drop -> ProcessingStep.EXTRACT_AUDIO
         else -> ProcessingStep.REMUX

@@ -37,6 +37,7 @@ object FfmpegCommand {
         plan: ConversionPlan,
         clip: Clip? = null,
     ): List<String> {
+        plan.frameAtSeconds?.let { at -> return frame(runtime, input, output, plan, at) }
         val args = mutableListOf(
             runtime.ffmpeg.absolutePath,
             "-nostdin",
@@ -67,6 +68,27 @@ object FfmpegCommand {
         }
         args += output.absolutePath
         return args
+    }
+
+    /**
+     * Un fotograma: `-ss` antes de `-i` (al decodificar, la búsqueda es exacta), la primera pista de video y
+     * un solo cuadro. FFmpeg aplica la rotación del video y convierte el formato de píxel.
+     */
+    private fun frame(runtime: FfmpegRuntime, input: File, output: File, plan: ConversionPlan, at: Double) = buildList {
+        addAll(
+            listOf(
+                runtime.ffmpeg.absolutePath, "-nostdin", "-hide_banner", "-nostats", "-loglevel", "error",
+                "-progress", "pipe:1", "-y",
+            ),
+        )
+        if (at > 0) addAll(listOf("-ss", seconds(at)))
+        addAll(listOf("-i", input.absolutePath, "-map", "0:v:0", "-an", "-sn", "-frames:v", "1"))
+        when ((plan.video as StreamPlan.Encode).codec) {
+            "png" -> addAll(listOf("-c:v", "png"))
+            else -> addAll(listOf("-c:v", "mjpeg", "-q:v", "2"))
+        }
+        // Un solo archivo, sin numeración de secuencia.
+        addAll(listOf("-update", "1", output.absolutePath))
     }
 
     /** Segundos con milésimas y punto decimal, sea cual sea el idioma del teléfono. */

@@ -45,6 +45,14 @@ sealed interface ConversionTarget {
     data class Video(val container: VideoContainer, val maxHeight: Int? = null) : ConversionTarget
 
     data class Audio(val format: AudioFormat, val bitrateKbps: Int? = null) : ConversionTarget
+
+    /** Un fotograma del video en [atSeconds], con la resolución original (ADR-020). */
+    data class Image(val atSeconds: Double, val format: ImageFormat = ImageFormat.JPG) : ConversionTarget
+}
+
+enum class ImageFormat(val extension: String, val mimeType: String) {
+    JPG("jpg", "image/jpeg"),
+    PNG("png", "image/png"),
 }
 
 enum class VideoContainer(val extension: String, val mimeType: String) {

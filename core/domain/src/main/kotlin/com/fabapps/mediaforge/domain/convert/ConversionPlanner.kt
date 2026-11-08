@@ -4,6 +4,7 @@ import com.fabapps.mediaforge.domain.download.AudioOptions
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionTarget
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
 
@@ -24,6 +25,8 @@ data class ConversionPlan(
     val scaleToHeight: Int?,
     val extension: String,
     val mimeType: String,
+    /** Solo para una imagen: el instante del fotograma. */
+    val frameAtSeconds: Double? = null,
 ) {
     val reencodes: Boolean get() = video is StreamPlan.Encode || audio is StreamPlan.Encode
 }
@@ -53,15 +56,35 @@ object ConversionPlanner {
     const val VIDEO_AUDIO_KBPS = 160
     const val WEBM_AUDIO_KBPS = 128
 
-    /** Con [clip], el fragmento tiene que caber en el archivo; con corte exacto el video se recodifica. */
+    /**
+     * Con [clip], el fragmento tiene que caber en el archivo; con corte exacto el video se recodifica. Una
+     * imagen no usa el recorte: su instante va en el destino.
+     */
     fun plan(media: LocalMedia, target: ConversionTarget, clip: Clip? = null): Outcome<ConversionPlan> {
-        clip?.problem(media.durationSeconds)?.let { problem ->
-            return Outcome.Failure(MediaError.UnsupportedConversion("clip: $problem"))
+        if (target !is ConversionTarget.Image) {
+            clip?.problem(media.durationSeconds)?.let { problem ->
+                return Outcome.Failure(MediaError.UnsupportedConversion("clip: $problem"))
+            }
         }
         return when (target) {
             is ConversionTarget.Video -> planVideo(media, target, forceEncode = clip?.exact == true)
             is ConversionTarget.Audio -> planAudio(media, target)
+            is ConversionTarget.Image -> planImage(media, target)
         }
+    }
+
+    private fun planImage(media: LocalMedia, target: ConversionTarget.Image): Outcome<ConversionPlan> {
+        if (media.video == null) return Outcome.Failure(MediaError.UnsupportedConversion("no video track"))
+        val at = target.atSeconds
+        val duration = media.durationSeconds
+        if (!at.isFinite() || at < 0 || (duration != null && at >= duration)) {
+            return Outcome.Failure(MediaError.UnsupportedConversion("frame time out of range"))
+        }
+        val format = target.format
+        val codec = if (format == ImageFormat.PNG) "png" else "mjpeg"
+        return Outcome.Success(
+            ConversionPlan(StreamPlan.Encode(codec), StreamPlan.Drop, null, format.extension, format.mimeType, at),
+        )
     }
 
     private fun planVideo(
@@ -116,6 +139,11 @@ object ConversionPlanner {
      * la parte proporcional.
      */
     fun estimateBytes(media: LocalMedia, plan: ConversionPlan, clip: Clip? = null): Long? {
+        if (plan.frameAtSeconds != null) {
+            // Cota: 4 bytes por píxel (PNG sin comprimir); 4K si no se conoce el tamaño.
+            val pixels = (media.video?.width ?: 3840).toLong() * (media.video?.height ?: 2160)
+            return pixels * 4
+        }
         val full = media.durationSeconds
         val duration = clip?.lengthSeconds(full) ?: full
         val fraction = if (clip != null && full != null && full > 0 && duration != null) {

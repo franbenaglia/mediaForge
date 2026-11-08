@@ -7,6 +7,7 @@ import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -90,6 +91,10 @@ object RequestJson {
     @SerialName("audio")
     private data class AudioTargetDto(val format: String, val bitrateKbps: Int? = null) : TargetDto
 
+    @Serializable
+    @SerialName("image")
+    private data class ImageTargetDto(val atSeconds: Double, val format: String) : TargetDto
+
     private fun JobRequest.toDto(): RequestDto = when (this) {
         is JobRequest.Download -> with(request) {
             DownloadDto(jobId, sourceUrl, selection.toDto(), fileName, embedMetadata, expectedBytes)
@@ -115,6 +120,7 @@ object RequestJson {
     private fun ConversionTarget.toDto(): TargetDto = when (this) {
         is ConversionTarget.Video -> VideoTargetDto(container.name, maxHeight)
         is ConversionTarget.Audio -> AudioTargetDto(format.name, bitrateKbps)
+        is ConversionTarget.Image -> ImageTargetDto(atSeconds, format.name)
     }
 
     private fun RequestDto.toDomain(): JobRequest = when (this) {
@@ -140,5 +146,6 @@ object RequestJson {
     private fun TargetDto.toDomain(): ConversionTarget = when (this) {
         is VideoTargetDto -> ConversionTarget.Video(VideoContainer.valueOf(container), maxHeight)
         is AudioTargetDto -> ConversionTarget.Audio(AudioFormat.valueOf(format), bitrateKbps)
+        is ImageTargetDto -> ConversionTarget.Image(atSeconds, ImageFormat.valueOf(format))
     }
 }

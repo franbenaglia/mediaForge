@@ -3,6 +3,7 @@ package com.fabapps.mediaforge.domain.convert
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionTarget
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import org.junit.Assert.assertEquals
@@ -92,6 +93,31 @@ class ClipTest {
     fun clipOutsideTheFileCannotBePlanned() {
         val result = ConversionPlanner.plan(media, ConversionTarget.Video(VideoContainer.MP4), Clip(10.0, 500.0))
         assertTrue((result as Outcome.Failure).error is MediaError.UnsupportedConversion)
+    }
+
+    @Test
+    fun frameIsAnImageAtTheOriginalResolution() {
+        val jpg = plan(ConversionTarget.Image(12.5), clip = null)
+        assertEquals(StreamPlan.Encode("mjpeg"), jpg.video)
+        assertEquals(StreamPlan.Drop, jpg.audio)
+        assertEquals(null, jpg.scaleToHeight)
+        assertEquals(12.5, jpg.frameAtSeconds!!, 0.0)
+        assertEquals("image/jpeg", jpg.mimeType)
+        val png = plan(ConversionTarget.Image(0.0, ImageFormat.PNG), clip = Clip(50.0))
+        assertEquals("png", png.extension)
+        // El recorte no aplica a una imagen.
+        assertEquals(0.0, png.frameAtSeconds!!, 0.0)
+        assertEquals(1920L * 1080 * 4, ConversionPlanner.estimateBytes(media, png))
+    }
+
+    @Test
+    fun frameNeedsVideoAndATimeInsideTheFile() {
+        val noVideo = media.copy(video = null)
+        listOf(
+            ConversionPlanner.plan(noVideo, ConversionTarget.Image(1.0)),
+            ConversionPlanner.plan(media, ConversionTarget.Image(100.0)),
+            ConversionPlanner.plan(media, ConversionTarget.Image(-1.0)),
+        ).forEach { assertTrue((it as Outcome.Failure).error is MediaError.UnsupportedConversion) }
     }
 
     @Test

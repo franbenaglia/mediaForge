@@ -42,6 +42,9 @@ enum class ProcessingStep {
 
     /** Escribe metadatos o portada. */
     METADATA,
+
+    /** Saca un fotograma del video. */
+    EXTRACT_FRAME,
 }
 
 /** Archivo producido por un trabajo. `location` es una URI de contenido o una ruta privada. */

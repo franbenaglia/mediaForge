@@ -109,10 +109,11 @@
     <string name="audio_name_wav" translatable="false">WAV</string>
     <string name="audio_name_flac" translatable="false">FLAC</string>
     <string name="job_status_processing_remux">Changing container</string>
+    <string name="job_status_processing_frame">Extracting the frame</string>
     <string name="job_status_processing_prepare">Preparing the file</string>
     <string name="error_unsupported_conversion">This file cannot be converted to that format (for example, it has no video or no audio track).</string>
     <string name="converter_title">Convert a file</string>
-    <string name="converter_supporting">Change the format of a video or audio file on this phone. Works offline.</string>
+    <string name="converter_supporting">Change the format of a video or audio file on this phone, cut a part of it or save a frame. Works offline.</string>
     <string name="converter_pick">Choose file</string>
     <string name="converter_change_file">Choose another file</string>
     <string name="converter_inspecting">Reading the file…</string>
@@ -136,6 +137,12 @@
     <string name="converter_failed">The conversion failed.</string>
     <string name="converter_interrupted">The conversion was interrupted. You can start it again.</string>
     <string name="converter_cancelled">Conversion cancelled. Temporary files were deleted.</string>
+    <string name="converter_target_image">Image</string>
+    <string name="converter_image_format">Image format</string>
+    <string name="converter_frame_time">Time of the frame</string>
+    <string name="converter_frame_hint">For example: 83, 1:23 or 1:02:03. Empty means the first frame.</string>
+    <string name="converter_frame_note">Saves one frame of the video at its original resolution.</string>
+    <string name="converter_frame_note_size">Saves one frame of the video at its original resolution (%1$s).</string>
     <string name="converter_trim">Trim</string>
     <string name="converter_trim_hint">Convert only part of the file, such as a song from a video.</string>
     <string name="converter_trim_start">Start</string>

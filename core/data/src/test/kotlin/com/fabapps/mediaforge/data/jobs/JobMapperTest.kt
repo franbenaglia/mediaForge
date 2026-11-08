@@ -9,6 +9,7 @@ import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.VideoContainer
@@ -87,6 +88,13 @@ class JobMapperTest {
                         "e",
                         Clip(1.5, 20.0, exact = true),
                     ),
+                ),
+            ),
+        )
+        roundTrip(
+            job(
+                JobRequest.Conversion(
+                    ConversionRequest("f", "content://doc/4", ConversionTarget.Image(12.5, ImageFormat.PNG), "f"),
                 ),
             ),
         )
