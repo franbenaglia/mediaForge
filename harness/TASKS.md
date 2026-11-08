@@ -136,9 +136,10 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
   *Depende de:* —
   *Acepta:* pruebas de la tabla de main.md §5.1 (MKV → MP4 remux, WebM → MP4 recodifica, MP4 → MP3, WAV → FLAC, audio → video imposible).
   *Hecho:* `LocalMedia`, `ConversionPlanner` (copia/recodifica/descarta por pista, reducción de resolución, estimación de tamaño), `MediaError.UnsupportedConversion`, pasos `REMUX` y `PREPARE_INPUT`. 16 pruebas.
-- [ ] **T6.2** · P1 · `:core:media`: parser de `ffprobe` (JSON), comando de FFmpeg desde el plan (`-nostdin`, `-progress pipe:1`, argumentos en lista, `-map` explícito) y parser de progreso (`out_time_us` / duración).
+- [x] **T6.2** · P1 · `:core:media`: parser de `ffprobe` (JSON), comando de FFmpeg desde el plan (`-nostdin`, `-progress pipe:1`, argumentos en lista, `-map` explícito) y parser de progreso (`out_time_us` / duración).
   *Depende de:* T6.1
   *Acepta:* pruebas con las salidas reales de `ffprobe` del teléfono.
+  *Hecho:* `FfprobeParser` (ignora portadas `attached_pic`), `FfmpegCommand` (`-map 0:v:0`/`0:a:0?`, `-map_metadata 0`, `+faststart` en MP4/MOV/M4A), `FfmpegProgressParser`. 14 pruebas.
 - [ ] **T6.3** · P1 · `FfmpegConverter` implementa `MediaConverter`: copia la entrada a una carpeta privada por trabajo (con chequeo de espacio), `ffprobe`, plan, FFmpeg con progreso, cancelación y limpieza.
   *Depende de:* T6.2
   *Acepta:* pruebas en la JVM con ffmpeg/ffprobe falsos (éxito, error, cancelación sin parciales, entrada sin pistas).

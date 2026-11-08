@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 6: sigue T6.2 (parser de `ffprobe`, comando y progreso de FFmpeg).
+Etapa 6: sigue T6.3 (`FfmpegConverter`).
 
 ## Etapas
 
