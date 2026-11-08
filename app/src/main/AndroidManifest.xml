@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Cola de trabajos en un servicio en primer plano (ADR-017). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".MediaForgeApplication"
         android:allowBackup="false"
@@ -17,6 +23,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- dataSync para descargas; mediaProcessing (Android 15+) para conversiones. -->
+        <service
+            android:name=".jobs.JobService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|mediaProcessing" />
     </application>
 
 </manifest>

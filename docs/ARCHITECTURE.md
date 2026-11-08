@@ -49,4 +49,8 @@ Calidades: `VideoOptions` arma una opción por altura con formatos concretos (`2
 
 ## Ejecución en segundo plano
 
-Foreground service de tipo `dataSync` (descargas) y `mediaProcessing` (conversiones, Android 15+), con un límite de 6 h cada 24 h en Android 15+. Los trabajos se persisten en Room; WorkManager reanuda los pendientes después de que muere el proceso. Detalle en FEASIBILITY §10.
+ADR-017. `JobScheduler` (dominio) es un singleton con un alcance propio del proceso (`@ApplicationScope`): corre los trabajos, guarda los estados en Room y expone `live` (progreso), `activity` (qué corre) y `finished` (avisos).
+
+- `JobServiceStarter` (se instala en `MediaForgeApplication`) arranca `JobService` cuando `activity.isBusy` pasa a `true` y publica el aviso de cada trabajo terminado.
+- `JobService` solo mantiene el proceso en primer plano y actualiza la notificación (dos veces por segundo como mucho), con Cancelar. Tipo `dataSync`, más `mediaProcessing` en Android 15+ mientras corre una conversión. Se detiene solo cuando la cola queda vacía. `onTimeout` (6 h por día en Android 15+) interrumpe lo que corre.
+- `MainActivity.onStart` llama a `JobScheduler.start()`: la primera vez recupera lo que quedó a medias si el proceso murió. Sin WorkManager: Android no deja arrancar el servicio desde segundo plano.

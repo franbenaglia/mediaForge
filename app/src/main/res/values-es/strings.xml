@@ -124,4 +124,18 @@
     <string name="converter_failed">La conversión falló.</string>
     <string name="converter_cancelled">Conversión cancelada. Se borraron los archivos temporales.</string>
     <string name="converter_keep_open">Dejá MediaForge abierta hasta que termine la conversión.</string>
+
+    <!-- Notificaciones de la cola -->
+    <string name="notification_channel_progress">Descargas y conversiones en curso</string>
+    <string name="notification_channel_results">Descargas y conversiones terminadas</string>
+    <string name="notification_waiting_retry">Esperando para reintentar</string>
+    <string name="notification_cancel">Cancelar</string>
+    <string name="notification_done">Guardado. Tocá para abrir.</string>
+    <string name="notification_failed">Falló: %1$s</string>
+    <string name="notification_interrupted">Se interrumpió. Abrí MediaForge para reintentar.</string>
+    <plurals name="notification_more">
+        <item quantity="one">%d más en la cola</item>
+        <item quantity="many">%d más en la cola</item>
+        <item quantity="other">%d más en la cola</item>
+    </plurals>
 </resources>
