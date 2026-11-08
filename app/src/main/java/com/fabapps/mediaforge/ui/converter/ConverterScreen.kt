@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -56,6 +57,7 @@ import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.JobRow
 import com.fabapps.mediaforge.ui.common.SavedFile
 import com.fabapps.mediaforge.ui.common.WorkState
+import com.fabapps.mediaforge.ui.common.messageRes
 import com.fabapps.mediaforge.ui.common.rememberNotificationPermissionRequest
 import com.fabapps.mediaforge.ui.format.Formatters
 import com.fabapps.mediaforge.ui.home.nameRes
@@ -66,8 +68,8 @@ import kotlin.math.roundToLong
 fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val focus = LocalFocusManager.current
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        viewModel.onFilePicked(uri?.toString())
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        viewModel.onFilesPicked(uris.map { it.toString() })
     }
     // Android 13+: notificaciones del progreso y del resultado. No bloquea el trabajo.
     val askNotifications = rememberNotificationPermissionRequest()
@@ -139,7 +141,10 @@ private fun ConverterContent(state: ConverterUiState, actions: ConverterActions)
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         when (val input = state.input) {
-            InputState.None -> Button(onClick = actions.onPick) { Text(stringResource(R.string.converter_pick)) }
+            InputState.None -> {
+                Button(onClick = actions.onPick) { Text(stringResource(R.string.converter_pick)) }
+                Note(stringResource(R.string.converter_pick_hint, InputState.Batch.MAX_BATCH))
+            }
             InputState.Inspecting -> Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -158,6 +163,12 @@ private fun ConverterContent(state: ConverterUiState, actions: ConverterActions)
                 TextButton(onClick = actions.onPick) { Text(stringResource(R.string.converter_change_file)) }
                 Options(state, input.media, actions)
                 Work(state, actions)
+            }
+            is InputState.Batch -> {
+                BatchFiles(state, input)
+                TextButton(onClick = actions.onPick) { Text(stringResource(R.string.converter_change_files)) }
+                if (state.batchQueued == null) Options(state, null, actions)
+                BatchWork(state, actions)
             }
         }
     }
@@ -191,7 +202,61 @@ private fun FileCard(media: LocalMedia) {
 }
 
 @Composable
-private fun Options(state: ConverterUiState, media: LocalMedia, actions: ConverterActions) {
+private fun BatchFiles(state: ConverterUiState, batch: InputState.Batch) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                pluralStringResource(R.plurals.converter_batch_files, batch.files.size, batch.files.size),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            batch.files.forEach { file ->
+                Column {
+                    Text(
+                        file.media?.displayName ?: stringResource(R.string.converter_inspecting),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    when (val plan = state.planFor(file)) {
+                        null -> Unit
+                        is Outcome.Success -> {
+                            val text = if (plan.value.reencodes) {
+                                R.string.converter_batch_encode
+                            } else {
+                                R.string.converter_batch_copy
+                            }
+                            Note(stringResource(text))
+                        }
+                        is Outcome.Failure -> ErrorNote(stringResource(plan.error.messageRes()))
+                    }
+                }
+            }
+            if (batch.truncated) Note(stringResource(R.string.converter_batch_truncated, InputState.Batch.MAX_BATCH))
+        }
+    }
+}
+
+@Composable
+private fun BatchWork(state: ConverterUiState, actions: ConverterActions) {
+    val queued = state.batchQueued
+    if (queued != null) {
+        Text(
+            pluralStringResource(R.plurals.converter_batch_queued, queued, queued),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Note(stringResource(R.string.converter_background))
+        return
+    }
+    val files = state.batch?.files.orEmpty()
+    val ready = state.batchReady.size
+    val skipped = files.count { !it.inspecting } - ready
+    if (skipped > 0) Note(pluralStringResource(R.plurals.converter_batch_skipped, skipped, skipped))
+    Button(onClick = actions.onConvert, enabled = state.canConvert, modifier = Modifier.fillMaxWidth()) {
+        Text(pluralStringResource(R.plurals.converter_batch_start, ready, ready))
+    }
+}
+
+/** Opciones del destino. [media] es nulo con varios archivos: sin recorte, fotograma ni nombre. */
+@Composable
+private fun Options(state: ConverterUiState, media: LocalMedia?, actions: ConverterActions) {
     if (state.locked || state.work is WorkState.Saved) return
     val kinds = listOf(
         TargetKind.VIDEO to R.string.converter_target_video,
@@ -203,14 +268,18 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
             SegmentedButton(
                 selected = state.kind == kind,
                 onClick = { actions.onKind(kind) },
-                enabled = kind == TargetKind.AUDIO || media.video != null,
+                enabled = when (kind) {
+                    TargetKind.AUDIO -> true
+                    TargetKind.VIDEO -> state.anyVideo
+                    TargetKind.IMAGE -> media?.video != null
+                },
                 shape = SegmentedButtonDefaults.itemShape(index, kinds.size),
             ) { Text(stringResource(label)) }
         }
     }
-    if (media.video == null) Note(stringResource(R.string.converter_no_video_track))
+    if (media != null && media.video == null) Note(stringResource(R.string.converter_no_video_track))
 
-    if (state.kind == TargetKind.IMAGE) {
+    if (state.kind == TargetKind.IMAGE && media != null) {
         ImageOptions(state, media, actions)
     } else if (state.kind == TargetKind.VIDEO) {
         Section(stringResource(R.string.converter_container)) {
@@ -268,6 +337,7 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
         }
     }
 
+    if (media == null) return
     if (state.kind != TargetKind.IMAGE) Trim(state, media, actions)
 
     when (val plan = state.plan) {

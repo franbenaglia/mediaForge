@@ -31,7 +31,7 @@ Para cancelar, se cancela la corrutina del trabajo; el adaptador mata el proceso
 
 Desde la Etapa 7, Inicio y Conversor no corren el trabajo: lo encolan en `JobQueue` (`JobScheduler`) y siguen su estado con `JobQueue.workState(id)` hasta que termina. El guardado en la galería lo hace la cola. Salir de la app no corta nada; el conversor conserva el permiso de lectura del archivo elegido (`InputAccess`) hasta que la conversión se guarda.
 
-Recorte (Etapa 10, ADR-020): `ConversionRequest.clip` lleva inicio, fin y "corte exacto". `ConversionPlanner` lo valida contra la duración y recodifica el video solo si se pide corte exacto; `FfmpegCommand` pone `-ss` antes de `-i` y `-t` con la duración, y el progreso se mide sobre el fragmento. Un fotograma es `ConversionTarget.Image` (instante y JPG o PNG): el plan lleva `frameAtSeconds` y el comando saca un solo cuadro; se guarda en `Pictures/MediaForge`.
+Recorte (Etapa 10, ADR-020): `ConversionRequest.clip` lleva inicio, fin y "corte exacto". `ConversionPlanner` lo valida contra la duración y recodifica el video solo si se pide corte exacto; `FfmpegCommand` pone `-ss` antes de `-i` y `-t` con la duración, y el progreso se mide sobre el fragmento. Un fotograma es `ConversionTarget.Image` (instante y JPG o PNG): el plan lleva `frameAtSeconds` y el comando saca un solo cuadro; se guarda en `Pictures/MediaForge`. Con varios archivos (`InputState.Batch`, hasta 50), el Conversor encola un trabajo por archivo compatible con el mismo destino.
 
 Calidades: `VideoOptions` arma una opción por altura con formatos concretos (`299+258`) para que el tamaño mostrado sea el que se baja; el comando agrega un respaldo por altura por si el sitio ya no ofrece esos IDs.
 

@@ -274,9 +274,10 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
   *Depende de:* T10.2
   *Acepta:* pruebas del plan, del comando y del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `ConversionTarget.Image` e `ImageFormat`, `ConversionPlan.frameAtSeconds`, comando con `-ss`, `-frames:v 1` y `-update 1` (JPG con `-q:v 2`), paso `EXTRACT_FRAME`, `MediaStoreLibrary` guarda imágenes en `Pictures/MediaForge`, JSON, historial y Descargas. Destino "Imagen" en el Conversor con instante y formato. 8 pruebas.
-- [ ] **T10.4** · P1 · Conversión masiva: elegir varios archivos (hasta 50), un mismo destino para todos, un trabajo por archivo con su nombre; los que no son compatibles (audio → video, imagen de un audio) se informan y no se encolan. El recorte no aplica a varios archivos.
+- [~] **T10.4** · P1 · Conversión masiva: elegir varios archivos (hasta 50), un mismo destino para todos, un trabajo por archivo con su nombre; los que no son compatibles (audio → video, imagen de un audio) se informan y no se encolan. El recorte no aplica a varios archivos.
   *Depende de:* T10.3
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+  *Hecho:* selector `OpenMultipleDocuments` (uno solo sigue el flujo de siempre); `InputState.Batch` con `BatchFile` (se leen de a uno), plan por archivo, destino de video si todos tienen video, sin "Imagen" ni recorte; "Convertir N archivos" encola un trabajo por archivo compatible y avisa cuántos se saltean. 5 pruebas.
 - [ ] **T10.5** · P2 · Compresión de video: calidad "Original (copia si se puede)", "Alta", "Media" o "Archivo chico" (recodifica con otro CRF), junto con la resolución.
   *Depende de:* T10.2
   *Acepta:* pruebas del plan, del comando y del ViewModel.

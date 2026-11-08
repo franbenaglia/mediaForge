@@ -69,6 +69,18 @@ sealed interface InputState {
     data class Ready(val uri: String, val media: LocalMedia) : InputState
 
     data class Failed(val error: MediaError) : InputState
+
+    /** Varios archivos, todos al mismo destino (ADR-020). [truncated]: se eligieron más de [MAX_BATCH]. */
+    data class Batch(val files: List<BatchFile>, val truncated: Boolean = false) : InputState {
+        companion object {
+            const val MAX_BATCH = 50
+        }
+    }
+}
+
+/** Un archivo de una conversión de varios: se está leyendo, está listo ([media]) o no se pudo leer ([error]). */
+data class BatchFile(val uri: String, val media: LocalMedia? = null, val error: MediaError? = null) {
+    val inspecting: Boolean get() = media == null && error == null
 }
 
 data class ConverterUiState(
@@ -86,8 +98,23 @@ data class ConverterUiState(
     val frameTime: String = "",
     val imageFormat: ImageFormat = ImageFormat.JPG,
     val work: WorkState = WorkState.None,
+    /** Cuántas conversiones se encolaron con estas opciones (varios archivos). */
+    val batchQueued: Int? = null,
 ) {
     val media: LocalMedia? get() = (input as? InputState.Ready)?.media
+
+    val batch: InputState.Batch? get() = input as? InputState.Batch
+
+    /** Plan de un archivo de la lista con el destino elegido; nulo mientras se lee. */
+    fun planFor(file: BatchFile): Outcome<ConversionPlan>? =
+        file.error?.let { Outcome.Failure(it) } ?: file.media?.let { ConversionPlanner.plan(it, target) }
+
+    /** Los archivos de la lista que se pueden convertir al destino elegido. */
+    val batchReady: List<BatchFile> get() = batch?.files.orEmpty().filter { planFor(it) is Outcome.Success }
+
+    /** El archivo, o alguno de la lista, tiene video. */
+    val anyVideo: Boolean
+        get() = media?.video != null || batch?.files.orEmpty().any { it.media?.video != null }
 
     /** Lo escrito en el recorte, leído: un fragmento, un error o nada (el archivo entero). */
     private val trimResult: Pair<Clip?, TrimError?>
@@ -144,7 +171,11 @@ data class ConverterUiState(
         get() = media?.let { m -> readyPlan?.let { ConversionPlanner.estimateBytes(m, it, clip) } }
 
     /** Alturas menores que la del archivo, para reducir la resolución. */
-    val heightOptions: List<Int> get() = HEIGHTS.filter { h -> (media?.video?.height ?: 0) > h }
+    val heightOptions: List<Int>
+        get() {
+            val tallest = media?.video?.height ?: batch?.files.orEmpty().maxOfOrNull { it.media?.video?.height ?: 0 }
+            return HEIGHTS.filter { h -> (tallest ?: 0) > h }
+        }
 
     val bitrates: List<Int> get() = AudioOptions.bitratesFor(audioFormat)
 
@@ -159,7 +190,16 @@ data class ConverterUiState(
         }
 
     val canConvert: Boolean
-        get() = readyPlan != null && trimError == null && frameError == null && !work.isActive
+        get() {
+            val files = batch?.files
+            if (files != null) {
+                return kind != TargetKind.IMAGE &&
+                    files.none { it.inspecting } &&
+                    batchReady.isNotEmpty() &&
+                    batchQueued == null
+            }
+            return readyPlan != null && trimError == null && frameError == null && !work.isActive
+        }
 
     val canCancel: Boolean get() = work is WorkState.Running
 
@@ -181,6 +221,9 @@ class ConverterViewModel @Inject constructor(
     val state: StateFlow<ConverterUiState> = _state.asStateFlow()
 
     private var inspectJob: Job? = null
+
+    /** El usuario eligió el tipo de destino a mano: la lista de varios no lo cambia al terminar de leerse. */
+    private var kindChosen = false
 
     /** Sigue en pantalla el trabajo encolado desde acá; la conversión corre en la cola (ADR-017). */
     private var trackJob: Job? = null
@@ -210,7 +253,53 @@ class ConverterViewModel @Inject constructor(
         }
     }
 
-    fun onKindChange(kind: TargetKind) = edit { it.copy(kind = kind) }
+    /** Varios archivos elegidos en el selector. Con uno solo, es el flujo de siempre. */
+    fun onFilesPicked(uris: List<String>) {
+        val distinct = uris.distinct()
+        if (distinct.size <= 1) return onFilePicked(distinct.firstOrNull())
+        inspectJob?.cancel()
+        stopTracking()
+        kindChosen = false
+        val chosen = distinct.take(InputState.Batch.MAX_BATCH)
+        _state.value = ConverterUiState(
+            input = InputState.Batch(chosen.map { BatchFile(it) }, truncated = distinct.size > chosen.size),
+        )
+        inspectJob = viewModelScope.launch {
+            chosen.forEach { uri ->
+                val result = inspector.inspect(uri)
+                _state.update { state ->
+                    val batch = state.batch ?: return@update state
+                    val files = batch.files.map { file ->
+                        if (file.uri != uri) {
+                            file
+                        } else {
+                            when (result) {
+                                is Outcome.Success -> file.copy(media = result.value)
+                                is Outcome.Failure -> file.copy(error = result.error)
+                            }
+                        }
+                    }
+                    state.copy(input = batch.copy(files = files))
+                }
+            }
+            // Si todos los que se leyeron tienen video, lo habitual es convertir a otro formato de video.
+            _state.update { state ->
+                val read = state.batch?.files.orEmpty().mapNotNull { it.media }
+                if (!kindChosen && read.isNotEmpty() && read.all { it.video != null }) {
+                    state.copy(kind = TargetKind.VIDEO)
+                } else {
+                    state
+                }
+            }
+        }
+    }
+
+    fun onKindChange(kind: TargetKind) {
+        // Un fotograma depende del instante de cada archivo: no se ofrece para varios.
+        if (kind == TargetKind.IMAGE && _state.value.batch != null) return
+        kindChosen = true
+        edit { it.copy(kind = kind) }
+    }
 
     fun onContainerChange(container: VideoContainer) = edit { it.copy(container = container) }
 
@@ -240,6 +329,7 @@ class ConverterViewModel @Inject constructor(
 
     fun onConvert() {
         val current = _state.value
+        if (current.batch != null) return convertBatch(current)
         val ready = current.input as? InputState.Ready ?: return
         if (!current.canConvert) return
         val request = ConversionRequest(
@@ -257,6 +347,23 @@ class ConverterViewModel @Inject constructor(
             val job = queue.enqueue(JobRequest.Conversion(request), title = request.fileName)
             workId = job.id
             queue.workState(job.id).collect { work -> _state.update { it.copy(work = work) } }
+        }
+    }
+
+    /** Un trabajo por archivo compatible, todos con el mismo destino. Se siguen en Descargas. */
+    private fun convertBatch(current: ConverterUiState) {
+        if (!current.canConvert) return
+        val files = current.batchReady
+        val target = current.target
+        files.forEach { inputAccess.keep(it.uri) }
+        _state.update { it.copy(batchQueued = files.size) }
+        viewModelScope.launch {
+            files.forEach { file ->
+                val display = file.media?.displayName.orEmpty()
+                val name = display.substringBeforeLast('.').ifBlank { display }
+                val request = ConversionRequest(UUID.randomUUID().toString(), file.uri, target, name)
+                queue.enqueue(JobRequest.Conversion(request), title = name)
+            }
         }
     }
 
@@ -288,7 +395,11 @@ class ConverterViewModel @Inject constructor(
     /** Cambios de opciones: no mientras se convierte; borran el resultado anterior. */
     private fun edit(change: (ConverterUiState) -> ConverterUiState) {
         if (_state.value.locked) return
-        _state.update { change(it).let { next -> if (next != it) next.copy(work = WorkState.None) else next } }
+        _state.update {
+            change(it).let { next ->
+                if (next != it) next.copy(work = WorkState.None, batchQueued = null) else next
+            }
+        }
     }
 
     private companion object {

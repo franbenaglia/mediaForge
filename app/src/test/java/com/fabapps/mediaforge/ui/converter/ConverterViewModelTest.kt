@@ -9,6 +9,7 @@ import com.fabapps.mediaforge.domain.convert.VideoStream
 import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.jobs.JobRequest
 import com.fabapps.mediaforge.domain.jobs.JobScheduler
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionRequest
@@ -55,7 +56,10 @@ class ConverterViewModelTest {
 
     private class FakeInspector : MediaInspector {
         var result = CompletableDeferred<Outcome<LocalMedia>>()
-        override suspend fun inspect(input: String) = result.await()
+
+        /** Para varios archivos: resultado por URI; si no está, el de [result]. */
+        val byUri = mutableMapOf<String, Outcome<LocalMedia>>()
+        override suspend fun inspect(input: String) = byUri[input] ?: result.await()
     }
 
     private class FakeConverter : MediaConverter {
@@ -377,6 +381,91 @@ class ConverterViewModelTest {
         vm.onKindChange(TargetKind.IMAGE)
         assertTrue((state.plan as Outcome.Failure).error is MediaError.UnsupportedConversion)
         assertFalse(state.canConvert)
+    }
+
+    private suspend fun TestScope.pickMany(vararg files: Pair<String, Outcome<LocalMedia>>) {
+        files.forEach { (uri, result) -> inspector.byUri[uri] = result }
+        vm.onFilesPicked(files.map { it.first })
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun oneFileFromTheMultiplePickerIsTheUsualFlow() = test {
+        vm.onFilesPicked(listOf("content://docs/1"))
+        assertEquals(InputState.Inspecting, state.input)
+        vm.onFilesPicked(emptyList())
+        assertEquals(InputState.Inspecting, state.input)
+    }
+
+    @Test
+    fun severalVideosDefaultToVideoAndQueueOneJobEach() = test {
+        val clip = video.copy(displayName = "Clip.webm", video = VideoStream("vp9", 1280, 720, 30.0))
+        pickMany("content://a" to Outcome.Success(video), "content://b" to Outcome.Success(clip))
+        assertEquals(TargetKind.VIDEO, state.kind)
+        assertEquals(listOf(720, 480, 360), state.heightOptions)
+        assertEquals(2, state.batchReady.size)
+        assertTrue(state.canConvert)
+
+        vm.onKindChange(TargetKind.IMAGE)
+        assertEquals(TargetKind.VIDEO, state.kind)
+        vm.onContainerChange(VideoContainer.MKV)
+        vm.onConvert()
+        advanceUntilIdle()
+        assertEquals(2, state.batchQueued)
+        assertFalse(state.canConvert)
+        val titles = store.jobs.value.values.map { it.title }.toSet()
+        assertEquals(setOf("Vacaciones", "Clip"), titles)
+        assertEquals(listOf("content://a", "content://b"), inputAccess.kept)
+        assertEquals(
+            setOf(ConversionTarget.Video(VideoContainer.MKV)),
+            converter.requests.map { it.target }.toSet() + store.jobs.value.values.map {
+                ((it.request as JobRequest.Conversion).request.target)
+            },
+        )
+        // Cambiar una opción permite encolar otra tanda.
+        vm.onContainerChange(VideoContainer.MP4)
+        assertEquals(null, state.batchQueued)
+        assertTrue(state.canConvert)
+    }
+
+    @Test
+    fun incompatibleOrUnreadableFilesAreSkipped() = test {
+        pickMany(
+            "content://v" to Outcome.Success(video),
+            "content://s" to Outcome.Success(song),
+            "content://x" to Outcome.Failure(MediaError.UnsupportedConversion("bad")),
+        )
+        // Hay un audio: queda en audio, y ahí entran el video y el audio.
+        assertEquals(TargetKind.AUDIO, state.kind)
+        assertEquals(listOf("content://v", "content://s"), state.batchReady.map { it.uri })
+        vm.onKindChange(TargetKind.VIDEO)
+        assertEquals(listOf("content://v"), state.batchReady.map { it.uri })
+        vm.onConvert()
+        advanceUntilIdle()
+        assertEquals(1, state.batchQueued)
+        assertEquals(1, store.jobs.value.size)
+    }
+
+    @Test
+    fun cannotConvertWhileFilesAreBeingRead() = test {
+        inspector.byUri["content://a"] = Outcome.Success(video)
+        vm.onFilesPicked(listOf("content://a", "content://b"))
+        advanceUntilIdle()
+        assertTrue(state.batch!!.files[1].inspecting)
+        assertFalse(state.canConvert)
+        inspector.result.complete(Outcome.Success(song))
+        advanceUntilIdle()
+        assertTrue(state.canConvert)
+    }
+
+    @Test
+    fun atMostFiftyFiles() = test {
+        val uris = (1..60).map { "content://f$it" }
+        uris.forEach { inspector.byUri[it] = Outcome.Success(song) }
+        vm.onFilesPicked(uris)
+        advanceUntilIdle()
+        assertEquals(50, state.batch!!.files.size)
+        assertTrue(state.batch!!.truncated)
     }
 
     @Test

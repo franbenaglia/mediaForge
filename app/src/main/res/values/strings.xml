@@ -114,7 +114,7 @@
     <string name="error_unsupported_conversion">This file cannot be converted to that format (for example, it has no video or no audio track).</string>
     <string name="converter_title">Convert a file</string>
     <string name="converter_supporting">Change the format of a video or audio file on this phone, cut a part of it or save a frame. Works offline.</string>
-    <string name="converter_pick">Choose file</string>
+    <string name="converter_pick">Choose files</string>
     <string name="converter_change_file">Choose another file</string>
     <string name="converter_inspecting">Reading the file…</string>
     <string name="converter_target_video">Video</string>
@@ -143,6 +143,27 @@
     <string name="converter_frame_hint">For example: 83, 1:23 or 1:02:03. Empty means the first frame.</string>
     <string name="converter_frame_note">Saves one frame of the video at its original resolution.</string>
     <string name="converter_frame_note_size">Saves one frame of the video at its original resolution (%1$s).</string>
+    <string name="converter_pick_hint">You can choose up to %1$d files to convert them all the same way.</string>
+    <string name="converter_change_files">Choose other files</string>
+    <string name="converter_batch_truncated">Only the first %1$d files were added.</string>
+    <string name="converter_batch_encode">Re-encoded</string>
+    <string name="converter_batch_copy">Without re-encoding</string>
+    <plurals name="converter_batch_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <plurals name="converter_batch_start">
+        <item quantity="one">Convert %1$d file</item>
+        <item quantity="other">Convert %1$d files</item>
+    </plurals>
+    <plurals name="converter_batch_queued">
+        <item quantity="one">%1$d conversion queued.</item>
+        <item quantity="other">%1$d conversions queued.</item>
+    </plurals>
+    <plurals name="converter_batch_skipped">
+        <item quantity="one">%1$d file can\'t be converted to this format and will be skipped.</item>
+        <item quantity="other">%1$d files can\'t be converted to this format and will be skipped.</item>
+    </plurals>
     <string name="converter_trim">Trim</string>
     <string name="converter_trim_hint">Convert only part of the file, such as a song from a video.</string>
     <string name="converter_trim_start">Start</string>

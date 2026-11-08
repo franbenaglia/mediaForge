@@ -103,7 +103,7 @@
     <string name="error_unsupported_conversion">Este archivo no se puede convertir a ese formato (por ejemplo, no tiene video o no tiene audio).</string>
     <string name="converter_title">Convertir un archivo</string>
     <string name="converter_supporting">Cambiá el formato de un video o un audio que está en el teléfono, recortá una parte o guardá un fotograma. Funciona sin internet.</string>
-    <string name="converter_pick">Elegir archivo</string>
+    <string name="converter_pick">Elegir archivos</string>
     <string name="converter_change_file">Elegir otro archivo</string>
     <string name="converter_inspecting">Leyendo el archivo…</string>
     <string name="converter_target_video">Video</string>
@@ -132,6 +132,31 @@
     <string name="converter_frame_hint">Por ejemplo: 83, 1:23 o 1:02:03. Vacío es el primer fotograma.</string>
     <string name="converter_frame_note">Guarda un fotograma del video con su resolución original.</string>
     <string name="converter_frame_note_size">Guarda un fotograma del video con su resolución original (%1$s).</string>
+    <string name="converter_pick_hint">Podés elegir hasta %1$d archivos para convertirlos todos de la misma forma.</string>
+    <string name="converter_change_files">Elegir otros archivos</string>
+    <string name="converter_batch_truncated">Solo se agregaron los primeros %1$d archivos.</string>
+    <string name="converter_batch_encode">Se recodifica</string>
+    <string name="converter_batch_copy">Sin recodificar</string>
+    <plurals name="converter_batch_files">
+        <item quantity="one">%1$d archivo</item>
+        <item quantity="many">%1$d archivos</item>
+        <item quantity="other">%1$d archivos</item>
+    </plurals>
+    <plurals name="converter_batch_start">
+        <item quantity="one">Convertir %1$d archivo</item>
+        <item quantity="many">Convertir %1$d archivos</item>
+        <item quantity="other">Convertir %1$d archivos</item>
+    </plurals>
+    <plurals name="converter_batch_queued">
+        <item quantity="one">Se encoló %1$d conversión.</item>
+        <item quantity="many">Se encolaron %1$d conversiones.</item>
+        <item quantity="other">Se encolaron %1$d conversiones.</item>
+    </plurals>
+    <plurals name="converter_batch_skipped">
+        <item quantity="one">%1$d archivo no se puede convertir a este formato y se saltea.</item>
+        <item quantity="many">%1$d archivos no se pueden convertir a este formato y se saltean.</item>
+        <item quantity="other">%1$d archivos no se pueden convertir a este formato y se saltean.</item>
+    </plurals>
     <string name="converter_trim">Recortar</string>
     <string name="converter_trim_hint">Convertir solo una parte del archivo, por ejemplo una canción de un video.</string>
     <string name="converter_trim_start">Inicio</string>
