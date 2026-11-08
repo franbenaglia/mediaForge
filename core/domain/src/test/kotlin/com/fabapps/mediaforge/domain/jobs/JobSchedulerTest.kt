@@ -3,6 +3,9 @@ package com.fabapps.mediaforge.domain.jobs
 import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.history.HistoryEntry
+import com.fabapps.mediaforge.domain.history.HistoryKind
+import com.fabapps.mediaforge.domain.history.HistoryStore
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
@@ -99,14 +102,27 @@ class JobSchedulerTest {
         override fun needsWritePermission() = false
     }
 
+    private class FakeHistory : HistoryStore {
+        val entries = linkedMapOf<String, HistoryEntry>()
+        override suspend fun put(entry: HistoryEntry) {
+            entries[entry.id] = entry
+        }
+        override suspend fun get(id: String) = entries[id]
+        override fun observeAll(): Flow<List<HistoryEntry>> = MutableStateFlow(entries.values.toList())
+        override suspend fun delete(id: String) {
+            entries.remove(id)
+        }
+    }
+
     private val store = FakeStore()
+    private val history = FakeHistory()
     private val engine = FakeEngine()
     private val library = FakeLibrary()
 
     private fun TestScope.scheduler(limits: JobScheduler.Limits = JobScheduler.Limits()) =
         JobScheduler(store, engine, engine, library, backgroundScope, clock = {
             testScheduler.currentTime
-        }, limits = limits)
+        }, initialLimits = limits, history = history)
 
     private fun download(id: String) =
         JobRequest.Download(DownloadRequest(id, "https://example.com/$id", DownloadSelection.Video(), id))
@@ -137,6 +153,56 @@ class JobSchedulerTest {
         assertNull(scheduler.live.value["a"])
         assertFalse(scheduler.activity.value.isBusy)
         assertEquals(listOf("a"), finished.map { it.id })
+    }
+
+    @Test
+    fun `completed jobs enter the history, failed and cancelled ones do not`() = runTest {
+        val scheduler = scheduler(JobScheduler.Limits(downloads = 3))
+        scheduler.enqueue(download("ok"), "Ok", sourceName = "YouTube")
+        scheduler.enqueue(download("bad"), "Bad")
+        scheduler.enqueue(download("stop"), "Stop")
+        scheduler.enqueue(conversion("c"), "Tema")
+        runCurrent()
+        engine.complete("ok")
+        engine.finish("bad", JobState.Failed(MediaError.AccessDenied()))
+        scheduler.cancel("stop")
+        engine.complete("c")
+        runCurrent()
+
+        assertEquals(setOf("ok", "c"), history.entries.keys)
+        val entry = history.entries.getValue("ok")
+        assertEquals(HistoryKind.VIDEO, entry.kind)
+        assertEquals("https://example.com/ok", entry.sourceUrl)
+        assertEquals("content://saved/ok.mp4", entry.file.location)
+        assertEquals(HistoryKind.CONVERSION, history.entries.getValue("c").kind)
+
+        // Quitarlo de Descargas no lo saca del historial.
+        scheduler.delete("ok")
+        assertTrue("ok" in history.entries)
+    }
+
+    @Test
+    fun `raising the download limit starts waiting jobs and lowering it never stops running ones`() = runTest {
+        val scheduler = scheduler()
+        listOf("d1", "d2", "d3", "d4").forEach { scheduler.enqueue(download(it), it) }
+        runCurrent()
+        assertEquals(listOf("d1", "d2"), engine.started)
+
+        scheduler.setDownloadLimit(3)
+        runCurrent()
+        assertEquals(listOf("d1", "d2", "d3"), engine.started)
+
+        scheduler.setDownloadLimit(1)
+        runCurrent()
+        assertTrue(engine.cancelled.isEmpty())
+        engine.complete("d1")
+        engine.complete("d2")
+        runCurrent()
+        // Siguen d3 sola: d4 espera hasta que haya menos de una corriendo.
+        assertEquals(listOf("d1", "d2", "d3"), engine.started)
+        engine.complete("d3")
+        runCurrent()
+        assertEquals(listOf("d1", "d2", "d3", "d4"), engine.started)
     }
 
     @Test

@@ -225,9 +225,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.1
   *Acepta:* pruebas en la JVM (mapeo del historial; ajustes con un archivo temporal) y prueba de la migración 1 → 2 en el teléfono.
   *Hecho:* `HistoryEntity`/`HistoryDao`, base versión 2 con `AutoMigration(1, 2)` (esquema `2.json`), `RoomHistoryStore`, `DataStoreSettingsStore` (archivo `files/datastore/settings.preferences_pb`, se reemplaza si está dañado), Hilt. 6 pruebas en la JVM. `MigrationDeviceTest` escrita; falta correrla en el teléfono.
-- [ ] **T9.3** · P1 · La cola anota en el historial cada trabajo completado y toma de los ajustes el límite de descargas simultáneas (bajar el límite no corta lo que ya corre).
+- [x] **T9.3** · P1 · La cola anota en el historial cada trabajo completado y toma de los ajustes el límite de descargas simultáneas (bajar el límite no corta lo que ya corre).
   *Depende de:* T9.2
   *Acepta:* pruebas de `JobScheduler` (entrada al completar, nada al fallar o cancelar; cambio de límite en vivo).
+  *Hecho:* `JobScheduler(history = …)` anota al completar; `setDownloadLimit`; `QueueSettings` (en `MediaForgeApplication`) lleva el ajuste a la cola. 2 pruebas.
 - [ ] **T9.4** · P1 · Inicio arranca con el modo, la calidad (la mayor que no supere la elegida) y el formato y bitrate de audio de los ajustes.
   *Depende de:* T9.2
   *Acepta:* pruebas de `HomeViewModel`.

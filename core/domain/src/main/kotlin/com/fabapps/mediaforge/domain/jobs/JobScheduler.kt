@@ -3,6 +3,8 @@ package com.fabapps.mediaforge.domain.jobs
 import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.history.HistoryEntry
+import com.fabapps.mediaforge.domain.history.HistoryStore
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
@@ -41,6 +43,7 @@ data class SchedulerActivity(val runningDownloads: Int = 0, val runningConversio
  * - En el [JobStore] van los cambios de estado; el progreso en vivo está en [live].
  * - Los errores de red se reintentan solos ([Limits.networkRetryDelaysMs]); el resto, a mano.
  * - [start] recupera lo que quedó a medias si el proceso murió: vuelve a la cola mientras queden intentos.
+ * - Cada trabajo completado queda en el [history] (ADR-019).
  */
 class JobScheduler(
     private val store: JobStore,
@@ -49,7 +52,8 @@ class JobScheduler(
     private val library: MediaLibrary,
     private val scope: CoroutineScope,
     private val clock: () -> Long = System::currentTimeMillis,
-    private val limits: Limits = Limits(),
+    initialLimits: Limits = Limits(),
+    private val history: HistoryStore? = null,
 ) : JobQueue {
     data class Limits(
         val downloads: Int = 2,
@@ -63,6 +67,7 @@ class JobScheduler(
     private class Running(val isConversion: Boolean, val coroutine: Coroutine)
 
     private val mutex = Mutex()
+    private var limits = initialLimits
     private val running = mutableMapOf<String, Running>()
     private val retryAt = mutableMapOf<String, Long>()
     private val saving = ConcurrentHashMap.newKeySet<String>()
@@ -147,6 +152,15 @@ class JobScheduler(
         val job = store.get(id) ?: return
         if (!job.status.canDelete) return
         store.delete(id)
+    }
+
+    /**
+     * Cambia cuántas descargas corren a la vez (ajustes, ADR-019). Bajarlo no corta las que ya corren:
+     * solo frena las que esperan hasta que se libere lugar.
+     */
+    suspend fun setDownloadLimit(downloads: Int) {
+        mutex.withLock { limits = limits.copy(downloads = downloads.coerceAtLeast(1)) }
+        pump()
     }
 
     /**
@@ -278,6 +292,7 @@ class JobScheduler(
     private suspend fun finish(job: Job, status: JobStatus, error: MediaError? = null, output: OutputFile? = null) {
         val done = job.copy(status = status, error = error, output = output, updatedAt = clock())
         store.put(done)
+        HistoryEntry.from(done)?.let { entry -> history?.put(entry) }
         if (status != JobStatus.CANCELLED) _finished.tryEmit(done)
     }
 
