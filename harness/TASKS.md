@@ -164,9 +164,10 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
 
 Descargas y conversiones pasan a una cola persistente que corre fuera de las pantallas, en un servicio en primer plano con notificación (main.md §7.3, §7.4, §8.3, §9). Diseño en ADR-017: la cola es lógica de dominio (probada en la JVM), Room vive en `:core:data` y el servicio en `:app`. Sin WorkManager: Android no deja arrancar el servicio desde segundo plano, así que los trabajos interrumpidos se recuperan al abrir la app.
 
-- [ ] **T7.1** · P1 · Dominio: `Job` (id, pedido de descarga o conversión, título, sitio, miniatura, estado persistido, error, archivo guardado, intentos, fechas), `JobStatus` (en cola, en curso, guardando, completado, fallido, cancelado, interrumpido) y contrato `JobStore` (guardar, observar todos, observar uno, borrar).
+- [x] **T7.1** · P1 · Dominio: `Job` (id, pedido de descarga o conversión, título, sitio, miniatura, estado persistido, error, archivo guardado, intentos, fechas), `JobStatus` (en cola, en curso, guardando, completado, fallido, cancelado, interrumpido) y contrato `JobStore` (guardar, observar todos, observar uno, borrar).
   *Depende de:* —
   *Acepta:* reglas de estado probadas (qué se puede cancelar, reintentar, borrar).
+  *Hecho:* `domain/jobs/Job.kt` (`JobRequest`, `JobStatus`, `Job`, `JobStore`). 5 pruebas.
 - [ ] **T7.2** · P1 · Dominio: `JobScheduler`. Cola en orden de llegada; hasta 2 descargas y 1 conversión a la vez; corre `MediaDownloader`/`MediaConverter` y guarda con `MediaLibrary`; estado en vivo en memoria y en el `JobStore` solo los cambios (progreso como mucho cada 1 s); cancelar, reintentar a mano, borrar; reintento automático solo para errores de red (2 veces, a los 5 s y 15 s); al arrancar, lo que quedó "en curso" vuelve a la cola (hasta 3 intentos) y si no, queda "interrumpido".
   *Depende de:* T7.1
   *Acepta:* pruebas en la JVM con motores falsos y tiempo virtual (concurrencia, orden, cancelación, reintentos, recuperación).
