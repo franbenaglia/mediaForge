@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. T8.1 hecha; T8.2 hecha, falta probarla en el teléfono (T8.3). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 9 (historial y configuración): detallar las tareas en `TASKS.md` a partir de main.md §14. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -16,7 +16,7 @@ Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. T8.1 he
 - [x] 5. Extracción de audio (validada en el teléfono: MP3, M4A, Opus)
 - [x] 6. Conversor multimedia (validado en el teléfono: MP4 → MP3, remux, recodificar y cancelar, WAV/FLAC)
 - [x] 7. Gestor de trabajos (validado en el teléfono: varias a la vez, notificación con Cancelar, cerrar desde recientes, reintentar)
-- [ ] 8. Android Sharesheet (en curso)
+- [x] 8. Android Sharesheet (validado en el teléfono: Chrome, YouTube, otras apps, app cerrada o abierta, texto sin enlace, giro)
 - [ ] 9. Historial y configuración
 - [ ] 10. Funciones avanzadas
 - [ ] 11. Calidad
@@ -43,6 +43,7 @@ Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. T8.1 he
 - Audio (Etapa 5, ADR-015): `AudioOptions` (copia sin recodificar, bitrates, automático), comando `-x` con portada y metadatos (mutagen 1.47 en el APK), modo "Solo audio" en Inicio con avisos de calidad. Se guarda en `Music/MediaForge`.
 - Conversor (Etapa 6, ADR-016): `ConversionPlanner` (copia o recodifica por pista), `FfmpegConverter` (copia la entrada a una carpeta privada, `ffprobe`, FFmpeg con progreso y cancelación), `ExtractorInspector` (análisis rápido con `MediaExtractor`) y pantalla Conversor. FFmpeg usa las librerías de Python, FFmpeg y aria2c en `LD_LIBRARY_PATH`.
 - Gestor de trabajos (Etapa 7, ADR-017): `JobScheduler` (dominio; 2 descargas y 1 conversión a la vez, reintento automático por red, recuperación al abrir la app), Room en `:core:data`, `JobService` en primer plano con notificaciones, pantalla Descargas. Inicio y Conversor encolan y dejan seguir agregando trabajos.
+- Compartir enlaces (Etapa 8, ADR-018): `ACTION_SEND` de texto, `SharedText.findUrl`, `ShareInbox`; la app pasa a Inicio y analiza sola.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
@@ -54,10 +55,11 @@ Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. T8.1 he
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
 | T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
+| T8.3 manual en 24115RA8EG | OK: todos los casos | 2026-11-08 |
 | `ConverterDeviceTest` en 24115RA8EG | OK: análisis y casos de main.md §5.1, cancelación sin procesos ni archivos | 2026-11-08 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
-Último commit validado: ver `git log -1` (commit de cierre de la Etapa 7).
+Último commit validado: ver `git log -1` (commit de cierre de la Etapa 8).
 
 ## Dependencias importantes
 

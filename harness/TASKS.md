@@ -196,7 +196,7 @@ Descargas y conversiones pasan a una cola persistente que corre fuera de las pan
   *Depende de:* T7.7
   *Acepta:* prueba en el teléfono con una descarga HTTP grande.
 
-## Etapa 8 · Android Sharesheet (en curso)
+## Etapa 8 · Android Sharesheet (hecha)
 
 Recibir enlaces con "Compartir" desde el navegador, apps multimedia u otras apps; el enlace se carga en Inicio y se analiza solo (main.md §8.1). Diseño en ADR-018.
 
@@ -204,13 +204,14 @@ Recibir enlaces con "Compartir" desde el navegador, apps multimedia u otras apps
   *Depende de:* —
   *Acepta:* pruebas en la JVM (YouTube, TikTok con texto, URL sin esquema, asunto, solo texto, `file://`, localhost, vacío, texto gigante).
   *Hecho:* `domain/url/SharedText.kt` sobre `UrlValidator`. 10 pruebas.
-- [~] **T8.2** · P1 · `:app`: `MainActivity` recibe `ACTION_SEND` `text/plain` (`singleTask`; `onCreate` solo la primera vez y no desde recientes, y `onNewIntent`). `ShareIntents` lee `EXTRA_TEXT`, `ClipData` y `EXTRA_SUBJECT` sin fallar con extras rotos. `ShareInbox` (singleton) guarda el último enlace hasta que Inicio lo toma; la app pasa a Inicio, carga el enlace y lo analiza. Un trabajo en curso sigue en la cola.
+- [x] **T8.2** · P1 · `:app`: `MainActivity` recibe `ACTION_SEND` `text/plain` (`singleTask`; `onCreate` solo la primera vez y no desde recientes, y `onNewIntent`). `ShareIntents` lee `EXTRA_TEXT`, `ClipData` y `EXTRA_SUBJECT` sin fallar con extras rotos. `ShareInbox` (singleton) guarda el último enlace hasta que Inicio lo toma; la app pasa a Inicio, carga el enlace y lo analiza. Un trabajo en curso sigue en la cola.
   *Depende de:* T8.1
   *Acepta:* pruebas de `HomeViewModel` (enlace compartido antes y después de abrir Inicio, texto sin URL, con una descarga en curso); compila y pasa lint.
-  *Hecho:* `share/ShareIntents.kt`, `share/ShareInbox.kt`, `MainActivity` (`singleTask`, `onNewIntent`, contador que lleva a Inicio), filtro `SEND` en el manifest, `HomeViewModel.onShared`. 5 pruebas nuevas. `[~]` hasta T8.3.
-- [ ] **T8.3** · P1 · Prueba en el teléfono: compartir desde Chrome, desde la app de YouTube y desde otra app (por ejemplo, un mensaje o una nota con texto y enlace); con la app cerrada, abierta en otra pestaña y con una descarga en curso; un texto sin enlace muestra el motivo; girar la pantalla no vuelve a analizar.
+  *Hecho:* `share/ShareIntents.kt`, `share/ShareInbox.kt`, `MainActivity` (`singleTask`, `onNewIntent`, contador que lleva a Inicio), filtro `SEND` en el manifest, `HomeViewModel.onShared`. 5 pruebas nuevas. Validado en el teléfono (T8.3).
+- [x] **T8.3** · P1 · Prueba en el teléfono: compartir desde Chrome, desde la app de YouTube y desde otra app (por ejemplo, un mensaje o una nota con texto y enlace); con la app cerrada, abierta en otra pestaña y con una descarga en curso; un texto sin enlace muestra el motivo; girar la pantalla no vuelve a analizar.
   *Depende de:* T8.2
   *Acepta:* validación manual registrada.
+  *Hecho:* el usuario validó todos los casos en 24115RA8EG (Android 15, 2026-11-08).
 
 ## Etapas 9–12
 

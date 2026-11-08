@@ -4,6 +4,16 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-08 · Etapa 8
+
+**Hecho:** T8.1–T8.3 (ADR-018). `SharedText.findUrl`, filtro `ACTION_SEND` con `singleTask`, `ShareIntents`, `ShareInbox`; Inicio carga y analiza el enlace compartido.
+
+**Teléfono:** el usuario validó Chrome, la app de YouTube, otra app, app cerrada, abierta en otra pestaña y con una descarga en curso, texto sin enlace y giro de pantalla.
+
+**Verificación:** `./scripts/verify.sh` OK (315 pruebas).
+
+---
+
 ## 2026-11-08 · Etapa 7
 
 **Hecho:** T7.1–T7.7 (ADR-017). `Job`/`JobStore`, `JobScheduler` con cola, límites y reintentos, Room en `:core:data`, `JobService` en primer plano con notificaciones, Inicio y Conversor encolan, pantalla Descargas.
