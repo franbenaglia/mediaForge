@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 9 (historial y configuración, ADR-019): tareas T9.1–T9.10 en `TASKS.md`. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 hechas (T9.2, T9.5 y T9.6 sin probar en el teléfono; falta correr `MigrationDeviceTest`). Siguen T9.7–T9.9 (P2) y la prueba T9.10. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -51,7 +51,7 @@ Etapa 9 (historial y configuración, ADR-019): tareas T9.1–T9.10 en `TASKS.md`
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 315 pruebas (99 dominio + 77 app + 133 media + 6 data), lint sin errores, ktlint OK | 2026-11-08 |
+| `./scripts/verify.sh` | OK: 358 pruebas (115 dominio + 98 app + 133 media + 12 data), lint sin errores, ktlint OK | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
 | T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
