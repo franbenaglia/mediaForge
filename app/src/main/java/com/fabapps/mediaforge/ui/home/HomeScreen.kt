@@ -146,10 +146,9 @@ private fun HomeContent(
             label = { Text(stringResource(R.string.home_url_label)) },
             placeholder = { Text(stringResource(R.string.home_url_placeholder)) },
             singleLine = true,
-            readOnly = state.inputLocked,
             isError = error != null,
             supportingText = error?.let { { Text(stringResource(it.messageRes())) } },
-            trailingIcon = if (state.input.isNotEmpty() && !state.inputLocked) {
+            trailingIcon = if (state.input.isNotEmpty()) {
                 {
                     IconButton(onClick = onClear) {
                         Icon(painterResource(R.drawable.ic_clear), stringResource(R.string.home_clear))
@@ -162,7 +161,7 @@ private fun HomeContent(
             keyboardActions = KeyboardActions(onGo = { onAnalyze() }),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = onPaste, enabled = !state.inputLocked) {
+            OutlinedButton(onClick = onPaste) {
                 Icon(painterResource(R.drawable.ic_paste), contentDescription = null)
                 Text(stringResource(R.string.home_paste), Modifier.padding(start = 8.dp))
             }

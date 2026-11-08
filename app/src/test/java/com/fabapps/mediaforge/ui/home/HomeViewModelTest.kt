@@ -385,8 +385,6 @@ class HomeViewModelTest {
         downloader.events.send(progress)
         advanceUntilIdle()
         assertEquals(WorkState.Running(progress), state.download)
-        assertTrue(state.inputLocked)
-        assertFalse(state.canAnalyze)
         assertFalse(state.canDownload)
 
         downloader.events.send(JobState.Processing(ProcessingStep.MERGE, null))
@@ -395,21 +393,28 @@ class HomeViewModelTest {
         advanceUntilIdle()
         assertEquals(listOf(privateFile), library.saved)
         assertEquals(WorkState.Saved(privateFile.copy(location = "content://media/1")), state.download)
-        assertFalse(state.inputLocked)
     }
 
     @Test
-    fun linkCannotChangeWhileDownloading() = test {
+    fun anotherLinkCanBeQueuedWhileTheFirstDownloads() = test {
+        analyzed()
+        vm.onDownload()
+        downloader.events.send(JobState.Downloading(0.1f, 10, 100, null))
+        advanceUntilIdle()
+
+        // Otro enlace: la pantalla deja de seguir la primera descarga, que sigue en la cola.
+        vm.onInputChange("https://example.com/other")
+        assertEquals(WorkState.None, state.download)
+        assertTrue(state.canAnalyze)
+
+        downloader.events = Channel(Channel.UNLIMITED)
+        extractor.pending = CompletableDeferred()
         analyzed()
         vm.onDownload()
         advanceUntilIdle()
-        vm.onInputChange("https://example.com/other")
-        vm.onPaste("https://example.com/other")
-        vm.onClear()
-        assertEquals("https://www.youtube.com/watch?v=aqz-KE-bpKQ", state.input)
-        assertTrue(state.analysis is AnalysisState.Loaded)
-        vm.onDownload()
-        assertEquals(1, downloader.requests.size)
+        assertEquals(2, downloader.requests.size)
+        assertEquals(0, downloader.cancelled)
+        assertTrue(state.download is WorkState.Running)
     }
 
     @Test

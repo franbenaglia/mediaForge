@@ -229,6 +229,22 @@ class ConverterViewModelTest {
     }
 
     @Test
+    fun anotherFileCanBePickedWhileConverting() = test {
+        pick(video)
+        vm.onConvert()
+        converter.events.send(JobState.Processing(ProcessingStep.TRANSCODE, 0.1f))
+        advanceUntilIdle()
+
+        vm.onFilePicked("content://docs/2")
+        assertEquals(InputState.Inspecting, state.input)
+        assertEquals(WorkState.None, state.work)
+        advanceUntilIdle()
+        // La primera conversión sigue en la cola.
+        assertEquals(0, converter.cancelled)
+        assertEquals(1, store.jobs.value.size)
+    }
+
+    @Test
     fun cancelStopsTheConversion() = test {
         pick(video)
         vm.onConvert()

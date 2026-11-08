@@ -135,9 +135,8 @@ private fun ConverterContent(state: ConverterUiState, actions: ConverterActions)
             }
             is InputState.Ready -> {
                 FileCard(input.media)
-                if (!state.locked) {
-                    TextButton(onClick = actions.onPick) { Text(stringResource(R.string.converter_change_file)) }
-                }
+                // También durante una conversión: la actual sigue en la cola y se elige la siguiente.
+                TextButton(onClick = actions.onPick) { Text(stringResource(R.string.converter_change_file)) }
                 Options(state, input.media, actions)
                 Work(state, actions)
             }

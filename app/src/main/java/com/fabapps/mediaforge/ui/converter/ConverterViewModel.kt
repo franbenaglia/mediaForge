@@ -116,8 +116,9 @@ class ConverterViewModel @Inject constructor(
 
     /** Archivo elegido en el selector; `null` si se canceló. */
     fun onFilePicked(uri: String?) {
-        if (uri == null || _state.value.locked) return
+        if (uri == null) return
         inspectJob?.cancel()
+        stopTracking()
         _state.value = ConverterUiState(input = InputState.Inspecting)
         inspectJob = viewModelScope.launch {
             when (val result = inspector.inspect(uri)) {
@@ -185,9 +186,16 @@ class ConverterViewModel @Inject constructor(
 
     /** Volver a elegir otro archivo. */
     fun onClear() {
-        if (_state.value.locked) return
         inspectJob?.cancel()
+        stopTracking()
         _state.value = ConverterUiState()
+    }
+
+    /** Deja de seguir la conversión en pantalla; sigue en la cola y se ve en Descargas. */
+    private fun stopTracking() {
+        trackJob?.cancel()
+        trackJob = null
+        workId = null
     }
 
     /** Cambios de opciones: no mientras se convierte; borran el resultado anterior. */

@@ -77,7 +77,7 @@
     <string name="download_file_name">File name</string>
     <string name="download_start">Download</string>
     <string name="download_cancel">Cancel</string>
-    <string name="download_background">The download keeps going if you leave the app. You can follow it in Downloads.</string>
+    <string name="download_background">The download keeps going if you leave the app. You can paste another link to queue another download, and follow them all in Downloads.</string>
     <string name="download_saving">Saving to the gallery…</string>
     <string name="download_saved">Saved in Movies/MediaForge</string>
     <string name="download_open">Open</string>
@@ -136,7 +136,7 @@
     <string name="converter_failed">The conversion failed.</string>
     <string name="converter_interrupted">The conversion was interrupted. You can start it again.</string>
     <string name="converter_cancelled">Conversion cancelled. Temporary files were deleted.</string>
-    <string name="converter_background">The conversion keeps going if you leave the app. You can follow it in Downloads.</string>
+    <string name="converter_background">The conversion keeps going if you leave the app. You can pick another file to queue another conversion, and follow them all in Downloads.</string>
 
     <!-- Notificaciones de la cola -->
     <string name="notification_channel_progress">Downloads and conversions in progress</string>

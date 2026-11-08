@@ -51,12 +51,8 @@ data class HomeUiState(
     val fileName: String = "",
     val download: WorkState = WorkState.None,
 ) {
-    /** Mientras se descarga, el enlace no cambia (la tarjeta y la descarga son del mismo recurso). */
-    val inputLocked: Boolean get() = download.isActive
-
     val canAnalyze: Boolean
         get() = status == InputStatus.READY &&
-            !inputLocked &&
             analysis !is AnalysisState.Loading &&
             analysis !is AnalysisState.UpdatingEngine
 
@@ -132,8 +128,9 @@ class HomeViewModel @Inject constructor(
     val needsStoragePermission: Boolean get() = library.needsWritePermission()
 
     fun onInputChange(text: String) {
-        if (text == _state.value.input || _state.value.inputLocked) return
+        if (text == _state.value.input) return
         cancelAnalysis()
+        stopTracking()
         _state.update { current ->
             val status = when {
                 text.isBlank() -> InputStatus.EMPTY
@@ -147,8 +144,9 @@ class HomeViewModel @Inject constructor(
     /** Pegado desde el portapapeles: si el texto trae una URL entre otras palabras, se queda solo con ella. */
     fun onPaste(clipboardText: String?) {
         val text = clipboardText?.trim().orEmpty()
-        if (text.isEmpty() || _state.value.inputLocked) return
+        if (text.isEmpty()) return
         cancelAnalysis()
+        stopTracking()
         val found = UrlValidator.findUrl(text)
         _state.value = if (found != null) {
             HomeUiState(input = found.url, status = InputStatus.READY)
@@ -166,6 +164,7 @@ class HomeViewModel @Inject constructor(
         val url = (check as UrlCheck.Valid).url
         if (!_state.value.canAnalyze) return
 
+        stopTracking()
         _state.update { it.copy(input = url, analysis = AnalysisState.Loading, download = WorkState.None) }
         analysisJob = viewModelScope.launch {
             when (val result = extractor.extract(url)) {
@@ -209,8 +208,8 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onClear() {
-        if (_state.value.inputLocked) return
         cancelAnalysis()
+        stopTracking()
         _state.value = HomeUiState()
     }
 
@@ -291,6 +290,17 @@ class HomeViewModel @Inject constructor(
         if (!_state.value.canCancelDownload) return
         val id = downloadId ?: return
         viewModelScope.launch { queue.cancel(id) }
+    }
+
+    /**
+     * Deja de seguir en pantalla la descarga encolada; la descarga sigue en la cola y se ve en Descargas.
+     * Así se puede pegar otro enlace y encolar otra descarga sin esperar.
+     */
+    private fun stopTracking() {
+        trackJob?.cancel()
+        trackJob = null
+        downloadId = null
+        _state.update { it.copy(download = WorkState.None) }
     }
 
     /** Cancelar la corrutina termina también el proceso de yt-dlp (ADR-005). */

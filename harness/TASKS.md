@@ -183,7 +183,7 @@ Descargas y conversiones pasan a una cola persistente que corre fuera de las pan
 - [x] **T7.5** · P1 · Inicio y Conversor encolan en lugar de correr en el `viewModelScope` y siguen el trabajo por id (el progreso se sigue viendo en la pantalla). El conversor conserva el permiso de lectura de la URI (`takePersistableUriPermission`) y lo suelta al terminar el trabajo.
   *Depende de:* T7.2
   *Acepta:* pruebas de `HomeViewModel` y `ConverterViewModel` con un scheduler falso.
-  *Hecho:* `JobQueue` (dominio) implementada por `JobScheduler`; `WorkState.of` y `JobQueue.workState(id)`; estado `Interrupted`; `InputAccess` (permiso persistente, se suelta al guardar); permiso de notificaciones al encolar. Las pruebas usan el `JobScheduler` real con motores falsos y `InMemoryJobStore`.
+  *Hecho:* `JobQueue` (dominio) implementada por `JobScheduler`; `WorkState.of` y `JobQueue.workState(id)`; estado `Interrupted`; `InputAccess` (permiso persistente, se suelta al guardar); permiso de notificaciones al encolar. Mientras un trabajo corre se puede pegar otro enlace o elegir otro archivo y encolar más (pedido del usuario en la prueba de T7.7). Las pruebas usan el `JobScheduler` real con motores falsos y `InMemoryJobStore`.
 - [~] **T7.6** · P1 · Pantalla Descargas (administrador): lista de trabajos con nombre, sitio, progreso, velocidad, tamaños, estado y fase (descarga o procesamiento), error con detalle; acciones Cancelar, Reintentar, Eliminar de la lista, Abrir, Compartir y Ver detalles.
   *Depende de:* T7.2
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.

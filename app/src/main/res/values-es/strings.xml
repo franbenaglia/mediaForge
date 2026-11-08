@@ -72,7 +72,7 @@
     <string name="download_file_name">Nombre del archivo</string>
     <string name="download_start">Descargar</string>
     <string name="download_cancel">Cancelar</string>
-    <string name="download_background">La descarga sigue aunque salgas de la app. Podés seguirla en Descargas.</string>
+    <string name="download_background">La descarga sigue aunque salgas de la app. Podés pegar otro enlace para encolar otra descarga y seguirlas todas en Descargas.</string>
     <string name="download_saving">Guardando en la galería…</string>
     <string name="download_saved">Guardado en Movies/MediaForge</string>
     <string name="download_open">Abrir</string>
@@ -125,7 +125,7 @@
     <string name="converter_failed">La conversión falló.</string>
     <string name="converter_interrupted">La conversión se interrumpió. Podés empezarla de nuevo.</string>
     <string name="converter_cancelled">Conversión cancelada. Se borraron los archivos temporales.</string>
-    <string name="converter_background">La conversión sigue aunque salgas de la app. Podés seguirla en Descargas.</string>
+    <string name="converter_background">La conversión sigue aunque salgas de la app. Podés elegir otro archivo para encolar otra conversión y seguirlas todas en Descargas.</string>
 
     <!-- Notificaciones de la cola -->
     <string name="notification_channel_progress">Descargas y conversiones en curso</string>
