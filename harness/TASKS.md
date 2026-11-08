@@ -196,6 +196,20 @@ Descargas y conversiones pasan a una cola persistente que corre fuera de las pan
   *Depende de:* T7.7
   *Acepta:* prueba en el teléfono con una descarga HTTP grande.
 
-## Etapas 8–12
+## Etapa 8 · Android Sharesheet (en curso)
+
+Recibir enlaces con "Compartir" desde el navegador, apps multimedia u otras apps; el enlace se carga en Inicio y se analiza solo (main.md §8.1). Diseño en ADR-018.
+
+- [ ] **T8.1** · P1 · Dominio: `SharedText.findUrl(texto, asunto)`: busca la primera URL válida en el texto compartido (con o sin palabras alrededor, con o sin esquema), después en el asunto; corta textos enormes antes de buscar; si no hay, devuelve el motivo.
+  *Depende de:* —
+  *Acepta:* pruebas en la JVM (YouTube, TikTok con texto, URL sin esquema, asunto, solo texto, `file://`, localhost, vacío, texto gigante).
+- [ ] **T8.2** · P1 · `:app`: `MainActivity` recibe `ACTION_SEND` `text/plain` (`singleTask`; `onCreate` solo la primera vez y no desde recientes, y `onNewIntent`). `ShareIntents` lee `EXTRA_TEXT`, `ClipData` y `EXTRA_SUBJECT` sin fallar con extras rotos. `ShareInbox` (singleton) guarda el último enlace hasta que Inicio lo toma; la app pasa a Inicio, carga el enlace y lo analiza. Un trabajo en curso sigue en la cola.
+  *Depende de:* T8.1
+  *Acepta:* pruebas de `HomeViewModel` (enlace compartido antes y después de abrir Inicio, texto sin URL, con una descarga en curso); compila y pasa lint.
+- [ ] **T8.3** · P1 · Prueba en el teléfono: compartir desde Chrome, desde la app de YouTube y desde otra app (por ejemplo, un mensaje o una nota con texto y enlace); con la app cerrada, abierta en otra pestaña y con una descarga en curso; un texto sin enlace muestra el motivo; girar la pantalla no vuelve a analizar.
+  *Depende de:* T8.2
+  *Acepta:* validación manual registrada.
+
+## Etapas 9–12
 
 Ver main.md §14. Se detallan al llegar.

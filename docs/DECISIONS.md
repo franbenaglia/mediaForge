@@ -209,3 +209,22 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Cola dentro del servicio: atarla al ciclo de vida del servicio complica las pruebas y la consulta del estado desde la UI.
 - Retomar la descarga desde el `.part` al recuperar: el descargador hoy empieza con la carpeta vacía. Queda para la pausa real (T7.8).
 
+---
+
+## ADR-018 · Compartir enlaces: solo ACTION_SEND, actividad única y análisis automático
+
+**Fecha:** 2026-11-08 · **Estado:** aceptada
+
+**Contexto:** main.md §8.1 pide aceptar URLs compartidas desde navegadores y otras apps y cargarlas en el analizador. Las apps comparten texto libre ("Mirá esto https://…"), a veces con el enlace en el asunto. El texto viene de otra app: no es confiable.
+
+**Decisión:**
+- `MainActivity` declara `ACTION_SEND` con `text/plain`. Nada de `ACTION_VIEW` para http/https: la app aparecería para abrir cualquier enlace web, y sin verificación de dominio Android 12+ igual los abre en el navegador.
+- `launchMode="singleTask"`: compartir trae la ventana de MediaForge que ya existe (`onNewIntent`) en lugar de abrir otra copia dentro de la tarea de la app que comparte.
+- La URL se busca con `SharedText.findUrl` (dominio, sobre `UrlValidator`): primero en el texto, después en el asunto. El texto se corta a 16 KB antes de buscar. Nunca se registra en logs.
+- El enlace pasa por `ShareInbox` (singleton en memoria) hasta que `HomeViewModel` lo toma: así llega aunque Inicio no exista todavía. La app pasa a la pestaña Inicio y analiza sola; si no hay URL válida, muestra el motivo como al pegar.
+- Un intent se procesa una sola vez: en `onCreate` sin estado guardado y sin venir de recientes, y en cada `onNewIntent`. Girar la pantalla no repite el análisis.
+
+**Descartadas:**
+- Una actividad aparte, transparente, para recibir: agrega una pantalla sin necesidad; la app ya tiene una sola actividad.
+- Encolar la descarga directamente al compartir: el usuario tiene que elegir calidad y formato (main.md §7.2).
+

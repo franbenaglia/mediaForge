@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 8 (Android Sharesheet): detallar las tareas en `TASKS.md` a partir de main.md §14. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -16,7 +16,7 @@ Etapa 8 (Android Sharesheet): detallar las tareas en `TASKS.md` a partir de main
 - [x] 5. Extracción de audio (validada en el teléfono: MP3, M4A, Opus)
 - [x] 6. Conversor multimedia (validado en el teléfono: MP4 → MP3, remux, recodificar y cancelar, WAV/FLAC)
 - [x] 7. Gestor de trabajos (validado en el teléfono: varias a la vez, notificación con Cancelar, cerrar desde recientes, reintentar)
-- [ ] 8. Android Sharesheet
+- [ ] 8. Android Sharesheet (en curso)
 - [ ] 9. Historial y configuración
 - [ ] 10. Funciones avanzadas
 - [ ] 11. Calidad
