@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.ServiceCompat
 import com.fabapps.mediaforge.domain.jobs.Job
 import com.fabapps.mediaforge.domain.jobs.JobScheduler
@@ -39,6 +40,9 @@ class JobService : Service() {
     /** Tipos con los que está en primer plano; `null` si no lo está. */
     private var foregroundTypes: Int? = null
 
+    /** El sistema rechazó `mediaProcessing` (pasa en algunos teléfonos o al agotar sus 6 h): se usa `dataSync`. */
+    private var mediaProcessingRejected = false
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -47,7 +51,7 @@ class JobService : Service() {
         if (intent?.action == ACTION_CANCEL) {
             intent.getStringExtra(EXTRA_JOB_ID)?.let { id -> scope.launch { scheduler.cancel(id) } }
         }
-        if (observing == null) observing = scope.launch { observe() }
+        if (observing == null && foregroundTypes != null) observing = scope.launch { observe() }
         return START_NOT_STICKY
     }
 
@@ -79,12 +83,34 @@ class JobService : Service() {
     /** Primer plano con el tipo que corresponde a lo que corre; si el tipo no cambia, solo actualiza el texto. */
     private fun promote(activity: SchedulerActivity, notification: android.app.Notification) {
         val types = typesFor(activity)
-        if (types != foregroundTypes) {
-            ServiceCompat.startForeground(this, JobNotifications.PROGRESS_ID, notification, types)
-            foregroundTypes = types
-        } else {
+        if (types == foregroundTypes) {
             notifications.notify(JobNotifications.PROGRESS_ID, notification)
+            return
         }
+        if (startForeground(notification, types)) return
+        val fallback = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        if (types != fallback) {
+            mediaProcessingRejected = true
+            if (startForeground(notification, fallback)) return
+        }
+        // Sin primer plano no se puede seguir en segundo plano, pero la app no se cae: la cola sigue
+        // mientras esté visible y el servicio vuelve a arrancar con el próximo trabajo.
+        observing?.cancel()
+        observing = null
+        stop()
+    }
+
+    private fun startForeground(notification: android.app.Notification, types: Int): Boolean = try {
+        ServiceCompat.startForeground(this, JobNotifications.PROGRESS_ID, notification, types)
+        foregroundTypes = types
+        true
+    } catch (e: IllegalStateException) {
+        // InvalidForegroundServiceTypeException y ForegroundServiceStartNotAllowedException.
+        Log.w(TAG, "startForeground rechazado (tipos $types): ${e.javaClass.simpleName}")
+        false
+    } catch (e: SecurityException) {
+        Log.w(TAG, "startForeground rechazado (tipos $types): ${e.javaClass.simpleName}")
+        false
     }
 
     /** Descargas: `dataSync`. Conversiones: `mediaProcessing` desde Android 15; antes, `dataSync`. */
@@ -92,7 +118,10 @@ class JobService : Service() {
         // Antes de Android 10 no hay tipos: ServiceCompat los ignora.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return 0
         var types = 0
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && activity.runningConversions > 0) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
+            !mediaProcessingRejected &&
+            activity.runningConversions > 0
+        ) {
             types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING
         }
         if (activity.runningDownloads > 0 || activity.waiting > 0 || types == 0) {
@@ -124,6 +153,7 @@ class JobService : Service() {
         private const val ACTION_CANCEL = "com.fabapps.mediaforge.action.CANCEL_JOB"
         private const val EXTRA_JOB_ID = "jobId"
         private const val UPDATE_INTERVAL_MS = 500L
+        private const val TAG = "JobService"
 
         fun startIntent(context: Context) = Intent(context, JobService::class.java)
 
