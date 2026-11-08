@@ -140,9 +140,10 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
   *Depende de:* T6.1
   *Acepta:* pruebas con las salidas reales de `ffprobe` del teléfono.
   *Hecho:* `FfprobeParser` (ignora portadas `attached_pic`), `FfmpegCommand` (`-map 0:v:0`/`0:a:0?`, `-map_metadata 0`, `+faststart` en MP4/MOV/M4A), `FfmpegProgressParser`. 14 pruebas.
-- [ ] **T6.3** · P1 · `FfmpegConverter` implementa `MediaConverter`: copia la entrada a una carpeta privada por trabajo (con chequeo de espacio), `ffprobe`, plan, FFmpeg con progreso, cancelación y limpieza.
+- [x] **T6.3** · P1 · `FfmpegConverter` implementa `MediaConverter`: copia la entrada a una carpeta privada por trabajo (con chequeo de espacio), `ffprobe`, plan, FFmpeg con progreso, cancelación y limpieza.
   *Depende de:* T6.2
   *Acepta:* pruebas en la JVM con ffmpeg/ffprobe falsos (éxito, error, cancelación sin parciales, entrada sin pistas).
+  *Hecho:* `FfmpegConverter` + `InputSource` (`ContentInputSource` copia con cancelación por bloque), `FfmpegRuntime` desde `YoutubeDlNativeEngine`, registrado en Hilt. 8 pruebas.
 - [ ] **T6.4** · P1 · Análisis rápido de un archivo local sin copiarlo (`MediaExtractor` de Android → `LocalMedia`), para mostrar el plan antes de convertir.
   *Depende de:* T6.1
   *Acepta:* prueba instrumentada en el teléfono con archivos generados por FFmpeg.

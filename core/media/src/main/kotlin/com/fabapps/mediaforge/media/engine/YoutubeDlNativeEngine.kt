@@ -3,6 +3,8 @@ package com.fabapps.mediaforge.media.engine
 import android.content.Context
 import android.os.StatFs
 import androidx.core.content.edit
+import com.fabapps.mediaforge.media.ffmpeg.FfmpegRuntime
+import com.fabapps.mediaforge.media.ffmpeg.FfmpegRuntimeProvider
 import com.fabapps.mediaforge.media.update.YtDlpVersions
 import com.fabapps.mediaforge.media.ytdlp.YtDlpRuntime
 import com.fabapps.mediaforge.media.ytdlp.YtDlpRuntimeProvider
@@ -20,7 +22,8 @@ internal class YoutubeDlNativeEngine @Inject constructor(
     @ApplicationContext private val context: Context,
     private val versions: YtDlpVersions,
 ) : NativeEngine,
-    YtDlpRuntimeProvider {
+    YtDlpRuntimeProvider,
+    FfmpegRuntimeProvider {
 
     private val nativeDir get() = File(context.applicationInfo.nativeLibraryDir)
     private val packagesDir get() = File(context.noBackupFilesDir, "youtubedl-android/packages")
@@ -66,6 +69,16 @@ internal class YoutubeDlNativeEngine @Inject constructor(
             ),
         )
     }
+
+    /** FFmpeg y ffprobe del APK, sin Python (el conversor no usa yt-dlp, ADR-002). */
+    override fun ffmpegRuntime(): FfmpegRuntime = FfmpegRuntime(
+        ffmpeg = File(nativeDir, "libffmpeg.so"),
+        ffprobe = File(nativeDir, "libffprobe.so"),
+        environment = mapOf(
+            "LD_LIBRARY_PATH" to File(packagesDir, "ffmpeg/usr/lib").absolutePath,
+            "TMPDIR" to context.cacheDir.absolutePath,
+        ),
+    )
 
     /** Copia de yt-dlp que la librería deja al inicializar. Nunca la modifica la app. */
     fun bundledYtDlp() = File(context.noBackupFilesDir, "youtubedl-android/yt-dlp/yt-dlp")

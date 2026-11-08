@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 6: sigue T6.3 (`FfmpegConverter`).
+Etapa 6: sigue T6.4 (análisis rápido con `MediaExtractor`).
 
 ## Etapas
 

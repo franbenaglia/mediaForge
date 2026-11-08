@@ -3,6 +3,7 @@ package com.fabapps.mediaforge.media.di
 import android.content.Context
 import androidx.core.content.edit
 import com.fabapps.mediaforge.domain.engine.ExtractorEngine
+import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
@@ -10,6 +11,8 @@ import com.fabapps.mediaforge.media.engine.EngineInitializer
 import com.fabapps.mediaforge.media.engine.IoDispatcher
 import com.fabapps.mediaforge.media.engine.NativeEngine
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
+import com.fabapps.mediaforge.media.ffmpeg.ContentInputSource
+import com.fabapps.mediaforge.media.ffmpeg.FfmpegConverter
 import com.fabapps.mediaforge.media.process.ProcessRunner
 import com.fabapps.mediaforge.media.storage.MediaStoreLibrary
 import com.fabapps.mediaforge.media.update.AndroidVersionProbe
@@ -81,6 +84,24 @@ internal abstract class MediaModule {
             engine = engine,
             runtimeProvider = native,
             runner = runner,
+            workRoot = File(context.noBackupFilesDir, "mediaforge/jobs"),
+            io = io,
+        )
+
+        /** Comparte la carpeta de trabajos con las descargas; cada trabajo tiene su propio ID. */
+        @Provides
+        @Singleton
+        fun mediaConverter(
+            @ApplicationContext context: Context,
+            engine: EngineInitializer,
+            native: YoutubeDlNativeEngine,
+            runner: ProcessRunner,
+            @IoDispatcher io: CoroutineDispatcher,
+        ): MediaConverter = FfmpegConverter(
+            engine = engine,
+            runtimeProvider = native,
+            runner = runner,
+            inputs = ContentInputSource(context),
             workRoot = File(context.noBackupFilesDir, "mediaforge/jobs"),
             io = io,
         )
