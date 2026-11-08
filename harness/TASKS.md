@@ -172,10 +172,10 @@ Descargas y conversiones pasan a una cola persistente que corre fuera de las pan
   *Depende de:* T7.1
   *Acepta:* pruebas en la JVM con motores falsos y tiempo virtual (concurrencia, orden, cancelación, reintentos, recuperación).
   *Hecho:* `JobScheduler` (`live`, `activity`, `finished`; `start`, `enqueue`, `cancel`, `retry`, `delete`, `interruptAll`). 12 pruebas.
-- [~] **T7.3** · P1 · `:core:data`: Room 2.8.5 (`JobEntity`, DAO con `Flow`, migraciones exportadas), pedidos guardados como JSON versionado, `RoomJobStore`; registrado en Hilt.
+- [x] **T7.3** · P1 · `:core:data`: Room 2.8.5 (`JobEntity`, DAO con `Flow`, migraciones exportadas), pedidos guardados como JSON versionado, `RoomJobStore`; registrado en Hilt.
   *Depende de:* T7.1
   *Acepta:* pruebas del mapeo en la JVM (ida y vuelta de cada tipo de pedido y error) y prueba instrumentada del DAO en el teléfono.
-  *Hecho:* `JobEntity`/`JobDao`/`MediaForgeDatabase` (esquema en `core/data/schemas/`), `RequestJson` (DTOs propios, versión 1), `JobMapper`, `RoomJobStore`, `DataModule`. 6 pruebas en la JVM. `RoomJobStoreDeviceTest` compila; se corre en el teléfono junto con T7.7.
+  *Hecho:* `JobEntity`/`JobDao`/`MediaForgeDatabase` (esquema en `core/data/schemas/`), `RequestJson` (DTOs propios, versión 1), `JobMapper`, `RoomJobStore`, `DataModule`. 6 pruebas en la JVM. `RoomJobStoreDeviceTest` OK en el teléfono (2/2, 2026-11-08).
 - [~] **T7.4** · P1 · `:app`: `JobService` en primer plano (`dataSync`; `mediaProcessing` para conversiones en Android 15+), que arranca cuando hay trabajo y se detiene al vaciarse la cola. Notificación con progreso y botón Cancelar; aviso al terminar o fallar cada trabajo. `onTimeout` (Android 15) marca lo que corre como interrumpido. Permiso de notificaciones (Android 13+) pedido al encolar por primera vez.
   *Depende de:* T7.2, T7.3
   *Acepta:* compila y pasa lint; se valida en T7.7.
