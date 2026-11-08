@@ -56,4 +56,11 @@ class FormattersTest {
         assertEquals("240p", Formatters.quality(240, null))
         assertEquals("480p", Formatters.quality(480, 29.97))
     }
+
+    @Test
+    fun codecNames() {
+        assertEquals("H.264", Formatters.codec("h264"))
+        assertEquals("PCM", Formatters.codec("pcm_s16le"))
+        assertEquals("X-UNKNOWN", Formatters.codec("video/x-unknown"))
+    }
 }

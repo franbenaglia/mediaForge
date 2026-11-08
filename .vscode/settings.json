@@ -3,5 +3,9 @@
     // (y generaba carpetas bin/). El proyecto es Kotlin y se compila con ./gradlew.
     "java.import.gradle.enabled": false,
     "java.autobuild.enabled": false,
-    "java.configuration.updateBuildConfiguration": "disabled"
+    "java.configuration.updateBuildConfiguration": "disabled",
+    // La extensión "Gradle for Java" también arranca su propio servidor de Gradle al abrir VS Code
+    // (~900 MB). Junto con un build, la máquina se cuelga (2026-11-08).
+    "java.gradle.buildServer.enabled": "off",
+    "gradle.autoDetect": "off"
 }

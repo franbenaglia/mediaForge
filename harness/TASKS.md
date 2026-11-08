@@ -148,7 +148,7 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
   *Depende de:* T6.1
   *Acepta:* prueba instrumentada en el teléfono con archivos generados por FFmpeg.
   *Hecho:* `MediaInspector` (dominio), `ExtractorInspector` + `MimeCodecs`; `ConverterDeviceTest` (análisis y los casos de §5.1 con URIs reales, cancelación) escrita, falta correrla en el teléfono.
-- [ ] **T6.5** · P1 · Pantalla Conversor: elegir archivo (SAF), datos del archivo, destino (contenedor de video o formato de audio con bitrate, resolución opcional), qué se copia y qué se recodifica, progreso, cancelar, guardar y abrir/compartir.
+- [~] **T6.5** · P1 · Pantalla Conversor: elegir archivo (SAF), datos del archivo, destino (contenedor de video o formato de audio con bitrate, resolución opcional), qué se copia y qué se recodifica, progreso, cancelar, guardar y abrir/compartir.
   *Depende de:* T6.3, T6.4
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
 - [ ] **T6.6** · P1 · Prueba en el teléfono: MP4 → MP3 (MVP), MKV → MP4 sin recodificar, WebM → MP4, WAV → FLAC, cancelar a mitad.

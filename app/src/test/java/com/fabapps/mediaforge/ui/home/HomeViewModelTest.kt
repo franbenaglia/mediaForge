@@ -16,6 +16,7 @@ import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.SourceSite
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.UrlCheck
+import com.fabapps.mediaforge.ui.common.WorkState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -364,7 +365,7 @@ class HomeViewModelTest {
         val progress = JobState.Downloading(0.5f, 500, 1000, 100)
         downloader.events.send(progress)
         advanceUntilIdle()
-        assertEquals(DownloadState.Running(progress), state.download)
+        assertEquals(WorkState.Running(progress), state.download)
         assertTrue(state.inputLocked)
         assertFalse(state.canAnalyze)
         assertFalse(state.canDownload)
@@ -374,7 +375,7 @@ class HomeViewModelTest {
         downloader.events.close()
         advanceUntilIdle()
         assertEquals(listOf(privateFile), library.saved)
-        assertEquals(DownloadState.Saved(privateFile.copy(location = "content://media/1")), state.download)
+        assertEquals(WorkState.Saved(privateFile.copy(location = "content://media/1")), state.download)
         assertFalse(state.inputLocked)
     }
 
@@ -401,7 +402,7 @@ class HomeViewModelTest {
         vm.onCancelDownload()
         advanceUntilIdle()
         assertEquals(1, downloader.cancelled)
-        assertEquals(DownloadState.Cancelled, state.download)
+        assertEquals(WorkState.Cancelled, state.download)
         assertTrue(library.saved.isEmpty())
         assertTrue(state.canDownload)
     }
@@ -413,7 +414,7 @@ class HomeViewModelTest {
         downloader.events.send(JobState.Failed(MediaError.AccessDenied()))
         downloader.events.close()
         advanceUntilIdle()
-        assertEquals(DownloadState.Failed(MediaError.AccessDenied()), state.download)
+        assertEquals(WorkState.Failed(MediaError.AccessDenied()), state.download)
         assertTrue(state.canDownload)
 
         downloader.events = Channel(Channel.UNLIMITED)
@@ -430,7 +431,7 @@ class HomeViewModelTest {
         downloader.events.send(JobState.Completed(listOf(privateFile)))
         downloader.events.close()
         advanceUntilIdle()
-        assertEquals(DownloadState.Failed(MediaError.InsufficientStorage(1050, 10)), state.download)
+        assertEquals(WorkState.Failed(MediaError.InsufficientStorage(1050, 10)), state.download)
     }
 
     @Test
@@ -442,7 +443,7 @@ class HomeViewModelTest {
         advanceUntilIdle()
         extractor.pending = CompletableDeferred()
         vm.onAnalyze()
-        assertEquals(DownloadState.None, state.download)
+        assertEquals(WorkState.None, state.download)
     }
 
     // Audio (T5.4)

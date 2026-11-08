@@ -18,6 +18,7 @@ import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.UrlCheck
 import com.fabapps.mediaforge.domain.url.UrlValidator
+import com.fabapps.mediaforge.ui.common.WorkState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
@@ -47,7 +48,7 @@ data class HomeUiState(
     val audioSourceBytes: Long? = null,
     /** Nombre del archivo sin extensión; arranca con el título. */
     val fileName: String = "",
-    val download: DownloadState = DownloadState.None,
+    val download: WorkState = WorkState.None,
 ) {
     /** Mientras se descarga, el enlace no cambia (la tarjeta y la descarga son del mismo recurso). */
     val inputLocked: Boolean get() = download.isActive
@@ -73,7 +74,7 @@ data class HomeUiState(
 
     val audioEstimatedBytes: Long? get() = audioOption?.estimatedBytes(audioBitrate, audioSourceBytes)
 
-    val canCancelDownload: Boolean get() = download is DownloadState.Running
+    val canCancelDownload: Boolean get() = download is WorkState.Running
 
     /** Se ofrece actualizar solo cuando el error lo sugiere. */
     val canUpdateEngine: Boolean
@@ -82,27 +83,6 @@ data class HomeUiState(
 }
 
 enum class DownloadMode { VIDEO, AUDIO }
-
-sealed interface DownloadState {
-    val isActive: Boolean get() = this is Running || this is Saving
-
-    data object None : DownloadState
-
-    /** Estado del motor: pendiente, bajando o uniendo pistas. */
-    data class Running(val job: JobState) : DownloadState
-
-    /** Copiando a la galería. */
-    data object Saving : DownloadState
-
-    data class Saved(val file: OutputFile) : DownloadState
-
-    data class Failed(val error: MediaError) : DownloadState
-
-    data object Cancelled : DownloadState
-
-    /** Android 8–9: el usuario no dio permiso de escritura. */
-    data object PermissionDenied : DownloadState
-}
 
 enum class InputStatus {
     EMPTY,
@@ -182,7 +162,7 @@ class HomeViewModel @Inject constructor(
         val url = (check as UrlCheck.Valid).url
         if (!_state.value.canAnalyze) return
 
-        _state.update { it.copy(input = url, analysis = AnalysisState.Loading, download = DownloadState.None) }
+        _state.update { it.copy(input = url, analysis = AnalysisState.Loading, download = WorkState.None) }
         analysisJob = viewModelScope.launch {
             when (val result = extractor.extract(url)) {
                 is Outcome.Success -> {
@@ -237,7 +217,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onModeChange(mode: DownloadMode) {
-        if (!_state.value.download.isActive) _state.update { it.copy(mode = mode, download = DownloadState.None) }
+        if (!_state.value.download.isActive) _state.update { it.copy(mode = mode, download = WorkState.None) }
     }
 
     fun onSelectAudioFormat(index: Int) {
@@ -281,21 +261,21 @@ class HomeViewModel @Inject constructor(
             fileName = current.fileName.ifBlank { info.title },
             expectedBytes = expected,
         )
-        _state.update { it.copy(download = DownloadState.Running(JobState.Pending)) }
+        _state.update { it.copy(download = WorkState.Running(JobState.Pending)) }
         downloadJob = viewModelScope.launch {
             downloader.download(request).collect { job ->
                 when (job) {
                     is JobState.Completed -> save(job.outputs.first())
-                    is JobState.Failed -> _state.update { it.copy(download = DownloadState.Failed(job.error)) }
-                    JobState.Cancelled -> _state.update { it.copy(download = DownloadState.Cancelled) }
-                    else -> _state.update { it.copy(download = DownloadState.Running(job)) }
+                    is JobState.Failed -> _state.update { it.copy(download = WorkState.Failed(job.error)) }
+                    JobState.Cancelled -> _state.update { it.copy(download = WorkState.Cancelled) }
+                    else -> _state.update { it.copy(download = WorkState.Running(job)) }
                 }
             }
         }
     }
 
     fun onStoragePermissionDenied() {
-        _state.update { it.copy(download = DownloadState.PermissionDenied) }
+        _state.update { it.copy(download = WorkState.PermissionDenied) }
     }
 
     /**
@@ -306,17 +286,17 @@ class HomeViewModel @Inject constructor(
         if (!_state.value.canCancelDownload) return
         downloadJob?.cancel()
         downloadJob = null
-        _state.update { it.copy(download = DownloadState.Cancelled) }
+        _state.update { it.copy(download = WorkState.Cancelled) }
     }
 
     private suspend fun save(file: OutputFile) {
-        _state.update { it.copy(download = DownloadState.Saving) }
+        _state.update { it.copy(download = WorkState.Saving) }
         val result = library.save(file)
         _state.update {
             it.copy(
                 download = when (result) {
-                    is Outcome.Success -> DownloadState.Saved(result.value)
-                    is Outcome.Failure -> DownloadState.Failed(result.error)
+                    is Outcome.Success -> WorkState.Saved(result.value)
+                    is Outcome.Failure -> WorkState.Failed(result.error)
                 },
             )
         }

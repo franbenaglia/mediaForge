@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 6: sigue T6.5 (pantalla Conversor). Pendiente en el teléfono: `ConverterDeviceTest` (T6.3, T6.4, T6.6).
+Etapa 6: código completo. Pendiente en el teléfono: `ConverterDeviceTest` (T6.3, T6.4) y prueba manual de la pantalla (T6.5, T6.6).
 
 ## Etapas
 
@@ -74,5 +74,6 @@ Ninguno.
 - Un primer intento de descarga de Dailymotion falló con `Unknown` y no se volvió a reproducir (2026-11-07). Si reaparece, pedir el detalle técnico.
 - Pendientes de validar en el teléfono (FEASIBILITY §12): TikTok, tiempos de conversión en arm64 y primer arranque. (Análisis de Dailymotion y cancelación con ffmpeg hijo ya validados.)
 - Verificación de desarrolladores de Google (global en 2027): decidir cuenta y clave de firma antes de la Etapa 12.
+- La máquina se volvió a colgar (2026-11-08) con un build y las extensiones de Java de VS Code corriendo su propio Gradle (~1 GB cada uno) aunque la importación estaba desactivada. El usuario desactivó para este proyecto "Gradle for Java" y "Language Support for Java (Red Hat)". Antes de compilar, chequear `pgrep -fa GradleDaemon`.
 - La máquina se colgó durante un build (2026-11-07). Se limitó Gradle (2 workers, heap de 1,5 GB, daemon de Kotlin de 1 GB) y `verify.sh` corre en dos pasos. Pico medido después del cambio: 8,9 GB usados en total.
 - El disco de la máquina de desarrollo tiene poco espacio (~21 GB libres al 2026-11-06).

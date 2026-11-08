@@ -81,7 +81,7 @@ private fun Note(text: String) {
 }
 
 @StringRes
-private fun AudioFormat.nameRes(): Int = when (this) {
+internal fun AudioFormat.nameRes(): Int = when (this) {
     AudioFormat.MP3 -> R.string.audio_name_mp3
     AudioFormat.M4A -> R.string.audio_name_m4a
     AudioFormat.OPUS -> R.string.audio_name_opus

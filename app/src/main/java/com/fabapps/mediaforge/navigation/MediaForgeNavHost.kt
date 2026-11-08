@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.fabapps.mediaforge.ui.common.NotImplementedScreen
+import com.fabapps.mediaforge.ui.converter.ConverterScreen
 import com.fabapps.mediaforge.ui.home.HomeScreen
 
 @Composable
@@ -18,7 +19,7 @@ fun MediaForgeNavHost(navController: NavHostController, modifier: Modifier = Mod
         // Cada pantalla reemplaza su NotImplementedScreen en la etapa que la implementa.
         composable<HomeRoute> { HomeScreen() }
         composable<DownloadsRoute> { NotImplementedScreen() }
-        composable<ConverterRoute> { NotImplementedScreen() }
+        composable<ConverterRoute> { ConverterScreen() }
         composable<HistoryRoute> { NotImplementedScreen() }
         composable<SettingsRoute> { NotImplementedScreen() }
     }

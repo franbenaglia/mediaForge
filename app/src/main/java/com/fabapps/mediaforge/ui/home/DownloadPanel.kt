@@ -1,9 +1,5 @@
 package com.fabapps.mediaforge.ui.home
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +10,6 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
@@ -27,19 +22,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import com.fabapps.mediaforge.R
 import com.fabapps.mediaforge.domain.download.VideoOption
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.JobState
-import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.JobRow
+import com.fabapps.mediaforge.ui.common.SavedFile
+import com.fabapps.mediaforge.ui.common.WorkState
 import com.fabapps.mediaforge.ui.format.Formatters
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 
@@ -56,7 +50,7 @@ internal fun DownloadPanel(
     onSelectAudioFormat: (Int) -> Unit = {},
     onSelectBitrate: (Int?) -> Unit = {},
 ) {
-    val editable = !state.download.isActive && state.download !is DownloadState.Saved
+    val editable = !state.download.isActive && state.download !is WorkState.Saved
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (editable) {
             ModeSelector(state.mode, onModeChange)
@@ -81,8 +75,8 @@ internal fun DownloadPanel(
             )
         }
         when (val download = state.download) {
-            DownloadState.None -> DownloadButton(state.canDownload, onDownload)
-            is DownloadState.Running -> {
+            WorkState.None -> DownloadButton(state.canDownload, onDownload)
+            is WorkState.Running -> {
                 JobRow(fileName = state.fileName, siteName = siteName, state = download.job, actions = {
                     TextButton(onClick = onCancel, enabled = state.canCancelDownload) {
                         Text(stringResource(R.string.download_cancel))
@@ -90,12 +84,12 @@ internal fun DownloadPanel(
                 })
                 Hint(stringResource(R.string.download_keep_open))
             }
-            DownloadState.Saving -> {
+            WorkState.Saving -> {
                 Text(stringResource(R.string.download_saving), style = MaterialTheme.typography.bodyMedium)
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
-            is DownloadState.Saved -> Saved(download.file)
-            is DownloadState.Failed -> {
+            is WorkState.Saved -> SavedFile(download.file)
+            is WorkState.Failed -> {
                 Text(
                     stringResource(R.string.download_failed),
                     style = MaterialTheme.typography.bodyLarge,
@@ -104,11 +98,11 @@ internal fun DownloadPanel(
                 ErrorMessage(error = download.error, modifier = Modifier.fillMaxWidth())
                 DownloadButton(state.canDownload, onDownload, again = true)
             }
-            DownloadState.Cancelled -> {
+            WorkState.Cancelled -> {
                 Hint(stringResource(R.string.download_cancelled))
                 DownloadButton(state.canDownload, onDownload, again = true)
             }
-            DownloadState.PermissionDenied -> {
+            WorkState.PermissionDenied -> {
                 Hint(stringResource(R.string.download_permission_denied))
                 DownloadButton(state.canDownload, onDownload, again = true)
             }
@@ -171,38 +165,6 @@ private fun DownloadButton(enabled: Boolean, onClick: () -> Unit, again: Boolean
 }
 
 @Composable
-private fun Saved(file: OutputFile) {
-    val context = LocalContext.current
-    val noApp = stringResource(R.string.download_no_app)
-    Text(file.displayName, style = MaterialTheme.typography.bodyLarge)
-    Hint(
-        stringResource(
-            if (file.mimeType.startsWith("audio/")) R.string.download_saved_music else R.string.download_saved,
-        ),
-    )
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(onClick = {
-            val intent = Intent(Intent.ACTION_VIEW).setDataAndType(file.location.toUri(), file.mimeType)
-            context.launch(intent, noApp)
-        }) { Text(stringResource(R.string.download_open)) }
-        OutlinedButton(onClick = {
-            val send = Intent(Intent.ACTION_SEND)
-                .setType(file.mimeType)
-                .putExtra(Intent.EXTRA_STREAM, file.location.toUri())
-            context.launch(Intent.createChooser(send, null), noApp)
-        }) { Text(stringResource(R.string.download_share)) }
-    }
-}
-
-private fun Context.launch(intent: Intent, noAppMessage: String) {
-    try {
-        startActivity(intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
-    } catch (_: ActivityNotFoundException) {
-        Toast.makeText(this, noAppMessage, Toast.LENGTH_SHORT).show()
-    }
-}
-
-@Composable
 private fun Hint(text: String) {
     Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
@@ -239,7 +201,7 @@ private fun DownloadPanelRunningPreview() {
                 state = HomeUiState(
                     options = previewOptions,
                     fileName = "Big Buck Bunny",
-                    download = DownloadState.Running(JobState.Downloading(0.42f, 120_000_000, null, 2_100_000)),
+                    download = WorkState.Running(JobState.Downloading(0.42f, 120_000_000, null, 2_100_000)),
                 ),
                 siteName = "YouTube",
                 onSelectOption = {},

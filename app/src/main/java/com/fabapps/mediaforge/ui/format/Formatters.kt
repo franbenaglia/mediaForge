@@ -37,4 +37,24 @@ object Formatters {
         val rounded = fps?.let { kotlin.math.round(it).toInt() }
         return if (rounded != null && rounded > 30) "${height}p$rounded" else "${height}p"
     }
+
+    /** Nombre corto de un códec de FFmpeg para mostrar. Son nombres técnicos: no se traducen. */
+    fun codec(name: String): String = when (name) {
+        "h264" -> "H.264"
+        "hevc" -> "H.265"
+        "vp8" -> "VP8"
+        "vp9" -> "VP9"
+        "av1" -> "AV1"
+        "mpeg4" -> "MPEG-4"
+        "aac" -> "AAC"
+        "mp3" -> "MP3"
+        "opus" -> "Opus"
+        "vorbis" -> "Vorbis"
+        "flac" -> "FLAC"
+        "alac" -> "ALAC"
+        "ac3" -> "AC-3"
+        "eac3" -> "E-AC-3"
+        "pcm_s16le" -> "PCM"
+        else -> name.substringAfterLast('/').uppercase()
+    }
 }
