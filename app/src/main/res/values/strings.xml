@@ -107,4 +107,7 @@
     <string name="audio_name_ogg" translatable="false">OGG</string>
     <string name="audio_name_wav" translatable="false">WAV</string>
     <string name="audio_name_flac" translatable="false">FLAC</string>
+    <string name="job_status_processing_remux">Changing container</string>
+    <string name="job_status_processing_prepare">Preparing the file</string>
+    <string name="error_unsupported_conversion">This file cannot be converted to that format (for example, it has no video or no audio track).</string>
 </resources>

@@ -96,4 +96,7 @@
     <string name="audio_exceeds_note">El original tiene unos %1$d kbps: un bitrate mayor no mejora la calidad.</string>
     <string name="audio_estimated_size">Tamaño estimado: %1$s</string>
     <string name="download_saved_music">Guardado en Music/MediaForge</string>
+    <string name="job_status_processing_remux">Cambiando de contenedor</string>
+    <string name="job_status_processing_prepare">Preparando el archivo</string>
+    <string name="error_unsupported_conversion">Este archivo no se puede convertir a ese formato (por ejemplo, no tiene video o no tiene audio).</string>
 </resources>

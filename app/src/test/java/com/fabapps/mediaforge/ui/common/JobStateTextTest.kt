@@ -23,6 +23,7 @@ class JobStateTextTest {
     private val allErrors: List<MediaError> = listOf(
         MediaError.InvalidUrl(),
         MediaError.UnsupportedSite(),
+        MediaError.UnsupportedConversion(),
         MediaError.LoginRequired(),
         MediaError.AccessDenied(),
         MediaError.Network(),

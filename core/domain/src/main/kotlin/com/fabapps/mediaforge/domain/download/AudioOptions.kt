@@ -69,6 +69,20 @@ object AudioOptions {
         AudioFormat.OGG to listOf(128, 192, 256),
     )
 
+    /** Bitrates que se ofrecen para recodificar a [format]; vacío para los formatos sin pérdida (ADR-015). */
+    fun bitratesFor(format: AudioFormat): List<Int> = BITRATES[format].orEmpty()
+
+    /**
+     * "Automático": el menor bitrate de la lista que iguala o supera al original (con 8 kbps de
+     * tolerancia por redondeo). Sin dato del original, el segundo de la lista.
+     */
+    fun autoBitrate(format: AudioFormat, sourceKbps: Double?): Int? {
+        val list = bitratesFor(format)
+        if (list.isEmpty()) return null
+        if (sourceKbps == null) return list.getOrElse(1) { list.last() }
+        return list.firstOrNull { it >= sourceKbps - 8 } ?: list.last()
+    }
+
     fun from(info: MediaInfo): List<AudioOption> {
         val audioOnly = info.formats.filter { it.hasAudio && !it.hasVideo }
         // Sin pistas de audio sueltas (Dailymotion), se usa el combinado más liviano: el video se descarta.
@@ -86,17 +100,16 @@ object AudioOptions {
         val sameCodec = candidates.filter { codecMatches(format, it.audioCodec) }.maxWithOrNull(quality)
         val source = sameCodec ?: candidates.maxWithOrNull(preferredForTranscoding)
         val copies = sameCodec != null
-        val bitrates = if (copies || format.lossless) emptyList() else BITRATES.getValue(format)
+        val bitrates = if (copies) emptyList() else bitratesFor(format)
         // En un formato combinado, el bitrate informado incluye el video: el del audio no se conoce.
         val sourceKbps = source?.takeIf { !it.hasVideo }?.bitrateKbps
-        val auto = bitrates.firstOrNull { sourceKbps != null && it >= sourceKbps - 8 } ?: bitrates.lastOrNull()
         return AudioOption(
             format = format,
             sourceFormatId = source?.formatId,
             sourceKbps = sourceKbps,
             copiesWithoutReencoding = copies,
             bitrates = bitrates,
-            autoKbps = auto.takeIf { sourceKbps != null } ?: bitrates.getOrNull(1),
+            autoKbps = if (bitrates.isEmpty()) null else autoBitrate(format, sourceKbps),
             durationSeconds = duration,
         )
     }

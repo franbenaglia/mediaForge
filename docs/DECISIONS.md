@@ -169,3 +169,20 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Para recodificar se parte de Opus cuando existe (rinde más que AAC al mismo bitrate). Sin pistas de audio sueltas (Dailymotion), se usa el combinado más liviano.
 
 **Descartadas:** ofrecer `.aac` aparte; mostrar bitrates también cuando se copia.
+
+---
+
+## ADR-016 · Conversor: copia de la entrada, decisión por pista y libx264
+
+**Fecha:** 2026-11-08 · **Estado:** aceptada
+
+**Contexto:** el conversor (main.md §5) trabaja sobre archivos elegidos con el selector de Android, que entrega URIs `content://`. FFmpeg es un proceso aparte: no puede abrir esas URIs y Android no le hereda descriptores de archivo abiertos. En el teléfono, `h264_mediacodec` falla desde el binario ("Failed to create encoder"), porque necesita la máquina virtual de Android.
+
+**Decisión:**
+- La entrada se copia a `noBackupFilesDir/mediaforge/jobs/<id>/` (espacio previo: tamaño de entrada + salida estimada + 100 MB) y se borra al terminar, fallar o cancelar. Leerla sin copiar queda como mejora (T6.7).
+- `ffprobe` (JSON) describe la entrada después de copiarla; para mostrar el plan antes de convertir se usa `MediaExtractor` sobre la URI, sin copiar.
+- Cada pista se decide por separado: se copia si el contenedor de destino admite el códec y no se pidió cambiar la resolución; si no, se recodifica. Destino de audio: el video se descarta (`-vn`) y el audio se copia si ya está en el códec de salida (ADR-015).
+- Recodificación: H.264 (libx264 `veryfast`, CRF 23) + AAC 160 kbps para MP4, MKV y MOV; VP9 (`realtime`) + Opus 128 kbps para WebM.
+- Una conversión a la vez hasta la Etapa 7.
+
+**Descartadas:** MediaCodec (no se puede usar desde el binario; requeriría un pipeline propio con `MediaCodec`/`MediaMuxer`, se reevalúa si la velocidad no alcanza); pasar la entrada por un pipe (MP4 con el índice al final no se puede leer sin buscar).

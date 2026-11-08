@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 6 (conversor offline con FFmpeg, sin yt-dlp): detallar las tareas en `TASKS.md`.
+Etapa 6: sigue T6.2 (parser de `ffprobe`, comando y progreso de FFmpeg).
 
 ## Etapas
 
@@ -14,7 +14,7 @@ Etapa 6 (conversor offline con FFmpeg, sin yt-dlp): detallar las tareas en `TASK
 - [x] 3. Motor de extracción (todo validado en el teléfono)
 - [x] 4. Descarga de video (validada en el teléfono: YouTube y Dailymotion)
 - [x] 5. Extracción de audio (validada en el teléfono: MP3, M4A, Opus)
-- [ ] 6. Conversor multimedia
+- [ ] 6. Conversor multimedia (en curso)
 - [ ] 7. Gestor de trabajos
 - [ ] 8. Android Sharesheet
 - [ ] 9. Historial y configuración

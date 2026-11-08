@@ -34,6 +34,12 @@ enum class ProcessingStep {
     /** Recodifica: más lento y con posible pérdida de calidad. */
     TRANSCODE,
 
+    /** Cambia de contenedor sin recodificar. */
+    REMUX,
+
+    /** Copia el archivo elegido a la carpeta privada antes de convertir. */
+    PREPARE_INPUT,
+
     /** Escribe metadatos o portada. */
     METADATA,
 }
@@ -62,6 +68,9 @@ sealed interface MediaError {
         val availableBytes: Long?,
         override val detail: String? = null,
     ) : MediaError
+
+    /** El archivo no tiene lo que el destino necesita (por ejemplo, audio → video) o no se puede leer. */
+    data class UnsupportedConversion(override val detail: String? = null) : MediaError
 
     /** Probablemente se arregla actualizando yt-dlp. */
     data class EngineOutdated(override val detail: String? = null) : MediaError

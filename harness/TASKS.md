@@ -128,9 +128,32 @@ Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Pyth
   *Acepta:* validación manual registrada (el archivo se reproduce y muestra portada en la app de música).
   *Validada por el usuario (2026-11-08):* MP3 320 kbps con aviso de bitrate, portada y título; M4A sin recodificar; Opus. Todo se reproduce.
 
-## Etapa 6 · Conversor (resumen)
+## Etapa 6 · Conversor (en curso)
 
-`FfmpegConverter` (sin yt-dlp), selector de archivo por SAF, remux cuando el códec es compatible y transcodificación en el resto, progreso con `-progress`, MP4 → MP3 como criterio del MVP.
+Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y `libffprobe.so` del APK (ADR-002, ADR-016). Mediciones en el teléfono (2026-11-08, 20 s de 720p30): remux 0,03 s; MP3 0,15 s; libx264 `veryfast` 3,8 s y 263 MB de RAM; VP9 `realtime` 4,6 s. `h264_mediacodec` no funciona desde el binario.
+
+- [x] **T6.1** · P1 · Dominio: `LocalMedia` (pistas, códecs, duración) y `ConversionPlanner`: por pista, copiar si el contenedor de destino admite el códec, recodificar si no, descartar el video si el destino es audio; error explicado si no hay pista útil. ADR-016.
+  *Depende de:* —
+  *Acepta:* pruebas de la tabla de main.md §5.1 (MKV → MP4 remux, WebM → MP4 recodifica, MP4 → MP3, WAV → FLAC, audio → video imposible).
+  *Hecho:* `LocalMedia`, `ConversionPlanner` (copia/recodifica/descarta por pista, reducción de resolución, estimación de tamaño), `MediaError.UnsupportedConversion`, pasos `REMUX` y `PREPARE_INPUT`. 16 pruebas.
+- [ ] **T6.2** · P1 · `:core:media`: parser de `ffprobe` (JSON), comando de FFmpeg desde el plan (`-nostdin`, `-progress pipe:1`, argumentos en lista, `-map` explícito) y parser de progreso (`out_time_us` / duración).
+  *Depende de:* T6.1
+  *Acepta:* pruebas con las salidas reales de `ffprobe` del teléfono.
+- [ ] **T6.3** · P1 · `FfmpegConverter` implementa `MediaConverter`: copia la entrada a una carpeta privada por trabajo (con chequeo de espacio), `ffprobe`, plan, FFmpeg con progreso, cancelación y limpieza.
+  *Depende de:* T6.2
+  *Acepta:* pruebas en la JVM con ffmpeg/ffprobe falsos (éxito, error, cancelación sin parciales, entrada sin pistas).
+- [ ] **T6.4** · P1 · Análisis rápido de un archivo local sin copiarlo (`MediaExtractor` de Android → `LocalMedia`), para mostrar el plan antes de convertir.
+  *Depende de:* T6.1
+  *Acepta:* prueba instrumentada en el teléfono con archivos generados por FFmpeg.
+- [ ] **T6.5** · P1 · Pantalla Conversor: elegir archivo (SAF), datos del archivo, destino (contenedor de video o formato de audio con bitrate, resolución opcional), qué se copia y qué se recodifica, progreso, cancelar, guardar y abrir/compartir.
+  *Depende de:* T6.3, T6.4
+  *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T6.6** · P1 · Prueba en el teléfono: MP4 → MP3 (MVP), MKV → MP4 sin recodificar, WebM → MP4, WAV → FLAC, cancelar a mitad.
+  *Depende de:* T6.5
+  *Acepta:* validación manual registrada.
+- [ ] **T6.7** · P3 · Leer la entrada sin copiarla (descriptor de archivo como stdin + protocolo `fd:` de FFmpeg) cuando sea buscable; copia como respaldo.
+  *Depende de:* T6.3
+  *Acepta:* prueba en el teléfono con un archivo grande; sin cambio de resultado.
 
 ## Etapa 7 · Gestor de trabajos (resumen)
 

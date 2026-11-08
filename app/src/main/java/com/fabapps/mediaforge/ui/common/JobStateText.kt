@@ -17,6 +17,8 @@ fun JobState.statusRes(): Int = when (this) {
         ProcessingStep.EXTRACT_AUDIO -> R.string.job_status_processing_extract
         ProcessingStep.TRANSCODE -> R.string.job_status_processing_transcode
         ProcessingStep.METADATA -> R.string.job_status_processing_metadata
+        ProcessingStep.REMUX -> R.string.job_status_processing_remux
+        ProcessingStep.PREPARE_INPUT -> R.string.job_status_processing_prepare
     }
     is JobState.Completed -> R.string.job_status_completed
     is JobState.Failed -> R.string.job_status_failed
@@ -32,6 +34,7 @@ fun MediaError.messageRes(): Int = when (this) {
     is MediaError.AccessDenied -> R.string.error_access_denied
     is MediaError.Network -> R.string.error_network
     is MediaError.InsufficientStorage -> R.string.error_insufficient_storage
+    is MediaError.UnsupportedConversion -> R.string.error_unsupported_conversion
     is MediaError.EngineOutdated -> R.string.error_engine_outdated
     is MediaError.Unknown -> R.string.error_unknown
 }
