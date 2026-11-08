@@ -213,7 +213,7 @@ Recibir enlaces con "Compartir" desde el navegador, apps multimedia u otras apps
   *Acepta:* validación manual registrada.
   *Hecho:* el usuario validó todos los casos en 24115RA8EG (Android 15, 2026-11-08).
 
-## Etapa 9 · Historial y configuración (en curso)
+## Etapa 9 · Historial y configuración (hecha)
 
 Historial persistente de descargas y conversiones, ajustes con DataStore y administración de los archivos guardados (main.md §9, §8.2, §10, §15 punto 16). Diseño en ADR-019.
 
@@ -241,18 +241,18 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.2
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `SettingsViewModel` (7 pruebas) y `SettingsScreen`; `MainActivity` aplica tema y colores; El idioma sigue al del teléfono (inglés por defecto, español si el teléfono está en español): el ajuste de idioma por app del sistema no guardaba la elección en el teléfono de prueba y se quitó el botón. "Solo Wi‑Fi" y la carpeta de destino no se muestran hasta T9.7 y T9.8. Se borró `NotImplementedScreen`: ya no queda ninguna sección sin hacer.
-- [~] **T9.7** · P2 · Política de conexión "Solo Wi‑Fi": con datos móviles las descargas nuevas esperan ("Esperando Wi‑Fi") y arrancan solas al volver el Wi‑Fi; las que ya corren siguen; las conversiones no dependen de la red.
+- [x] **T9.7** · P2 · Política de conexión "Solo Wi‑Fi": con datos móviles las descargas nuevas esperan ("Esperando Wi‑Fi") y arrancan solas al volver el Wi‑Fi; las que ya corren siguen; las conversiones no dependen de la red.
   *Depende de:* T9.3
   *Acepta:* pruebas de `JobScheduler` con una red falsa; `[~]` hasta probarlo en el teléfono.
-  *Hecho:* `JobScheduler.setDownloadsAllowed` y `downloadsAllowed` (en `JobQueue`), `SchedulerActivity.waitingForNetwork`; `UnmeteredNetwork` (red por defecto con internet y sin cobro por datos, solo se escucha con el ajuste activo); `QueueSettings`; notificación "Esperando Wi‑Fi" (el servicio sigue vivo mientras espera); estado en Descargas, aviso en Inicio, interruptor en Ajustes. Permiso `ACCESS_NETWORK_STATE`. 4 pruebas.
-- [~] **T9.8** · P2 · Carpeta de destino elegida con el selector de carpetas del sistema (permiso persistente); si se pierde el permiso, vuelve a la galería y avisa. La galería sigue siendo el predeterminado.
+  *Hecho:* `JobScheduler.setDownloadsAllowed` y `downloadsAllowed` (en `JobQueue`), `SchedulerActivity.waitingForNetwork`; `UnmeteredNetwork` (red por defecto con internet y sin cobro por datos, solo se escucha con el ajuste activo); `QueueSettings`; notificación "Esperando Wi‑Fi" (el servicio sigue vivo mientras espera); estado en Descargas, aviso en Inicio, interruptor en Ajustes. Permiso `ACCESS_NETWORK_STATE`. 4 pruebas. Validado en el teléfono (2026-11-08).
+- [x] **T9.8** · P2 · Carpeta de destino elegida con el selector de carpetas del sistema (permiso persistente); si se pierde el permiso, vuelve a la galería y avisa. La galería sigue siendo el predeterminado.
   *Depende de:* T9.6
   *Acepta:* prueba en el teléfono (guardar en una carpeta elegida y abrir el archivo).
-  *Hecho:* `FolderLibrary` (dominio) y `DocumentTreeLibrary` (`:core:media`, crea el documento con nombre único y lee el que dejó el proveedor); `RoutingLibrary` elige carpeta o galería (`@GalleryLibrary`), y si la carpeta no sirve vuelve a la galería, borra el ajuste, suelta el permiso y avisa con una notificación; `DestinationFolders` (permiso persistente); sección "Guardar en" en Ajustes. 6 pruebas.
-- [~] **T9.9** · P2 · Archivos temporales: tamaño de las carpetas privadas de trabajos y botón para limpiar las que no pertenecen a un trabajo activo.
+  *Hecho:* `FolderLibrary` (dominio) y `DocumentTreeLibrary` (`:core:media`, crea el documento con nombre único y lee el que dejó el proveedor); `RoutingLibrary` elige carpeta o galería (`@GalleryLibrary`), y si la carpeta no sirve vuelve a la galería, borra el ajuste, suelta el permiso y avisa con una notificación; `DestinationFolders` (permiso persistente); sección "Guardar en" en Ajustes. 6 pruebas. Validado en el teléfono: guardar en una carpeta, abrir desde Historial y volver a la galería (2026-11-08).
+- [x] **T9.9** · P2 · Archivos temporales: tamaño de las carpetas privadas de trabajos y botón para limpiar las que no pertenecen a un trabajo activo.
   *Depende de:* T9.6
   *Acepta:* pruebas de la regla de qué se puede borrar.
-  *Hecho:* `TempFolders.removable` (dominio, 3 pruebas); `JobScheduler.withJobsFrozen` (borra sin que arranque un trabajo a mitad, 1 prueba); `JobFoldersTempStorage` (`noBackupFilesDir/mediaforge/jobs`); sección "Archivos temporales" en Ajustes con tamaño, Limpiar y lo liberado (1 prueba). La caché de yt-dlp y el `TMPDIR` quedan para el sistema.
+  *Hecho:* `TempFolders.removable` (dominio, 3 pruebas); `JobScheduler.withJobsFrozen` (borra sin que arranque un trabajo a mitad, 1 prueba); `JobFoldersTempStorage` (`noBackupFilesDir/mediaforge/jobs`); sección "Archivos temporales" en Ajustes con tamaño, Limpiar y lo liberado (1 prueba). La caché de yt-dlp y el `TMPDIR` quedan para el sistema. Validado en el teléfono (2026-11-08).
 - [x] **T9.10** · P1 · Prueba en el teléfono: el historial sobrevive a cerrar la app y a actualizarla (migración), búsqueda y filtros, borrar un archivo, descargar de nuevo; los ajustes se aplican y se conservan.
   *Depende de:* T9.5, T9.6
   *Acepta:* validación manual registrada.

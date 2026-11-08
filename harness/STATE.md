@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 y T9.10 hechas y validadas en el teléfono. T9.7 (solo Wi‑Fi), T9.8 (carpeta de destino) y T9.9 (temporales) hechas, falta probarlas en el teléfono. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 9 cerrada y validada en el teléfono. Sigue la Etapa 10 (funciones avanzadas). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -17,7 +17,7 @@ Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 y T9.10 hechas y vali
 - [x] 6. Conversor multimedia (validado en el teléfono: MP4 → MP3, remux, recodificar y cancelar, WAV/FLAC)
 - [x] 7. Gestor de trabajos (validado en el teléfono: varias a la vez, notificación con Cancelar, cerrar desde recientes, reintentar)
 - [x] 8. Android Sharesheet (validado en el teléfono: Chrome, YouTube, otras apps, app cerrada o abierta, texto sin enlace, giro)
-- [ ] 9. Historial y configuración (en curso)
+- [x] 9. Historial y configuración (validado en el teléfono: historial, ajustes, solo Wi‑Fi, carpeta de destino, temporales)
 - [ ] 10. Funciones avanzadas
 - [ ] 11. Calidad
 - [ ] 12. Distribución
@@ -43,6 +43,7 @@ Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 y T9.10 hechas y vali
 - Audio (Etapa 5, ADR-015): `AudioOptions` (copia sin recodificar, bitrates, automático), comando `-x` con portada y metadatos (mutagen 1.47 en el APK), modo "Solo audio" en Inicio con avisos de calidad. Se guarda en `Music/MediaForge`.
 - Conversor (Etapa 6, ADR-016): `ConversionPlanner` (copia o recodifica por pista), `FfmpegConverter` (copia la entrada a una carpeta privada, `ffprobe`, FFmpeg con progreso y cancelación), `ExtractorInspector` (análisis rápido con `MediaExtractor`) y pantalla Conversor. FFmpeg usa las librerías de Python, FFmpeg y aria2c en `LD_LIBRARY_PATH`.
 - Gestor de trabajos (Etapa 7, ADR-017): `JobScheduler` (dominio; 2 descargas y 1 conversión a la vez, reintento automático por red, recuperación al abrir la app), Room en `:core:data`, `JobService` en primer plano con notificaciones, pantalla Descargas. Inicio y Conversor encolan y dejan seguir agregando trabajos.
+- Historial y ajustes (Etapa 9, ADR-019): tabla `history` (Room v2), DataStore, pantallas Historial y Ajustes, solo Wi‑Fi, carpeta de destino con el selector del sistema, limpieza de temporales. El idioma sigue al del teléfono.
 - Compartir enlaces (Etapa 8, ADR-018): `ACTION_SEND` de texto, `SharedText.findUrl`, `ShareInbox`; la app pasa a Inicio y analiza sola.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
@@ -51,16 +52,17 @@ Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 y T9.10 hechas y vali
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 358 pruebas (115 dominio + 98 app + 133 media + 12 data), lint sin errores, ktlint OK | 2026-11-08 |
+| `./scripts/verify.sh` | OK: 372 pruebas (120 dominio + 107 app + 133 media + 12 data), lint sin errores, ktlint OK | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
 | T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
 | T8.3 manual en 24115RA8EG | OK: todos los casos | 2026-11-08 |
 | T9.10 manual en 24115RA8EG | OK (idioma por app del sistema no funciona: se quitó) | 2026-11-08 |
+| T9.7–T9.9 manual en 24115RA8EG | OK: solo Wi‑Fi, carpeta de destino, temporales | 2026-11-08 |
 | `ConverterDeviceTest` en 24115RA8EG | OK: análisis y casos de main.md §5.1, cancelación sin procesos ni archivos | 2026-11-08 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
-Último commit validado: ver `git log -1` (commit de cierre de la Etapa 8).
+Último commit validado: ver `git log -1` (commit de cierre de la Etapa 9).
 
 ## Dependencias importantes
 

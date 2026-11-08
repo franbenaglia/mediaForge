@@ -4,6 +4,16 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-08 · Etapa 9
+
+**Hecho:** T9.1–T9.10 (ADR-019). Historial en Room (v2, migración automática), ajustes con DataStore, pantallas Historial y Ajustes, Inicio con los predeterminados, límite de descargas en vivo, solo Wi‑Fi, carpeta de destino (SAF) con vuelta a la galería, limpieza de temporales.
+
+**Teléfono:** el usuario validó todo en 24115RA8EG. El ajuste de idioma por app del sistema no guardaba la elección: se quitó y el idioma sigue al del teléfono.
+
+**Verificación:** `./scripts/verify.sh` OK (372 pruebas).
+
+---
+
 ## 2026-11-08 · Etapa 8
 
 **Hecho:** T8.1–T8.3 (ADR-018). `SharedText.findUrl`, filtro `ACTION_SEND` con `singleTask`, `ShareIntents`, `ShareInbox`; Inicio carga y analiza el enlace compartido.
