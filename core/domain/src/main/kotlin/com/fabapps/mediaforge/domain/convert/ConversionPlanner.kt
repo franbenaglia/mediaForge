@@ -53,17 +53,27 @@ object ConversionPlanner {
     const val VIDEO_AUDIO_KBPS = 160
     const val WEBM_AUDIO_KBPS = 128
 
-    fun plan(media: LocalMedia, target: ConversionTarget): Outcome<ConversionPlan> = when (target) {
-        is ConversionTarget.Video -> planVideo(media, target)
-        is ConversionTarget.Audio -> planAudio(media, target)
+    /** Con [clip], el fragmento tiene que caber en el archivo; con corte exacto el video se recodifica. */
+    fun plan(media: LocalMedia, target: ConversionTarget, clip: Clip? = null): Outcome<ConversionPlan> {
+        clip?.problem(media.durationSeconds)?.let { problem ->
+            return Outcome.Failure(MediaError.UnsupportedConversion("clip: $problem"))
+        }
+        return when (target) {
+            is ConversionTarget.Video -> planVideo(media, target, forceEncode = clip?.exact == true)
+            is ConversionTarget.Audio -> planAudio(media, target)
+        }
     }
 
-    private fun planVideo(media: LocalMedia, target: ConversionTarget.Video): Outcome<ConversionPlan> {
+    private fun planVideo(
+        media: LocalMedia,
+        target: ConversionTarget.Video,
+        forceEncode: Boolean,
+    ): Outcome<ConversionPlan> {
         val video = media.video ?: return Outcome.Failure(MediaError.UnsupportedConversion("no video track"))
         val container = target.container
         val scale = target.maxHeight?.takeIf { max -> video.height != null && video.height > max }
         val webm = container == VideoContainer.WEBM
-        val videoPlan = if (scale == null && accepts(videoCodecs, container, video.codec)) {
+        val videoPlan = if (!forceEncode && scale == null && accepts(videoCodecs, container, video.codec)) {
             StreamPlan.Copy
         } else {
             StreamPlan.Encode(if (webm) "vp9" else "h264")
@@ -102,10 +112,18 @@ object ConversionPlanner {
 
     /**
      * Tamaño de salida, para chequear el espacio. Copia: el de la entrada. Audio recodificado:
-     * bitrate × duración (WAV: PCM). Video recodificado: el de la entrada, como cota razonable.
+     * bitrate × duración (WAV: PCM). Video recodificado: el de la entrada, como cota razonable. Con [clip],
+     * la parte proporcional.
      */
-    fun estimateBytes(media: LocalMedia, plan: ConversionPlan): Long? {
-        val duration = media.durationSeconds
+    fun estimateBytes(media: LocalMedia, plan: ConversionPlan, clip: Clip? = null): Long? {
+        val full = media.durationSeconds
+        val duration = clip?.lengthSeconds(full) ?: full
+        val fraction = if (clip != null && full != null && full > 0 && duration != null) {
+            (duration / full).coerceIn(0.0, 1.0)
+        } else {
+            1.0
+        }
+        val wholeFile = media.sizeBytes?.let { (it * fraction).toLong() }
         if (plan.video == StreamPlan.Drop) {
             val audio = plan.audio
             return when {
@@ -115,10 +133,10 @@ object ConversionPlanner {
                 }
                 audio is StreamPlan.Encode && audio.bitrateKbps != null ->
                     duration?.let { (audio.bitrateKbps * 1000 / 8 * it).toLong() }
-                else -> media.sizeBytes
+                else -> wholeFile
             }
         }
-        return media.sizeBytes
+        return wholeFile
     }
 
     private val LOSSLESS = setOf("pcm_s16le", "flac")

@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.data.jobs
 
+import com.fabapps.mediaforge.domain.convert.Clip
 import com.fabapps.mediaforge.domain.jobs.Job
 import com.fabapps.mediaforge.domain.jobs.JobRequest
 import com.fabapps.mediaforge.domain.jobs.JobStatus
@@ -76,6 +77,35 @@ class JobMapperTest {
                 ),
             ),
         )
+        roundTrip(
+            job(
+                JobRequest.Conversion(
+                    ConversionRequest(
+                        "e",
+                        "content://doc/3",
+                        ConversionTarget.Video(VideoContainer.MP4),
+                        "e",
+                        Clip(1.5, 20.0, exact = true),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `conversions saved before the clip existed still load`() {
+        val row = JobMapper.toEntity(
+            job(
+                JobRequest.Conversion(
+                    ConversionRequest("c", "content://doc/1", ConversionTarget.Audio(AudioFormat.MP3), "c"),
+                ),
+            ),
+        )
+        val old = """{"type":"conversion","jobId":"c","input":"content://doc/1",""" +
+            """"target":{"type":"audio","format":"MP3"},"fileName":"c"}"""
+        val request = (JobMapper.toDomain(row.copy(requestJson = old))?.request as JobRequest.Conversion).request
+        assertNull(request.clip)
+        assertEquals(ConversionTarget.Audio(AudioFormat.MP3), request.target)
     }
 
     @Test

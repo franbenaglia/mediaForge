@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.media.ffmpeg
 
+import com.fabapps.mediaforge.domain.convert.Clip
 import com.fabapps.mediaforge.domain.convert.ConversionPlan
 import com.fabapps.mediaforge.domain.convert.ConversionPlanner
 import com.fabapps.mediaforge.domain.convert.LocalMedia
@@ -74,14 +75,16 @@ class FfmpegConverter(
                 is Outcome.Success -> probed.value
                 is Outcome.Failure -> return@flow emit(failed(probed.error))
             }
-            val plan = when (val planned = ConversionPlanner.plan(media, request.target)) {
+            val plan = when (val planned = ConversionPlanner.plan(media, request.target, request.clip)) {
                 is Outcome.Success -> planned.value
                 is Outcome.Failure -> return@flow emit(failed(planned.error))
             }
-            spaceError(ConversionPlanner.estimateBytes(media, plan) ?: 0)?.let { return@flow emit(failed(it)) }
+            spaceError(ConversionPlanner.estimateBytes(media, plan, request.clip) ?: 0)?.let {
+                return@flow emit(failed(it))
+            }
 
             val output = File(workDir, "$OUTPUT.${plan.extension}")
-            val ok = runFfmpeg(runtime, input, output, plan, media)
+            val ok = runFfmpeg(runtime, input, output, plan, media, request.clip)
             if (!ok) return@flow
             input.delete()
             keep = true
@@ -129,13 +132,15 @@ class FfmpegConverter(
         output: File,
         plan: ConversionPlan,
         media: LocalMedia,
+        clip: Clip?,
     ): Boolean {
         val step = stepFor(plan)
-        val progress = FfmpegProgressParser(media.durationSeconds)
+        // El progreso de FFmpeg cuenta desde el inicio del fragmento.
+        val progress = FfmpegProgressParser(clip?.lengthSeconds(media.durationSeconds) ?: media.durationSeconds)
         val stderr = ArrayDeque<String>()
         var code: Int? = null
         emit(JobState.Processing(step, 0f))
-        runner.run(FfmpegCommand.convert(runtime, input, output, plan), runtime.environment).collect { event ->
+        runner.run(FfmpegCommand.convert(runtime, input, output, plan, clip), runtime.environment).collect { event ->
             when (event) {
                 is ProcessEvent.Stdout -> progress.feed(event.line)?.let { emit(JobState.Processing(step, it)) }
                 is ProcessEvent.Stderr -> {

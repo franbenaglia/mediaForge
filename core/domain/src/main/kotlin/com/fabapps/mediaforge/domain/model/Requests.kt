@@ -1,5 +1,7 @@
 package com.fabapps.mediaforge.domain.model
 
+import com.fabapps.mediaforge.domain.convert.Clip
+
 /** Qué quiere obtener el usuario de un recurso remoto. */
 sealed interface DownloadSelection {
     /** Video con audio. `formatIds` vacío significa "mejor calidad disponible". */
@@ -35,6 +37,8 @@ data class ConversionRequest(
     val input: String,
     val target: ConversionTarget,
     val fileName: String,
+    /** Solo un fragmento de la entrada; nulo = el archivo entero (ADR-020). */
+    val clip: Clip? = null,
 )
 
 sealed interface ConversionTarget {

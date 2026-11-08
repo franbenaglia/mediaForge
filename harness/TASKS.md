@@ -258,6 +258,36 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Acepta:* validación manual registrada.
   *Hecho:* el usuario validó en 24115RA8EG (2026-11-08): migración con los trabajos anteriores, predeterminados, límite de descargas, tema, motor, historial (búsqueda, filtros, descargar de nuevo, borrar archivo), quitar completados, todo se conserva al reabrir. El ajuste de idioma por app no funcionaba en el teléfono y se quitó (ver ADR-019).
 
-## Etapas 10–12
+## Etapa 10 · Funciones avanzadas (en curso)
+
+Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md §5.2); subtítulos y listas de reproducción públicas en las descargas (main.md §2.3, §14). Diseño en ADR-020 (conversor) y ADR-021 (subtítulos y listas). La actualización del extractor ya está hecha (T3.8–T3.9).
+
+- [x] **T10.1** · P1 · Dominio y FFmpeg del recorte: `Clip` (inicio, fin opcional, corte exacto), lectura y formato de tiempos (`83`, `1:23`, `1:02:03`, `1:23.5`), validación contra la duración, plan (con corte exacto el video se recodifica; sin él, se copia y el corte cae en un fotograma clave), comando (`-ss` antes de `-i`, `-t`), progreso sobre la duración del fragmento, tamaño estimado proporcional, pedido guardado con el recorte.
+  *Depende de:* —
+  *Acepta:* pruebas en la JVM (tiempos, validación, plan, comando, JSON viejo sin recorte).
+  *Hecho:* `convert/Clip.kt` (`Clip`, `ClipProblem`, `TimeCodes`), `ConversionPlanner.plan(…, clip)` y `estimateBytes(…, clip)`, `FfmpegCommand.convert(…, clip)` con `-avoid_negative_ts make_zero`, `FfmpegConverter` (progreso sobre el fragmento), `RequestJson` (`clip` opcional, misma versión). 13 pruebas.
+- [ ] **T10.2** · P1 · Recorte en la pantalla Conversor: inicio y fin, "Corte exacto" con su explicación, duración del fragmento, errores de rango; sirve también para extraer un fragmento de audio.
+  *Depende de:* T10.1
+  *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T10.3** · P1 · Extracción de un fotograma: destino "Imagen" (JPG o PNG) en un instante del video, con la resolución original; se guarda en `Pictures/MediaForge` (o en la carpeta elegida); historial como conversión.
+  *Depende de:* T10.2
+  *Acepta:* pruebas del plan, del comando y del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T10.4** · P1 · Conversión masiva: elegir varios archivos (hasta 50), un mismo destino para todos, un trabajo por archivo con su nombre; los que no son compatibles (audio → video, imagen de un audio) se informan y no se encolan. El recorte no aplica a varios archivos.
+  *Depende de:* T10.3
+  *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T10.5** · P2 · Compresión de video: calidad "Original (copia si se puede)", "Alta", "Media" o "Archivo chico" (recodifica con otro CRF), junto con la resolución.
+  *Depende de:* T10.2
+  *Acepta:* pruebas del plan, del comando y del ViewModel.
+- [ ] **T10.6** · P1 · Subtítulos: el análisis lista los idiomas disponibles (manuales y automáticos del idioma original); en video se puede elegir uno y se incrusta en el archivo (MP4, MKV o WebM). Un subtítulo que no se puede bajar no hace fallar el video (se avisa).
+  *Depende de:* —
+  *Acepta:* pruebas del parser, del comando y de `HomeViewModel`; `[~]` hasta probarlo en el teléfono.
+- [ ] **T10.7** · P1 · Listas de reproducción públicas: el análisis reconoce una lista (sin bajar cada video), muestra sus elementos (título, duración) para elegir; un mismo modo y calidad para todos; un trabajo por elemento. Hasta 200 elementos; las listas privadas o que piden iniciar sesión dan el error habitual.
+  *Depende de:* —
+  *Acepta:* pruebas del parser, del comando y del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T10.8** · P1 · Prueba en el teléfono: recorte de video (rápido y exacto) y de audio, fotograma JPG y PNG, conversión de varios archivos, compresión, video con subtítulos, lista de reproducción de YouTube.
+  *Depende de:* T10.2–T10.7
+  *Acepta:* validación manual registrada.
+
+## Etapas 11–12
 
 Ver main.md §14. Se detallan al llegar.

@@ -1,8 +1,10 @@
 package com.fabapps.mediaforge.media.ffmpeg
 
+import com.fabapps.mediaforge.domain.convert.Clip
 import com.fabapps.mediaforge.domain.convert.ConversionPlan
 import com.fabapps.mediaforge.domain.convert.StreamPlan
 import java.io.File
+import java.util.Locale
 
 /** Binarios de FFmpeg del APK y su entorno. */
 data class FfmpegRuntime(val ffmpeg: File, val ffprobe: File, val environment: Map<String, String>)
@@ -24,8 +26,17 @@ object FfmpegCommand {
      * Conversión según [plan]. Entrada y salida son rutas absolutas dentro de la carpeta del trabajo (nunca
      * empiezan con `-`). `-map` explícito: solo la primera pista de video y la primera de audio, sin
      * subtítulos ni pistas de datos que el contenedor de destino podría rechazar.
+     *
+     * Con [clip]: `-ss` antes de `-i` (busca sin decodificar todo lo anterior; al copiar, arranca en el
+     * fotograma clave previo) y `-t` con la duración del fragmento (ADR-020).
      */
-    fun convert(runtime: FfmpegRuntime, input: File, output: File, plan: ConversionPlan): List<String> {
+    fun convert(
+        runtime: FfmpegRuntime,
+        input: File,
+        output: File,
+        plan: ConversionPlan,
+        clip: Clip? = null,
+    ): List<String> {
         val args = mutableListOf(
             runtime.ffmpeg.absolutePath,
             "-nostdin",
@@ -36,9 +47,10 @@ object FfmpegCommand {
             "-progress",
             "pipe:1",
             "-y",
-            "-i",
-            input.absolutePath,
         )
+        if (clip != null && clip.startSeconds > 0) args += listOf("-ss", seconds(clip.startSeconds))
+        args += listOf("-i", input.absolutePath)
+        clip?.endSeconds?.let { end -> args += listOf("-t", seconds(end - clip.startSeconds)) }
         args += when (plan.video) {
             StreamPlan.Drop -> listOf("-vn")
             else -> listOf("-map", "0:v:0")
@@ -47,6 +59,8 @@ object FfmpegCommand {
         args += videoArgs(plan)
         args += audioArgs(plan.audio)
         args += listOf("-map_metadata", "0")
+        // Al copiar un fragmento, los tiempos pueden quedar negativos y algunos reproductores lo rechazan.
+        if (clip != null) args += listOf("-avoid_negative_ts", "make_zero")
         if (plan.extension == "mp4" || plan.extension == "mov" || plan.extension == "m4a") {
             // El índice al principio: el archivo se puede empezar a reproducir sin leerlo entero.
             args += listOf("-movflags", "+faststart")
@@ -54,6 +68,9 @@ object FfmpegCommand {
         args += output.absolutePath
         return args
     }
+
+    /** Segundos con milésimas y punto decimal, sea cual sea el idioma del teléfono. */
+    internal fun seconds(value: Double): String = String.format(Locale.ROOT, "%.3f", value)
 
     private fun videoArgs(plan: ConversionPlan): List<String> = when (val video = plan.video) {
         StreamPlan.Drop -> emptyList()

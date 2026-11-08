@@ -248,3 +248,24 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Historial como filtro de la tabla `jobs`: quitar un trabajo de la lista borraría su historial, y la lista de trabajos se llenaría de entradas viejas.
 - Proto DataStore: los ajustes son pocos valores sueltos; Preferences alcanza y no necesita esquema.
 
+
+---
+
+## ADR-020 · Conversor avanzado: recorte, fotogramas, varios archivos y compresión
+
+**Fecha:** 2026-11-08 · **Estado:** aceptada
+
+**Contexto:** main.md §5.2 pide extraer fragmentos de audio, recortar video, extraer fotogramas, convertir varios archivos y comprimir video. Sin recodificar, FFmpeg solo puede cortar el video en un fotograma clave (en un video de YouTube suelen estar cada 2 a 5 s). Recodificar da el corte exacto pero tarda mucho más en el teléfono.
+
+**Decisión:**
+- El recorte va en el pedido (`ConversionRequest.clip`: inicio, fin opcional y "corte exacto"). El comando usa `-ss` antes de `-i` (busca sin leer todo el archivo) y `-t` con la duración del fragmento.
+- Sin "corte exacto", el video se copia si se puede y el corte cae en el fotograma clave anterior al inicio: el fragmento puede empezar unos segundos antes. La pantalla lo explica; no se finge un corte exacto. Con "corte exacto", el video siempre se recodifica. El audio se corta bien aunque se copie.
+- Los tiempos se escriben como `83`, `1:23`, `1:02:03` o con décimas (`1:23.5`). El fin no puede pasar la duración conocida y el fragmento dura al menos 0,5 s.
+- Un fotograma es un destino más (`ConversionTarget.Image`: instante y JPG o PNG), con la resolución original. Se guarda en `Pictures/MediaForge`, o en la carpeta elegida.
+- Varios archivos: un trabajo por archivo, todos con el mismo destino, hasta 50. Los incompatibles se informan y no se encolan. El recorte y el fotograma no se ofrecen para varios archivos, porque los instantes dependen de cada uno.
+- Compresión: niveles de calidad que fuerzan la recodificación con otro CRF (H.264: 23, 26, 30; VP9: 32, 36, 40). "Original" copia cuando se puede.
+- Los campos nuevos del pedido son opcionales en el JSON guardado: los trabajos guardados antes se siguen leyendo con la misma versión.
+
+**Descartadas:**
+- Cortar sin recodificar solo el tramo inicial (recodificar hasta el siguiente fotograma clave y copiar el resto): es frágil con FFmpeg desde la línea de comandos (parámetros del codificador que tienen que coincidir) y no vale el riesgo.
+- Varios fotogramas por trabajo (uno cada N segundos): un trabajo produce un archivo (ADR-017); se puede agregar más adelante con un ZIP o una carpeta.

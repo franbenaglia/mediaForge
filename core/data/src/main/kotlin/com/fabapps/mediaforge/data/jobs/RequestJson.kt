@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.data.jobs
 
+import com.fabapps.mediaforge.domain.convert.Clip
 import com.fabapps.mediaforge.domain.jobs.JobRequest
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionRequest
@@ -52,7 +53,12 @@ object RequestJson {
         val input: String,
         val target: TargetDto,
         val fileName: String,
+        /** Desde la Etapa 10; falta en los pedidos guardados antes. */
+        val clip: ClipDto? = null,
     ) : RequestDto
+
+    @Serializable
+    private data class ClipDto(val startSeconds: Double, val endSeconds: Double? = null, val exact: Boolean = false)
 
     @Serializable
     private sealed interface SelectionDto
@@ -88,7 +94,17 @@ object RequestJson {
         is JobRequest.Download -> with(request) {
             DownloadDto(jobId, sourceUrl, selection.toDto(), fileName, embedMetadata, expectedBytes)
         }
-        is JobRequest.Conversion -> with(request) { ConversionDto(jobId, input, target.toDto(), fileName) }
+        is JobRequest.Conversion -> with(request) {
+            ConversionDto(
+                jobId,
+                input,
+                target.toDto(),
+                fileName,
+                clip?.let {
+                    ClipDto(it.startSeconds, it.endSeconds, it.exact)
+                },
+            )
+        }
     }
 
     private fun DownloadSelection.toDto(): SelectionDto = when (this) {
@@ -105,7 +121,15 @@ object RequestJson {
         is DownloadDto -> JobRequest.Download(
             DownloadRequest(jobId, sourceUrl, selection.toDomain(), fileName, embedMetadata, expectedBytes),
         )
-        is ConversionDto -> JobRequest.Conversion(ConversionRequest(jobId, input, target.toDomain(), fileName))
+        is ConversionDto -> JobRequest.Conversion(
+            ConversionRequest(
+                jobId,
+                input,
+                target.toDomain(),
+                fileName,
+                clip?.let { Clip(it.startSeconds, it.endSeconds, it.exact) },
+            ),
+        )
     }
 
     private fun SelectionDto.toDomain(): DownloadSelection = when (this) {

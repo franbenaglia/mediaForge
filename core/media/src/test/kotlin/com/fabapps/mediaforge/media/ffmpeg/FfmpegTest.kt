@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.media.ffmpeg
 
+import com.fabapps.mediaforge.domain.convert.Clip
 import com.fabapps.mediaforge.domain.convert.ConversionPlan
 import com.fabapps.mediaforge.domain.convert.ConversionPlanner
 import com.fabapps.mediaforge.domain.convert.LocalMedia
@@ -126,6 +127,33 @@ class FfmpegTest {
         val args = command(plan(ConversionTarget.Video(VideoContainer.MKV)))
         assertEquals(listOf("-map", "0:v:0", "-map", "0:a:0?", "-c:v", "copy", "-c:a", "copy"), args.subList(11, 19))
         assertFalse("-movflags" in args)
+    }
+
+    @Test
+    fun clipSeeksBeforeTheInputAndLimitsTheLength() {
+        val clip = Clip(83.5, 93.5)
+        val args = FfmpegCommand.convert(
+            runtime,
+            input,
+            File("/w/job/output.mkv"),
+            plan(ConversionTarget.Video(VideoContainer.MKV)),
+            clip,
+        )
+        val ss = args.indexOf("-ss")
+        assertEquals(listOf("-ss", "83.500", "-i", "/w/job/input", "-t", "10.000"), args.subList(ss, ss + 6))
+        assertEquals("make_zero", args[args.indexOf("-avoid_negative_ts") + 1])
+    }
+
+    @Test
+    fun clipFromTheStartOrToTheEnd() {
+        val target = plan(ConversionTarget.Audio(AudioFormat.MP3))
+        val fromStart = FfmpegCommand.convert(runtime, input, File("/w/job/output.mp3"), target, Clip(0.0, 30.0))
+        assertFalse("-ss" in fromStart)
+        assertEquals("30.000", fromStart[fromStart.indexOf("-t") + 1])
+        val toEnd = FfmpegCommand.convert(runtime, input, File("/w/job/output.mp3"), target, Clip(12.0))
+        assertEquals("12.000", toEnd[toEnd.indexOf("-ss") + 1])
+        assertFalse("-t" in toEnd)
+        assertFalse("-ss" in command(target))
     }
 
     @Test

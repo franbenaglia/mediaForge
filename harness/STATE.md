@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 9 cerrada y validada en el teléfono. Sigue la Etapa 10 (funciones avanzadas). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 10 (funciones avanzadas, ADR-020): tareas detalladas en TASKS.md, empieza por T10.1 (recorte). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -18,7 +18,7 @@ Etapa 9 cerrada y validada en el teléfono. Sigue la Etapa 10 (funciones avanzad
 - [x] 7. Gestor de trabajos (validado en el teléfono: varias a la vez, notificación con Cancelar, cerrar desde recientes, reintentar)
 - [x] 8. Android Sharesheet (validado en el teléfono: Chrome, YouTube, otras apps, app cerrada o abierta, texto sin enlace, giro)
 - [x] 9. Historial y configuración (validado en el teléfono: historial, ajustes, solo Wi‑Fi, carpeta de destino, temporales)
-- [ ] 10. Funciones avanzadas
+- [ ] 10. Funciones avanzadas (en curso)
 - [ ] 11. Calidad
 - [ ] 12. Distribución
 
