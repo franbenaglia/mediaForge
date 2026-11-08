@@ -1,10 +1,10 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-07
+**Última actualización:** 2026-11-08
 
 ## Próximo paso
 
-Etapa 5: código completo. T5.3 validada en el teléfono; app instalada (2026-11-08). Falta la prueba manual de audio del usuario (T5.4, T5.5). Pendiente menor: que el usuario confirme que el teclado ya no se abre solo al terminar una descarga.
+Etapa 6 (conversor offline con FFmpeg, sin yt-dlp): detallar las tareas en `TASKS.md`.
 
 ## Etapas
 
@@ -13,7 +13,7 @@ Etapa 5: código completo. T5.3 validada en el teléfono; app instalada (2026-11
 - [x] 2. Interfaz base
 - [x] 3. Motor de extracción (todo validado en el teléfono)
 - [x] 4. Descarga de video (validada en el teléfono: YouTube y Dailymotion)
-- [ ] 5. Extracción de audio (en curso)
+- [x] 5. Extracción de audio (validada en el teléfono: MP3, M4A, Opus)
 - [ ] 6. Conversor multimedia
 - [ ] 7. Gestor de trabajos
 - [ ] 8. Android Sharesheet
@@ -40,7 +40,7 @@ Etapa 5: código completo. T5.3 validada en el teléfono; app instalada (2026-11
 - `YtDlpUpdater` (implementa `ExtractorEngine`): última versión permitida por `_update_spec` → `SHA2-256SUMS` con firma OpenPGP de la clave fijada de yt-dlp (`OpenPgp`, sin Bouncy Castle) → SHA-256 del zipapp → prueba de `--version` → activa y conserva la anterior (`YtDlpVersions`). El motor usa la versión activa o la del APK. 22 pruebas.
 - Descarga de video (T4.3–T4.5): comando con formatos concretos, `YtDlpProgressParser` (varias partes como un avance, merge, metadatos) y `YtDlpDownloader` (registrado en Hilt; carpeta privada por trabajo que se borra al fallar o cancelar).
 - `MediaLibrary` / `MediaStoreLibrary` (T4.6): copia a `Movies/MediaForge` o `Music/MediaForge` con `IS_PENDING` (Android 10+) o permiso de escritura (8–9), nombre único, y borra la copia privada.
-- `AudioOptions` (dominio, T5.1, ADR-015): formatos de audio con copia sin recodificar, bitrates y automático.
+- Audio (Etapa 5, ADR-015): `AudioOptions` (copia sin recodificar, bitrates, automático), comando `-x` con portada y metadatos (mutagen 1.47 en el APK), modo "Solo audio" en Inicio con avisos de calidad. Se guarda en `Music/MediaForge`.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
@@ -52,7 +52,7 @@ Etapa 5: código completo. T5.3 validada en el teléfono; app instalada (2026-11
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
-Último commit validado: ver `git log -1` (commit de cierre de la Etapa 4).
+Último commit validado: ver `git log -1` (commit de cierre de la Etapa 5).
 
 ## Dependencias importantes
 

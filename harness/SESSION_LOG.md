@@ -4,6 +4,18 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-08 · Etapa 5
+
+**Hecho:** T5.1–T5.5. `AudioOptions` (ADR-015), comando de audio con portada y metadatos, pasos de audio en el parser, descargador con audio, modo "Solo audio" en Inicio.
+
+**Teléfono:** `MediaLibraryDeviceTest` guardó los seis formatos de audio. El usuario validó MP3 320 kbps (aviso, portada, título), M4A sin recodificar y Opus.
+
+**Problemas:** una instalación se canceló porque nadie tocó "Instalar" a tiempo; desde entonces se avisa antes y se espera la confirmación.
+
+**Verificación:** `./scripts/verify.sh` OK.
+
+---
+
 ## 2026-11-07 · Etapa 4
 
 **Hecho:** T4.1–T4.8. Miniatura (Coil), `VideoOptions`, comando y parser de progreso, `YtDlpDownloader`, `MediaStoreLibrary`, panel de descarga en Inicio y "Detalles técnicos" en los errores. 189 pruebas en la JVM.

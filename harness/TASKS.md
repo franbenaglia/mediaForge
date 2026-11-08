@@ -104,7 +104,7 @@ Criterio del MVP: punto 6 de main.md §15. La descarga corre en el `viewModelSco
   *Acepta:* `EngineDeviceTest` o validación manual registrada en STATE.md.
   *Validada a mano por el usuario (2026-11-07):* YouTube (merge) y Dailymotion (HLS) descargados y reproducidos; cancelar sin parciales. Un primer intento de Dailymotion falló con `Unknown` sin detalle visible y no se pudo reproducir; desde entonces los errores muestran "Detalles técnicos". `EngineDeviceTest.t5` descarga Dailymotion (necesita correr antes `t1b`, porque reinstalar el APK de prueba borra el yt-dlp actualizado).
 
-## Etapa 5 · Extracción de audio
+## Etapa 5 · Extracción de audio ✅
 
 Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Python del APK trae `mutagen` 1.47 (verificado en el teléfono): portada y metadatos en MP3, M4A, Opus, OGG y FLAC.
 
@@ -120,12 +120,13 @@ Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Pyth
   *Depende de:* T5.2
   *Acepta:* pruebas con yt-dlp falso; `MediaLibraryDeviceTest` guarda MP3, M4A, Opus, OGG, WAV y FLAC en `Music/MediaForge` sin cambiar el nombre.
   *Hecho:* salida por extensión esperada (ignora portadas sueltas), MIME por formato (WAV = `audio/x-wav`). Prueba con yt-dlp falso OK; `savesEveryAudioFormatIntoMusic` OK en el teléfono (2026-11-08): los seis formatos en `Music/MediaForge/` sin cambio de nombre.
-- [~] **T5.4** · P1 · Inicio: elegir Video o Audio; en audio, formato, bitrate (con "Automático"), avisos de calidad y tamaño.
+- [x] **T5.4** · P1 · Inicio: elegir Video o Audio; en audio, formato, bitrate (con "Automático"), avisos de calidad y tamaño.
   *Depende de:* T5.1, T5.3
   *Acepta:* pruebas de `HomeViewModel`; `[~]` hasta probarlo en el teléfono.
-- [ ] **T5.5** · P1 · Prueba en el teléfono: MP3 320 kbps con portada y título, M4A sin recodificar, Opus.
+- [x] **T5.5** · P1 · Prueba en el teléfono: MP3 320 kbps con portada y título, M4A sin recodificar, Opus.
   *Depende de:* T5.4
   *Acepta:* validación manual registrada (el archivo se reproduce y muestra portada en la app de música).
+  *Validada por el usuario (2026-11-08):* MP3 320 kbps con aviso de bitrate, portada y título; M4A sin recodificar; Opus. Todo se reproduce.
 
 ## Etapa 6 · Conversor (resumen)
 
