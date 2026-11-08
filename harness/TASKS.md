@@ -221,9 +221,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* —
   *Acepta:* pruebas en la JVM (armado de la entrada por tipo, filtro y búsqueda, rangos de los ajustes).
   *Hecho:* `domain/history/History.kt` (`HistoryEntry.from`, `HistorySearch`, `HistoryStore`) y `domain/settings/Settings.kt` (`Settings.normalized`, `SettingsStore`). 11 pruebas.
-- [ ] **T9.2** · P1 · `:core:data`: tabla `history` en Room (versión 2, migración automática desde la 1, esquema exportado) y `RoomHistoryStore`; DataStore Preferences 1.3.0 en `DataStoreSettingsStore` (un valor desconocido vuelve al predeterminado); todo en Hilt.
+- [~] **T9.2** · P1 · `:core:data`: tabla `history` en Room (versión 2, migración automática desde la 1, esquema exportado) y `RoomHistoryStore`; DataStore Preferences 1.3.0 en `DataStoreSettingsStore` (un valor desconocido vuelve al predeterminado); todo en Hilt.
   *Depende de:* T9.1
   *Acepta:* pruebas en la JVM (mapeo del historial; ajustes con un archivo temporal) y prueba de la migración 1 → 2 en el teléfono.
+  *Hecho:* `HistoryEntity`/`HistoryDao`, base versión 2 con `AutoMigration(1, 2)` (esquema `2.json`), `RoomHistoryStore`, `DataStoreSettingsStore` (archivo `files/datastore/settings.preferences_pb`, se reemplaza si está dañado), Hilt. 6 pruebas en la JVM. `MigrationDeviceTest` escrita; falta correrla en el teléfono.
 - [ ] **T9.3** · P1 · La cola anota en el historial cada trabajo completado y toma de los ajustes el límite de descargas simultáneas (bajar el límite no corta lo que ya corre).
   *Depende de:* T9.2
   *Acepta:* pruebas de `JobScheduler` (entrada al completar, nada al fallar o cancelar; cambio de límite en vivo).

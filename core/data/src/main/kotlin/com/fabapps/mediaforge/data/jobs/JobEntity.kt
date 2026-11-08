@@ -1,5 +1,6 @@
 package com.fabapps.mediaforge.data.jobs
 
+import androidx.room.AutoMigration
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -8,6 +9,8 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Upsert
+import com.fabapps.mediaforge.data.history.HistoryDao
+import com.fabapps.mediaforge.data.history.HistoryEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -58,9 +61,17 @@ interface JobDao {
     suspend fun delete(id: String)
 }
 
-@Database(entities = [JobEntity::class], version = 1, exportSchema = true)
+/** Versión 2: tabla `history` (ADR-019). Cada versión exporta su esquema a `core/data/schemas/`. */
+@Database(
+    entities = [JobEntity::class, HistoryEntity::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
+)
 abstract class MediaForgeDatabase : RoomDatabase() {
     abstract fun jobs(): JobDao
+
+    abstract fun history(): HistoryDao
 
     companion object {
         const val NAME = "mediaforge.db"
