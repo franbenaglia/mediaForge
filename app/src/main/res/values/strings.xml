@@ -228,4 +228,9 @@
     <string name="settings_destination_note">Files in a chosen folder may not show up in gallery apps.</string>
     <string name="notification_folder_lost_title">The chosen folder is not available</string>
     <string name="notification_folder_lost">The file was saved to the gallery. You can choose a folder again in Settings.</string>
+    <string name="settings_temp">Temporary files</string>
+    <string name="settings_temp_size">Can be freed: %1$s</string>
+    <string name="settings_temp_freed">Freed %1$s.</string>
+    <string name="settings_temp_clean">Clean</string>
+    <string name="settings_temp_note">Leftovers from downloads and conversions that did not finish. Running jobs are not touched.</string>
 </resources>

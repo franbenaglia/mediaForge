@@ -230,6 +230,22 @@ class JobSchedulerTest {
     }
 
     @Test
+    fun `while frozen no job starts and the running ones are reported`() = runTest {
+        val scheduler = scheduler()
+        scheduler.enqueue(download("a"), "a")
+        runCurrent()
+        val seen = scheduler.withJobsFrozen { running ->
+            backgroundScope.launch { scheduler.enqueue(download("b"), "b") }
+            runCurrent()
+            assertEquals(listOf("a"), engine.started)
+            running
+        }
+        runCurrent()
+        assertEquals(setOf("a"), seen)
+        assertEquals(listOf("a", "b"), engine.started)
+    }
+
+    @Test
     fun `at most two downloads and one conversion run at once, in order`() = runTest {
         val scheduler = scheduler()
         listOf("d1", "d2", "d3").forEach { scheduler.enqueue(download(it), it) }

@@ -249,9 +249,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.6
   *Acepta:* prueba en el teléfono (guardar en una carpeta elegida y abrir el archivo).
   *Hecho:* `FolderLibrary` (dominio) y `DocumentTreeLibrary` (`:core:media`, crea el documento con nombre único y lee el que dejó el proveedor); `RoutingLibrary` elige carpeta o galería (`@GalleryLibrary`), y si la carpeta no sirve vuelve a la galería, borra el ajuste, suelta el permiso y avisa con una notificación; `DestinationFolders` (permiso persistente); sección "Guardar en" en Ajustes. 6 pruebas.
-- [ ] **T9.9** · P2 · Archivos temporales: tamaño de las carpetas privadas de trabajos y botón para limpiar las que no pertenecen a un trabajo activo.
+- [~] **T9.9** · P2 · Archivos temporales: tamaño de las carpetas privadas de trabajos y botón para limpiar las que no pertenecen a un trabajo activo.
   *Depende de:* T9.6
   *Acepta:* pruebas de la regla de qué se puede borrar.
+  *Hecho:* `TempFolders.removable` (dominio, 3 pruebas); `JobScheduler.withJobsFrozen` (borra sin que arranque un trabajo a mitad, 1 prueba); `JobFoldersTempStorage` (`noBackupFilesDir/mediaforge/jobs`); sección "Archivos temporales" en Ajustes con tamaño, Limpiar y lo liberado (1 prueba). La caché de yt-dlp y el `TMPDIR` quedan para el sistema.
 - [x] **T9.10** · P1 · Prueba en el teléfono: el historial sobrevive a cerrar la app y a actualizarla (migración), búsqueda y filtros, borrar un archivo, descargar de nuevo; los ajustes se aplican y se conservan.
   *Depende de:* T9.5, T9.6
   *Acepta:* validación manual registrada.

@@ -173,6 +173,13 @@ class JobScheduler(
     }
 
     /**
+     * Corre [block] sin que arranque ni termine ningún trabajo, con los ids de los que están corriendo.
+     * Sirve para limpiar carpetas temporales sin pisar un trabajo que está empezando (T9.9).
+     */
+    suspend fun <T> withJobsFrozen(block: suspend (running: Set<String>) -> T): T =
+        mutex.withLock { block(running.keys.toSet()) }
+
+    /**
      * "Solo Wi‑Fi" con una red medida: las descargas en cola esperan y arrancan solas cuando vuelve a
      * permitirse. Las que corren siguen: cortarlas perdería lo bajado (no hay pausa real, ADR-019).
      * Las conversiones no usan la red.

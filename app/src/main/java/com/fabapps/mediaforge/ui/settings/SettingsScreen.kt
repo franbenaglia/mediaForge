@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -43,6 +44,7 @@ import com.fabapps.mediaforge.domain.settings.PreferredMode
 import com.fabapps.mediaforge.domain.settings.Settings
 import com.fabapps.mediaforge.domain.settings.ThemeMode
 import com.fabapps.mediaforge.ui.common.messageRes
+import com.fabapps.mediaforge.ui.format.Formatters
 import com.fabapps.mediaforge.ui.home.nameRes
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 
@@ -65,6 +67,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onWifiOnlyChange = viewModel::onWifiOnlyChange,
             onPickFolder = { pickFolder.launch(null) },
             onUseGallery = viewModel::onUseGallery,
+            onCleanTemp = viewModel::onCleanTemp,
             onThemeChange = viewModel::onThemeChange,
             onDynamicColorChange = viewModel::onDynamicColorChange,
             onCheckEngine = viewModel::onCheckEngine,
@@ -84,6 +87,7 @@ data class SettingsActions(
     val onWifiOnlyChange: (Boolean) -> Unit = {},
     val onPickFolder: () -> Unit = {},
     val onUseGallery: () -> Unit = {},
+    val onCleanTemp: () -> Unit = {},
     val onThemeChange: (ThemeMode) -> Unit = {},
     val onDynamicColorChange: (Boolean) -> Unit = {},
     val onCheckEngine: () -> Unit = {},
@@ -171,6 +175,7 @@ fun SettingsContent(
         )
 
         Destination(state, actions)
+        Temp(state, actions)
 
         HorizontalDivider()
         Section(stringResource(R.string.settings_section_appearance))
@@ -227,6 +232,25 @@ private fun Destination(state: SettingsUiState, actions: SettingsActions) {
             }
         }
         Note(stringResource(R.string.settings_destination_note))
+    }
+}
+
+@Composable
+private fun Temp(state: SettingsUiState, actions: SettingsActions) {
+    val locale = LocalConfiguration.current.locales[0]
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.settings_temp), style = MaterialTheme.typography.titleSmall)
+        state.tempBytes?.let {
+            Text(
+                stringResource(R.string.settings_temp_size, Formatters.bytes(it, locale)),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        state.freedBytes?.let { Note(stringResource(R.string.settings_temp_freed, Formatters.bytes(it, locale))) }
+        OutlinedButton(onClick = actions.onCleanTemp, enabled = state.canCleanTemp) {
+            Text(stringResource(R.string.settings_temp_clean))
+        }
+        Note(stringResource(R.string.settings_temp_note))
     }
 }
 

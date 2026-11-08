@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 y T9.10 hechas y validadas en el teléfono. Siguen T9.7 (solo Wi‑Fi), T9.8 (carpeta de destino) y T9.9 (temporales), las tres P2. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 y T9.10 hechas y validadas en el teléfono. T9.7 (solo Wi‑Fi), T9.8 (carpeta de destino) y T9.9 (temporales) hechas, falta probarlas en el teléfono. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 

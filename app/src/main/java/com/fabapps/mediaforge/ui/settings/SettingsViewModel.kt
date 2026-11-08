@@ -12,6 +12,7 @@ import com.fabapps.mediaforge.domain.settings.Settings
 import com.fabapps.mediaforge.domain.settings.SettingsStore
 import com.fabapps.mediaforge.domain.settings.ThemeMode
 import com.fabapps.mediaforge.files.DestinationFolders
+import com.fabapps.mediaforge.files.TempStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,7 +54,14 @@ data class SettingsUiState(
     val folderName: String? = null,
     /** El sistema no concedió el permiso sobre la carpeta elegida. */
     val folderDenied: Boolean = false,
+    /** Temporales que se pueden borrar; nulo mientras se calcula. */
+    val tempBytes: Long? = null,
+    val cleaningTemp: Boolean = false,
+    /** Bytes liberados en la última limpieza. */
+    val freedBytes: Long? = null,
 ) {
+    val canCleanTemp: Boolean get() = !cleaningTemp && (tempBytes ?: 0) > 0
+
     val usesFolder: Boolean get() = settings.destinationTree != null
 
     val bitrates: List<Int> get() = AudioOptions.bitratesFor(settings.audioFormat)
@@ -67,7 +75,12 @@ class SettingsViewModel @Inject constructor(
     private val store: SettingsStore,
     private val engine: ExtractorEngine,
     private val folders: DestinationFolders,
+    private val temp: TempStorage,
 ) : ViewModel() {
+    private data class Temp(val bytes: Long? = null, val cleaning: Boolean = false, val freed: Long? = null)
+
+    private val tempState = MutableStateFlow(Temp())
+
     private val version = MutableStateFlow<String?>(null)
     private val engineStatus = MutableStateFlow<EngineStatus>(EngineStatus.Idle)
     private val folderDenied = MutableStateFlow(false)
@@ -78,13 +91,12 @@ class SettingsViewModel @Inject constructor(
     }
 
     val state: StateFlow<SettingsUiState> =
-        combine(store.settings, version, engineStatus, folderName, folderDenied) {
-                settings,
-                v,
-                status,
-                folder,
-                denied,
-            ->
+        combine(
+            combine(store.settings, version, engineStatus, ::Triple),
+            folderName,
+            folderDenied,
+            tempState,
+        ) { (settings, v, status), folder, denied, tmp ->
             SettingsUiState(
                 loading = false,
                 settings = settings,
@@ -92,11 +104,15 @@ class SettingsViewModel @Inject constructor(
                 engine = status,
                 folderName = folder,
                 folderDenied = denied,
+                tempBytes = tmp.bytes,
+                cleaningTemp = tmp.cleaning,
+                freedBytes = tmp.freed,
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SettingsUiState())
 
     init {
         viewModelScope.launch { version.value = engine.installedVersion() }
+        viewModelScope.launch { tempState.value = Temp(bytes = temp.removableBytes()) }
     }
 
     fun onModeChange(mode: PreferredMode) = edit { it.copy(mode = mode) }
@@ -133,6 +149,16 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             store.update { it.copy(destinationTree = null) }
             folders.release(previous)
+        }
+    }
+
+    /** Borra los restos de trabajos que no están corriendo. */
+    fun onCleanTemp() {
+        if (tempState.value.cleaning) return
+        tempState.value = tempState.value.copy(cleaning = true, freed = null)
+        viewModelScope.launch {
+            val freed = temp.clean()
+            tempState.value = Temp(bytes = temp.removableBytes(), freed = freed)
         }
     }
 

@@ -44,7 +44,7 @@ Calidades: `VideoOptions` arma una opción por altura con formatos concretos (`2
 
 - Descargas en curso en `noBackupFilesDir/mediaforge/jobs/<jobId>/` (privado, el sistema no lo borra a mitad). Si el trabajo falla o se cancela, se borra la carpeta; al guardar, se borra la copia privada (también si el guardado falla).
 - Espacio previo: 2 × tamaño estimado + 100 MB (video y audio conviven en disco durante el merge).
-- Resultados en MediaStore (`Movies/MediaForge`, `Music/MediaForge`) con `IS_PENDING` en Android 10+, sin permisos. En Android 8–9, `WRITE_EXTERNAL_STORAGE` (limitado a API 28) y el scanner. Carpeta elegida por SAF: más adelante.
+- Resultados en MediaStore (`Movies/MediaForge`, `Music/MediaForge`) con `IS_PENDING` en Android 10+, sin permisos. En Android 8–9, `WRITE_EXTERNAL_STORAGE` (limitado a API 28) y el scanner. Carpeta elegida por SAF (Etapa 9): `RoutingLibrary` guarda ahí con `DocumentTreeLibrary` y, si la carpeta ya no sirve, vuelve a la galería y avisa.
 - Nombres por `FileNames.sanitize` + `FileNames.unique`.
 
 ## Ejecución en segundo plano
@@ -62,5 +62,7 @@ Otra app comparte texto (`ACTION_SEND`, `text/plain`) → `MainActivity` (`singl
 ## Historial y ajustes
 
 - Cuando la cola completa un trabajo anota una `HistoryEntry` en `HistoryStore` (tabla `history`, ADR-019). Descargas es el administrador de trabajos; Historial es el registro de archivos guardados, con búsqueda, filtros, Descargar de nuevo (vía `ShareInbox`) y Borrar archivo (`SavedFiles`: MediaStore o documento, con la confirmación del sistema si hace falta).
+- Temporales: las carpetas `jobs/<id>` de trabajos que no están corriendo se pueden limpiar desde Ajustes (`JobScheduler.withJobsFrozen` evita pisar uno que arranca).
+- "Solo Wi‑Fi": `UnmeteredNetwork` + `QueueSettings` → `JobScheduler.setDownloadsAllowed`; el servicio sigue vivo con "Esperando Wi‑Fi".
 - Los ajustes (`SettingsStore`) viven en DataStore Preferences (`files/datastore/settings.preferences_pb`). `QueueSettings` lleva el límite de descargas a la cola; Inicio lee los predeterminados al terminar cada análisis.
 

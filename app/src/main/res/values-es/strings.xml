@@ -216,4 +216,9 @@
     <string name="settings_destination_note">Los archivos de una carpeta elegida pueden no aparecer en las apps de galería.</string>
     <string name="notification_folder_lost_title">La carpeta elegida no está disponible</string>
     <string name="notification_folder_lost">El archivo se guardó en la galería. Podés volver a elegir una carpeta en Ajustes.</string>
+    <string name="settings_temp">Archivos temporales</string>
+    <string name="settings_temp_size">Se pueden liberar: %1$s</string>
+    <string name="settings_temp_freed">Se liberaron %1$s.</string>
+    <string name="settings_temp_clean">Limpiar</string>
+    <string name="settings_temp_note">Restos de descargas y conversiones que no terminaron. No se tocan los trabajos en curso.</string>
 </resources>

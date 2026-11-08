@@ -21,6 +21,9 @@ abstract class FilesModule {
     abstract fun savedFiles(files: ContentSavedFiles): SavedFiles
 
     @Binds
+    abstract fun tempStorage(storage: JobFoldersTempStorage): TempStorage
+
+    @Binds
     abstract fun destinationFolders(folders: SafDestinationFolders): DestinationFolders
 
     companion object {

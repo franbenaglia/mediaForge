@@ -7,6 +7,7 @@ import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.settings.PreferredMode
 import com.fabapps.mediaforge.domain.settings.ThemeMode
 import com.fabapps.mediaforge.files.DestinationFolders
+import com.fabapps.mediaforge.files.TempStorage
 import com.fabapps.mediaforge.testing.FakeSettingsStore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,14 @@ class SettingsViewModelTest {
         override suspend fun name(folder: String) = if ("Music" in folder) "Music" else null
     }
 
+    private class FakeTemp : TempStorage {
+        var bytes = 5_000L
+        override suspend fun removableBytes() = bytes
+        override suspend fun clean() = bytes.also { bytes = 0 }
+    }
+
     private val folders = FakeFolders()
+    private val temp = FakeTemp()
     private val store = FakeSettingsStore()
     private val engine = FakeEngine()
     private lateinit var vm: SettingsViewModel
@@ -63,7 +71,7 @@ class SettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = SettingsViewModel(store, engine, folders)
+        vm = SettingsViewModel(store, engine, folders, temp)
     }
 
     @After
@@ -195,5 +203,16 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         assertTrue(state.folderDenied)
         assertNull(store.settings.value.destinationTree)
+    }
+
+    @Test
+    fun cleaningTempFilesShowsWhatWasFreed() = test {
+        assertEquals(5_000L, state.tempBytes)
+        assertTrue(state.canCleanTemp)
+        vm.onCleanTemp()
+        advanceUntilIdle()
+        assertEquals(5_000L, state.freedBytes)
+        assertEquals(0L, state.tempBytes)
+        assertFalse(state.canCleanTemp)
     }
 }
