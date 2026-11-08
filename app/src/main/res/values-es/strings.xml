@@ -156,4 +156,22 @@
     <string name="downloads_remove_note">Quitarlo de la lista no borra el archivo guardado.</string>
     <string name="downloads_height">%1$dp</string>
     <string name="downloads_kbps">%1$d kbps</string>
+    <string name="downloads_remove_completed">Quitar completados</string>
+    <string name="history_empty_title">Todavía no hay nada</string>
+    <string name="history_empty_message">Los archivos que descargues o conviertas aparecen acá, con su enlace para volver a descargarlos.</string>
+    <string name="history_search">Buscar</string>
+    <string name="history_no_results">Sin resultados.</string>
+    <string name="history_filter_all">Todo</string>
+    <string name="history_filter_conversions">Conversiones</string>
+    <string name="history_kind_video">Video</string>
+    <string name="history_kind_audio">Audio</string>
+    <string name="history_kind_conversion">Conversión</string>
+    <string name="history_missing">El archivo ya no está en el dispositivo.</string>
+    <string name="history_redownload">Descargar de nuevo</string>
+    <string name="history_delete_file">Borrar archivo</string>
+    <string name="history_delete_title">¿Borrar el archivo?</string>
+    <string name="history_delete_message">Se va a borrar %1$s del dispositivo y del historial.</string>
+    <string name="history_delete_confirm">Borrar</string>
+    <string name="history_file_deleted">Archivo borrado.</string>
+    <string name="history_delete_failed">No se pudo borrar el archivo.</string>
 </resources>

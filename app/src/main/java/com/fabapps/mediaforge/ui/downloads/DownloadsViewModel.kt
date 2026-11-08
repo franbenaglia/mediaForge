@@ -37,7 +37,10 @@ data class DownloadsUiState(
     val items: List<JobItem> = emptyList(),
     /** Trabajo con los detalles abiertos. */
     val expandedId: String? = null,
-)
+) {
+    /** Hay completados para quitar de una vez; siguen en el Historial. */
+    val hasCompleted: Boolean get() = items.any { it.job.status == JobStatus.COMPLETED }
+}
 
 /** Administrador de descargas y conversiones (main.md §7.3, §7.4). */
 @HiltViewModel
@@ -70,6 +73,12 @@ class DownloadsViewModel @Inject constructor(private val queue: JobQueue, privat
             queue.delete(id)
             (item.job.request as? JobRequest.Conversion)?.let { inputAccess.release(it.request.input) }
         }
+    }
+
+    /** Quita de la lista los completados. Siguen en el Historial y el archivo queda. */
+    fun onRemoveCompleted() {
+        val ids = state.value.items.filter { it.job.status == JobStatus.COMPLETED }.map { it.id }
+        viewModelScope.launch { ids.forEach { queue.delete(it) } }
     }
 
     fun onToggleDetails(id: String) = expanded.update { if (it == id) null else id }

@@ -166,4 +166,22 @@
     <string name="downloads_remove_note">Removing it from the list does not delete the saved file.</string>
     <string name="downloads_height">%1$dp</string>
     <string name="downloads_kbps">%1$d kbps</string>
+    <string name="downloads_remove_completed">Remove completed</string>
+    <string name="history_empty_title">Nothing here yet</string>
+    <string name="history_empty_message">Files you download or convert show up here, with their link to download them again.</string>
+    <string name="history_search">Search</string>
+    <string name="history_no_results">No results.</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_filter_conversions">Conversions</string>
+    <string name="history_kind_video">Video</string>
+    <string name="history_kind_audio">Audio</string>
+    <string name="history_kind_conversion">Conversion</string>
+    <string name="history_missing">The file is no longer on the device.</string>
+    <string name="history_redownload">Download again</string>
+    <string name="history_delete_file">Delete file</string>
+    <string name="history_delete_title">Delete the file?</string>
+    <string name="history_delete_message">%1$s will be deleted from the device and removed from the history.</string>
+    <string name="history_delete_confirm">Delete</string>
+    <string name="history_file_deleted">File deleted.</string>
+    <string name="history_delete_failed">The file could not be deleted.</string>
 </resources>

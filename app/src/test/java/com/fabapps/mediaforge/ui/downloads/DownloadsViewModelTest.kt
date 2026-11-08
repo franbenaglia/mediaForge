@@ -194,6 +194,22 @@ class DownloadsViewModelTest {
     }
 
     @Test
+    fun removeCompletedKeepsTheRest() = test {
+        queue.enqueue(download("done"), "Done")
+        queue.enqueue(download("run"), "Run")
+        advanceUntilIdle()
+        engines.channel("done").send(JobState.Completed(listOf(OutputFile("/p/d", "d.mp4", "video/mp4", 1))))
+        engines.channel("done").close()
+        advanceUntilIdle()
+        assertTrue(state.hasCompleted)
+
+        vm.onRemoveCompleted()
+        advanceUntilIdle()
+        assertEquals(listOf("run"), state.items.map { it.id })
+        assertFalse(state.hasCompleted)
+    }
+
+    @Test
     fun detailsOpenOneAtATime() = test {
         queue.enqueue(download("a"), "A")
         queue.enqueue(download("b"), "B")

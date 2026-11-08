@@ -1,6 +1,7 @@
 package com.fabapps.mediaforge.ui.downloads
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -63,6 +65,7 @@ fun DownloadsScreen(viewModel: DownloadsViewModel = hiltViewModel()) {
             onRetry = viewModel::onRetry,
             onRemove = viewModel::onRemove,
             onToggleDetails = viewModel::onToggleDetails,
+            onRemoveCompleted = viewModel::onRemoveCompleted,
         ),
     )
 }
@@ -72,6 +75,7 @@ data class JobActions(
     val onRetry: (String) -> Unit = {},
     val onRemove: (String) -> Unit = {},
     val onToggleDetails: (String) -> Unit = {},
+    val onRemoveCompleted: () -> Unit = {},
 )
 
 @Composable
@@ -89,6 +93,15 @@ fun DownloadsContent(state: DownloadsUiState, actions: JobActions, modifier: Mod
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (state.hasCompleted) {
+                item(key = "remove-completed") {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        TextButton(onClick = actions.onRemoveCompleted) {
+                            Text(stringResource(R.string.downloads_remove_completed))
+                        }
+                    }
+                }
+            }
             items(state.items, key = { it.id }) { item ->
                 JobCard(item, expanded = item.id == state.expandedId, actions = actions)
             }

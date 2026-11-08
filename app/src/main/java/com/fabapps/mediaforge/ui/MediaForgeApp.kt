@@ -18,12 +18,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fabapps.mediaforge.navigation.MediaForgeNavHost
 import com.fabapps.mediaforge.navigation.TopLevelDestination
+import com.fabapps.mediaforge.navigation.navigateToTopLevel
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 
 /**
@@ -67,15 +67,6 @@ fun MediaForgeApp(navController: NavHostController = rememberNavController(), op
 private fun NavDestination?.toTopLevel(): TopLevelDestination = TopLevelDestination.entries.firstOrNull { top ->
     this?.hierarchy?.any { it.hasRoute(top.route::class) } == true
 } ?: TopLevelDestination.START
-
-/** Cambia de pestaña conservando el estado de cada una y sin apilar copias. */
-private fun NavHostController.navigateToTopLevel(destination: TopLevelDestination) {
-    navigate(destination.route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
-    }
-}
 
 @Preview
 @Composable

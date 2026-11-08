@@ -58,3 +58,9 @@ ADR-017. `JobScheduler` (dominio) es un singleton con un alcance propio del proc
 ## Enlaces compartidos
 
 Otra app comparte texto (`ACTION_SEND`, `text/plain`) → `MainActivity` (`singleTask`, una sola ventana) → `ShareIntents.read` (texto, `ClipData`, asunto) → `ShareInbox` (en memoria) → la app pasa a Inicio y `HomeViewModel` toma el contenido, busca la URL con `SharedText.findUrl` y la analiza. El intent se procesa una vez: en `onCreate` sin estado guardado y sin venir de recientes, y en `onNewIntent` (ADR-018).
+
+## Historial y ajustes
+
+- Cuando la cola completa un trabajo anota una `HistoryEntry` en `HistoryStore` (tabla `history`, ADR-019). Descargas es el administrador de trabajos; Historial es el registro de archivos guardados, con búsqueda, filtros, Descargar de nuevo (vía `ShareInbox`) y Borrar archivo (`SavedFiles`: MediaStore o documento, con la confirmación del sistema si hace falta).
+- Los ajustes (`SettingsStore`) viven en DataStore Preferences (`files/datastore/settings.preferences_pb`). `QueueSettings` lleva el límite de descargas a la cola; Inicio lee los predeterminados al terminar cada análisis.
+
