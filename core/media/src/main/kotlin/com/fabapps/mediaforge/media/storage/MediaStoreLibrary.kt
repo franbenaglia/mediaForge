@@ -158,3 +158,8 @@ class MediaStoreLibrary(private val context: Context, private val io: CoroutineD
         const val FOLDER = "MediaForge"
     }
 }
+
+/** La galería (MediaStore). La app elige entre ella y una carpeta elegida (ADR-019). */
+@javax.inject.Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class GalleryLibrary

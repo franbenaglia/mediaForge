@@ -219,4 +219,13 @@
     <string name="download_waiting_wifi">Waiting for Wi‑Fi: it starts by itself when you connect. You can turn this off in Settings.</string>
     <string name="settings_wifi_only">Wi‑Fi only</string>
     <string name="settings_wifi_only_note">On mobile data, new downloads wait. Downloads already running go on.</string>
+    <string name="settings_destination">Save to</string>
+    <string name="settings_destination_gallery">Gallery (Movies/MediaForge and Music/MediaForge)</string>
+    <string name="settings_destination_folder">Folder: %1$s</string>
+    <string name="settings_destination_pick">Choose folder</string>
+    <string name="settings_destination_use_gallery">Use the gallery</string>
+    <string name="settings_destination_denied">Android did not allow access to that folder. Choose another one.</string>
+    <string name="settings_destination_note">Files in a chosen folder may not show up in gallery apps.</string>
+    <string name="notification_folder_lost_title">The chosen folder is not available</string>
+    <string name="notification_folder_lost">The file was saved to the gallery. You can choose a folder again in Settings.</string>
 </resources>

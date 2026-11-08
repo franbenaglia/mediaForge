@@ -7,6 +7,7 @@ import com.fabapps.mediaforge.domain.engine.ExtractorEngine
 import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
+import com.fabapps.mediaforge.domain.storage.FolderLibrary
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.media.engine.EngineInitializer
 import com.fabapps.mediaforge.media.engine.IoDispatcher
@@ -16,6 +17,8 @@ import com.fabapps.mediaforge.media.ffmpeg.ContentInputSource
 import com.fabapps.mediaforge.media.ffmpeg.ExtractorInspector
 import com.fabapps.mediaforge.media.ffmpeg.FfmpegConverter
 import com.fabapps.mediaforge.media.process.ProcessRunner
+import com.fabapps.mediaforge.media.storage.DocumentTreeLibrary
+import com.fabapps.mediaforge.media.storage.GalleryLibrary
 import com.fabapps.mediaforge.media.storage.MediaStoreLibrary
 import com.fabapps.mediaforge.media.update.AndroidVersionProbe
 import com.fabapps.mediaforge.media.update.KeyValueStore
@@ -70,8 +73,14 @@ internal abstract class MediaModule {
 
         @Provides
         @Singleton
-        fun mediaLibrary(@ApplicationContext context: Context, @IoDispatcher io: CoroutineDispatcher): MediaLibrary =
+        @GalleryLibrary
+        fun galleryLibrary(@ApplicationContext context: Context, @IoDispatcher io: CoroutineDispatcher): MediaLibrary =
             MediaStoreLibrary(context, io)
+
+        @Provides
+        @Singleton
+        fun folderLibrary(@ApplicationContext context: Context, @IoDispatcher io: CoroutineDispatcher): FolderLibrary =
+            DocumentTreeLibrary(context, io)
 
         /** Carpeta privada para los trabajos en curso (no entra en backups ni la limpia el sistema). */
         @Provides

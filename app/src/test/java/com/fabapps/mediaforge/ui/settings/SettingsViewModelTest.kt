@@ -6,6 +6,7 @@ import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.settings.PreferredMode
 import com.fabapps.mediaforge.domain.settings.ThemeMode
+import com.fabapps.mediaforge.files.DestinationFolders
 import com.fabapps.mediaforge.testing.FakeSettingsStore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,18 @@ class SettingsViewModelTest {
         }
     }
 
+    private class FakeFolders : DestinationFolders {
+        val granted = mutableSetOf<String>()
+        var allow = true
+        override fun hasAccess(folder: String) = folder in granted
+        override fun take(folder: String) = allow.also { if (it) granted += folder }
+        override fun release(folder: String) {
+            granted -= folder
+        }
+        override suspend fun name(folder: String) = if ("Music" in folder) "Music" else null
+    }
+
+    private val folders = FakeFolders()
     private val store = FakeSettingsStore()
     private val engine = FakeEngine()
     private lateinit var vm: SettingsViewModel
@@ -50,7 +63,7 @@ class SettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = SettingsViewModel(store, engine)
+        vm = SettingsViewModel(store, engine, folders)
     }
 
     @After
@@ -147,5 +160,40 @@ class SettingsViewModelTest {
         engine.check.complete(Outcome.Failure(MediaError.Network("offline")))
         advanceUntilIdle()
         assertEquals(EngineStatus.Failed(MediaError.Network("offline")), state.engine)
+    }
+
+    private val music = "content://com.android.externalstorage.documents/tree/primary%3AMusic"
+    private val docs = "content://com.android.externalstorage.documents/tree/primary%3ADocuments"
+
+    @Test
+    fun pickingAFolderKeepsItsPermissionAndShowsItsName() = test {
+        assertFalse(state.usesFolder)
+        vm.onFolderPicked(music)
+        advanceUntilIdle()
+        assertEquals(music, store.settings.value.destinationTree)
+        assertEquals("Music", state.folderName)
+        assertTrue(music in folders.granted)
+
+        // Otra carpeta suelta el permiso de la anterior; sin nombre legible se usa el final de la ruta.
+        vm.onFolderPicked(docs)
+        advanceUntilIdle()
+        assertEquals(setOf(docs), folders.granted)
+        assertEquals("Documents", state.folderName)
+
+        vm.onUseGallery()
+        advanceUntilIdle()
+        assertNull(store.settings.value.destinationTree)
+        assertNull(state.folderName)
+        assertTrue(folders.granted.isEmpty())
+    }
+
+    @Test
+    fun deniedFolderChangesNothing() = test {
+        folders.allow = false
+        vm.onFolderPicked(music)
+        vm.onFolderPicked(null)
+        advanceUntilIdle()
+        assertTrue(state.folderDenied)
+        assertNull(store.settings.value.destinationTree)
     }
 }

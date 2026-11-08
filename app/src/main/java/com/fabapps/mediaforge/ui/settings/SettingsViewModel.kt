@@ -11,12 +11,17 @@ import com.fabapps.mediaforge.domain.settings.PreferredMode
 import com.fabapps.mediaforge.domain.settings.Settings
 import com.fabapps.mediaforge.domain.settings.SettingsStore
 import com.fabapps.mediaforge.domain.settings.ThemeMode
+import com.fabapps.mediaforge.files.DestinationFolders
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -44,7 +49,13 @@ data class SettingsUiState(
     /** Versión de yt-dlp en uso; nula mientras se lee o si no se pudo leer. */
     val engineVersion: String? = null,
     val engine: EngineStatus = EngineStatus.Idle,
+    /** Nombre de la carpeta de destino elegida; nulo = la galería. */
+    val folderName: String? = null,
+    /** El sistema no concedió el permiso sobre la carpeta elegida. */
+    val folderDenied: Boolean = false,
 ) {
+    val usesFolder: Boolean get() = settings.destinationTree != null
+
     val bitrates: List<Int> get() = AudioOptions.bitratesFor(settings.audioFormat)
     val busyEngine: Boolean get() = engine == EngineStatus.Checking || engine == EngineStatus.Updating
     val canInstall: Boolean get() = engine is EngineStatus.Available
@@ -52,14 +63,37 @@ data class SettingsUiState(
 
 /** Ajustes (main.md §9, §10, ADR-019). Cada cambio se guarda al instante. */
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val store: SettingsStore, private val engine: ExtractorEngine) :
-    ViewModel() {
+class SettingsViewModel @Inject constructor(
+    private val store: SettingsStore,
+    private val engine: ExtractorEngine,
+    private val folders: DestinationFolders,
+) : ViewModel() {
     private val version = MutableStateFlow<String?>(null)
     private val engineStatus = MutableStateFlow<EngineStatus>(EngineStatus.Idle)
+    private val folderDenied = MutableStateFlow(false)
 
-    val state: StateFlow<SettingsUiState> = combine(store.settings, version, engineStatus) { settings, v, status ->
-        SettingsUiState(loading = false, settings = settings, engineVersion = v, engine = status)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SettingsUiState())
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val folderName = store.settings.map { it.destinationTree }.distinctUntilChanged().mapLatest { tree ->
+        tree?.let { folders.name(it) ?: it.substringAfterLast("%3A").ifBlank { it } }
+    }
+
+    val state: StateFlow<SettingsUiState> =
+        combine(store.settings, version, engineStatus, folderName, folderDenied) {
+                settings,
+                v,
+                status,
+                folder,
+                denied,
+            ->
+            SettingsUiState(
+                loading = false,
+                settings = settings,
+                engineVersion = v,
+                engine = status,
+                folderName = folder,
+                folderDenied = denied,
+            )
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SettingsUiState())
 
     init {
         viewModelScope.launch { version.value = engine.installedVersion() }
@@ -77,6 +111,30 @@ class SettingsViewModel @Inject constructor(private val store: SettingsStore, pr
     fun onMaxDownloadsChange(count: Int) = edit { it.copy(maxDownloads = count) }
 
     fun onWifiOnlyChange(enabled: Boolean) = edit { it.copy(wifiOnly = enabled) }
+
+    /** Carpeta elegida con el selector del sistema (`null` si se canceló). Suelta el permiso de la anterior. */
+    fun onFolderPicked(folder: String?) {
+        folder ?: return
+        if (!folders.take(folder)) {
+            folderDenied.value = true
+            return
+        }
+        folderDenied.value = false
+        val previous = state.value.settings.destinationTree
+        viewModelScope.launch {
+            store.update { it.copy(destinationTree = folder) }
+            if (previous != null && previous != folder) folders.release(previous)
+        }
+    }
+
+    fun onUseGallery() {
+        folderDenied.value = false
+        val previous = state.value.settings.destinationTree ?: return
+        viewModelScope.launch {
+            store.update { it.copy(destinationTree = null) }
+            folders.release(previous)
+        }
+    }
 
     fun onThemeChange(theme: ThemeMode) = edit { it.copy(theme = theme) }
 

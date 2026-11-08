@@ -207,4 +207,13 @@
     <string name="download_waiting_wifi">Esperando Wi‑Fi: empieza sola cuando te conectes. Se puede desactivar en Ajustes.</string>
     <string name="settings_wifi_only">Solo Wi‑Fi</string>
     <string name="settings_wifi_only_note">Con datos móviles, las descargas nuevas esperan. Las que ya están bajando siguen.</string>
+    <string name="settings_destination">Guardar en</string>
+    <string name="settings_destination_gallery">Galería (Movies/MediaForge y Music/MediaForge)</string>
+    <string name="settings_destination_folder">Carpeta: %1$s</string>
+    <string name="settings_destination_pick">Elegir carpeta</string>
+    <string name="settings_destination_use_gallery">Usar la galería</string>
+    <string name="settings_destination_denied">Android no permitió usar esa carpeta. Elegí otra.</string>
+    <string name="settings_destination_note">Los archivos de una carpeta elegida pueden no aparecer en las apps de galería.</string>
+    <string name="notification_folder_lost_title">La carpeta elegida no está disponible</string>
+    <string name="notification_folder_lost">El archivo se guardó en la galería. Podés volver a elegir una carpeta en Ajustes.</string>
 </resources>

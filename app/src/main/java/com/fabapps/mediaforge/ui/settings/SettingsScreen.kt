@@ -4,6 +4,8 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -49,6 +51,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val sourceUrl = stringResource(R.string.settings_source_url)
+    val pickFolder = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
+        viewModel.onFolderPicked(it?.toString())
+    }
     SettingsContent(
         state = state,
         actions = SettingsActions(
@@ -58,6 +63,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onAudioBitrateChange = viewModel::onAudioBitrateChange,
             onMaxDownloadsChange = viewModel::onMaxDownloadsChange,
             onWifiOnlyChange = viewModel::onWifiOnlyChange,
+            onPickFolder = { pickFolder.launch(null) },
+            onUseGallery = viewModel::onUseGallery,
             onThemeChange = viewModel::onThemeChange,
             onDynamicColorChange = viewModel::onDynamicColorChange,
             onCheckEngine = viewModel::onCheckEngine,
@@ -75,6 +82,8 @@ data class SettingsActions(
     val onAudioBitrateChange: (Int?) -> Unit = {},
     val onMaxDownloadsChange: (Int) -> Unit = {},
     val onWifiOnlyChange: (Boolean) -> Unit = {},
+    val onPickFolder: () -> Unit = {},
+    val onUseGallery: () -> Unit = {},
     val onThemeChange: (ThemeMode) -> Unit = {},
     val onDynamicColorChange: (Boolean) -> Unit = {},
     val onCheckEngine: () -> Unit = {},
@@ -161,6 +170,8 @@ fun SettingsContent(
             note = stringResource(R.string.settings_wifi_only_note),
         )
 
+        Destination(state, actions)
+
         HorizontalDivider()
         Section(stringResource(R.string.settings_section_appearance))
         Choices(
@@ -188,6 +199,34 @@ fun SettingsContent(
         Note(stringResource(R.string.settings_license))
         Note(stringResource(R.string.settings_privacy))
         OutlinedButton(onClick = actions.onOpenSource) { Text(stringResource(R.string.settings_source)) }
+    }
+}
+
+@Composable
+private fun Destination(state: SettingsUiState, actions: SettingsActions) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.settings_destination), style = MaterialTheme.typography.titleSmall)
+        Text(
+            state.folderName?.let { stringResource(R.string.settings_destination_folder, it) }
+                ?: stringResource(R.string.settings_destination_gallery),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        if (state.folderDenied) {
+            Text(
+                stringResource(R.string.settings_destination_denied),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(onClick = actions.onPickFolder) { Text(stringResource(R.string.settings_destination_pick)) }
+            if (state.usesFolder) {
+                OutlinedButton(onClick = actions.onUseGallery) {
+                    Text(stringResource(R.string.settings_destination_use_gallery))
+                }
+            }
+        }
+        Note(stringResource(R.string.settings_destination_note))
     }
 }
 

@@ -245,9 +245,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.3
   *Acepta:* pruebas de `JobScheduler` con una red falsa; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `JobScheduler.setDownloadsAllowed` y `downloadsAllowed` (en `JobQueue`), `SchedulerActivity.waitingForNetwork`; `UnmeteredNetwork` (red por defecto con internet y sin cobro por datos, solo se escucha con el ajuste activo); `QueueSettings`; notificación "Esperando Wi‑Fi" (el servicio sigue vivo mientras espera); estado en Descargas, aviso en Inicio, interruptor en Ajustes. Permiso `ACCESS_NETWORK_STATE`. 4 pruebas.
-- [ ] **T9.8** · P2 · Carpeta de destino elegida con el selector de carpetas del sistema (permiso persistente); si se pierde el permiso, vuelve a la galería y avisa. La galería sigue siendo el predeterminado.
+- [~] **T9.8** · P2 · Carpeta de destino elegida con el selector de carpetas del sistema (permiso persistente); si se pierde el permiso, vuelve a la galería y avisa. La galería sigue siendo el predeterminado.
   *Depende de:* T9.6
   *Acepta:* prueba en el teléfono (guardar en una carpeta elegida y abrir el archivo).
+  *Hecho:* `FolderLibrary` (dominio) y `DocumentTreeLibrary` (`:core:media`, crea el documento con nombre único y lee el que dejó el proveedor); `RoutingLibrary` elige carpeta o galería (`@GalleryLibrary`), y si la carpeta no sirve vuelve a la galería, borra el ajuste, suelta el permiso y avisa con una notificación; `DestinationFolders` (permiso persistente); sección "Guardar en" en Ajustes. 6 pruebas.
 - [ ] **T9.9** · P2 · Archivos temporales: tamaño de las carpetas privadas de trabajos y botón para limpiar las que no pertenecen a un trabajo activo.
   *Depende de:* T9.6
   *Acepta:* pruebas de la regla de qué se puede borrar.

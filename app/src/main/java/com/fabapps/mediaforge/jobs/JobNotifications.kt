@@ -104,6 +104,19 @@ class JobNotifications @Inject constructor(@ApplicationContext private val conte
         notify(job.id.hashCode(), notification)
     }
 
+    /** La carpeta elegida ya no se puede usar: lo guardado fue a la galería (ADR-019). */
+    fun showFolderLost() {
+        val notification = NotificationCompat.Builder(context, CHANNEL_RESULTS)
+            .setSmallIcon(R.drawable.ic_nav_downloads)
+            .setContentTitle(context.getString(R.string.notification_folder_lost_title))
+            .setContentText(context.getString(R.string.notification_folder_lost))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.notification_folder_lost)))
+            .setAutoCancel(true)
+            .setContentIntent(openApp())
+            .build()
+        notify(FOLDER_LOST_ID, notification)
+    }
+
     fun notify(id: Int, notification: Notification) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
@@ -140,6 +153,7 @@ class JobNotifications @Inject constructor(@ApplicationContext private val conte
 
     companion object {
         const val PROGRESS_ID = 1
+        const val FOLDER_LOST_ID = 2
         private const val CHANNEL_PROGRESS = "jobs_progress"
         private const val CHANNEL_RESULTS = "jobs_results"
         private const val PROGRESS_MAX = 1000
