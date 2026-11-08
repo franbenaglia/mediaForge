@@ -2,6 +2,7 @@ package com.fabapps.mediaforge.jobs
 
 import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
+import com.fabapps.mediaforge.domain.jobs.JobQueue
 import com.fabapps.mediaforge.domain.jobs.JobScheduler
 import com.fabapps.mediaforge.domain.jobs.JobStore
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
@@ -37,4 +38,10 @@ object JobsModule {
         library: MediaLibrary,
         @ApplicationScope scope: CoroutineScope,
     ): JobScheduler = JobScheduler(store, downloader, converter, library, scope)
+
+    @Provides
+    fun queue(scheduler: JobScheduler): JobQueue = scheduler
+
+    @Provides
+    fun inputAccess(access: PersistedInputAccess): InputAccess = access
 }

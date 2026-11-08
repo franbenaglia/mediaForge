@@ -49,6 +49,7 @@ import com.fabapps.mediaforge.domain.url.UrlCheck
 import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.MediaCard
 import com.fabapps.mediaforge.ui.common.RemoteThumbnail
+import com.fabapps.mediaforge.ui.common.rememberNotificationPermissionRequest
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 import kotlinx.coroutines.launch
 
@@ -61,6 +62,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     // Sin esto, el campo del enlace conserva el foco mientras está bloqueado y, al desbloquearse
     // cuando termina la descarga, Android abre el teclado solo.
     val focus = LocalFocusManager.current
+    // Android 13+: notificaciones del progreso y del resultado. No bloquea el trabajo.
+    val askNotifications = rememberNotificationPermissionRequest()
     // Solo Android 8–9: guardar en la galería pide permiso de escritura.
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) viewModel.onDownload() else viewModel.onStoragePermissionDenied()
@@ -90,6 +93,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 if (viewModel.needsStoragePermission) {
                     permission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 } else {
+                    askNotifications()
                     viewModel.onDownload()
                 }
             },

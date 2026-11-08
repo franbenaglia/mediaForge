@@ -8,17 +8,19 @@ import com.fabapps.mediaforge.domain.convert.LocalMedia
 import com.fabapps.mediaforge.domain.convert.MediaInspector
 import com.fabapps.mediaforge.domain.convert.StreamPlan
 import com.fabapps.mediaforge.domain.download.AudioOptions
-import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.jobs.JobQueue
+import com.fabapps.mediaforge.domain.jobs.JobRequest
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
-import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
+import com.fabapps.mediaforge.jobs.InputAccess
 import com.fabapps.mediaforge.ui.common.WorkState
+import com.fabapps.mediaforge.ui.common.workState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
@@ -97,14 +99,18 @@ data class ConverterUiState(
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
     private val inspector: MediaInspector,
-    private val converter: MediaConverter,
+    private val queue: JobQueue,
     private val library: MediaLibrary,
+    private val inputAccess: InputAccess,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ConverterUiState())
     val state: StateFlow<ConverterUiState> = _state.asStateFlow()
 
     private var inspectJob: Job? = null
-    private var workJob: Job? = null
+
+    /** Sigue en pantalla el trabajo encolado desde acá; la conversión corre en la cola (ADR-017). */
+    private var trackJob: Job? = null
+    private var workId: String? = null
 
     val needsStoragePermission: Boolean get() = library.needsWritePermission()
 
@@ -156,24 +162,21 @@ class ConverterViewModel @Inject constructor(
             fileName = current.fileName.ifBlank { ready.media.displayName.substringBeforeLast('.') },
         )
         _state.update { it.copy(work = WorkState.Running(JobState.Pending)) }
-        workJob = viewModelScope.launch {
-            converter.convert(request).collect { job ->
-                when (job) {
-                    is JobState.Completed -> save(job.outputs.first())
-                    is JobState.Failed -> _state.update { it.copy(work = WorkState.Failed(job.error)) }
-                    JobState.Cancelled -> _state.update { it.copy(work = WorkState.Cancelled) }
-                    else -> _state.update { it.copy(work = WorkState.Running(job)) }
-                }
-            }
+        // La cola puede correrla o reintentarla cuando esta pantalla ya no existe.
+        inputAccess.keep(ready.uri)
+        trackJob?.cancel()
+        trackJob = viewModelScope.launch {
+            val job = queue.enqueue(JobRequest.Conversion(request), title = request.fileName)
+            workId = job.id
+            queue.workState(job.id).collect { work -> _state.update { it.copy(work = work) } }
         }
     }
 
     /** Termina FFmpeg y borra la copia y la salida parcial (ADR-005). No durante el guardado. */
     fun onCancel() {
         if (!_state.value.canCancel) return
-        workJob?.cancel()
-        workJob = null
-        _state.update { it.copy(work = WorkState.Cancelled) }
+        val id = workId ?: return
+        viewModelScope.launch { queue.cancel(id) }
     }
 
     fun onStoragePermissionDenied() {
@@ -185,19 +188,6 @@ class ConverterViewModel @Inject constructor(
         if (_state.value.locked) return
         inspectJob?.cancel()
         _state.value = ConverterUiState()
-    }
-
-    private suspend fun save(file: OutputFile) {
-        _state.update { it.copy(work = WorkState.Saving) }
-        val result = library.save(file)
-        _state.update {
-            it.copy(
-                work = when (result) {
-                    is Outcome.Success -> WorkState.Saved(result.value)
-                    is Outcome.Failure -> WorkState.Failed(result.error)
-                },
-            )
-        }
     }
 
     /** Cambios de opciones: no mientras se convierte; borran el resultado anterior. */

@@ -77,12 +77,13 @@
     <string name="download_file_name">File name</string>
     <string name="download_start">Download</string>
     <string name="download_cancel">Cancel</string>
-    <string name="download_keep_open">Keep MediaForge open until the download finishes.</string>
+    <string name="download_background">The download keeps going if you leave the app. You can follow it in Downloads.</string>
     <string name="download_saving">Saving to the gallery…</string>
     <string name="download_saved">Saved in Movies/MediaForge</string>
     <string name="download_open">Open</string>
     <string name="download_share">Share</string>
     <string name="download_no_app">No app can open this file.</string>
+    <string name="download_interrupted">The download was interrupted. You can start it again.</string>
     <string name="download_cancelled">Download cancelled. Partial files were deleted.</string>
     <string name="download_failed">The download failed.</string>
     <string name="download_again">Download again</string>
@@ -133,8 +134,9 @@
     <string name="converter_start">Convert</string>
     <string name="converter_again">Convert again</string>
     <string name="converter_failed">The conversion failed.</string>
+    <string name="converter_interrupted">The conversion was interrupted. You can start it again.</string>
     <string name="converter_cancelled">Conversion cancelled. Temporary files were deleted.</string>
-    <string name="converter_keep_open">Keep MediaForge open until the conversion finishes.</string>
+    <string name="converter_background">The conversion keeps going if you leave the app. You can follow it in Downloads.</string>
 
     <!-- Notificaciones de la cola -->
     <string name="notification_channel_progress">Downloads and conversions in progress</string>

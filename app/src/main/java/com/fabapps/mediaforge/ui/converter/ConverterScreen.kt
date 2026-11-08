@@ -49,6 +49,7 @@ import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.JobRow
 import com.fabapps.mediaforge.ui.common.SavedFile
 import com.fabapps.mediaforge.ui.common.WorkState
+import com.fabapps.mediaforge.ui.common.rememberNotificationPermissionRequest
 import com.fabapps.mediaforge.ui.format.Formatters
 import com.fabapps.mediaforge.ui.home.nameRes
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
@@ -61,6 +62,8 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         viewModel.onFilePicked(uri?.toString())
     }
+    // Android 13+: notificaciones del progreso y del resultado. No bloquea el trabajo.
+    val askNotifications = rememberNotificationPermissionRequest()
     // Solo Android 8–9: guardar en la galería pide permiso de escritura.
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) viewModel.onConvert() else viewModel.onStoragePermissionDenied()
@@ -80,6 +83,7 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
                 if (viewModel.needsStoragePermission) {
                     permission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 } else {
+                    askNotifications()
                     viewModel.onConvert()
                 }
             },
@@ -312,7 +316,7 @@ private fun Work(state: ConverterUiState, actions: ConverterActions) {
                     Text(stringResource(R.string.download_cancel))
                 }
             })
-            Note(stringResource(R.string.converter_keep_open))
+            Note(stringResource(R.string.converter_background))
         }
         WorkState.Saving -> {
             Text(stringResource(R.string.download_saving), style = MaterialTheme.typography.bodyMedium)
@@ -330,6 +334,10 @@ private fun Work(state: ConverterUiState, actions: ConverterActions) {
         }
         WorkState.Cancelled -> {
             Note(stringResource(R.string.converter_cancelled))
+            ConvertButton(state.canConvert, actions.onConvert, again = true)
+        }
+        WorkState.Interrupted -> {
+            Note(stringResource(R.string.converter_interrupted))
             ConvertButton(state.canConvert, actions.onConvert, again = true)
         }
         WorkState.PermissionDenied -> {

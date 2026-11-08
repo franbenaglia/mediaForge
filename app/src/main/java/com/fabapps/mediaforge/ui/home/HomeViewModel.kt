@@ -7,18 +7,19 @@ import com.fabapps.mediaforge.domain.download.AudioOptions
 import com.fabapps.mediaforge.domain.download.VideoOption
 import com.fabapps.mediaforge.domain.download.VideoOptions
 import com.fabapps.mediaforge.domain.engine.ExtractorEngine
-import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.jobs.JobQueue
+import com.fabapps.mediaforge.domain.jobs.JobRequest
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaInfo
-import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.UrlCheck
 import com.fabapps.mediaforge.domain.url.UrlValidator
 import com.fabapps.mediaforge.ui.common.WorkState
+import com.fabapps.mediaforge.ui.common.workState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
@@ -115,14 +116,17 @@ sealed interface AnalysisState {
 class HomeViewModel @Inject constructor(
     private val extractor: MediaExtractor,
     private val engine: ExtractorEngine,
-    private val downloader: MediaDownloader,
+    private val queue: JobQueue,
     private val library: MediaLibrary,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
     private var analysisJob: Job? = null
-    private var downloadJob: Job? = null
+
+    /** Sigue en pantalla el trabajo encolado desde acá; el trabajo en sí corre en la cola (ADR-017). */
+    private var trackJob: Job? = null
+    private var downloadId: String? = null
 
     /** En Android 8–9 hay que pedir el permiso de escritura antes de [onDownload]. */
     val needsStoragePermission: Boolean get() = library.needsWritePermission()
@@ -262,15 +266,16 @@ class HomeViewModel @Inject constructor(
             expectedBytes = expected,
         )
         _state.update { it.copy(download = WorkState.Running(JobState.Pending)) }
-        downloadJob = viewModelScope.launch {
-            downloader.download(request).collect { job ->
-                when (job) {
-                    is JobState.Completed -> save(job.outputs.first())
-                    is JobState.Failed -> _state.update { it.copy(download = WorkState.Failed(job.error)) }
-                    JobState.Cancelled -> _state.update { it.copy(download = WorkState.Cancelled) }
-                    else -> _state.update { it.copy(download = WorkState.Running(job)) }
-                }
-            }
+        trackJob?.cancel()
+        trackJob = viewModelScope.launch {
+            val job = queue.enqueue(
+                JobRequest.Download(request),
+                title = request.fileName,
+                sourceName = info.site.displayName,
+                thumbnailUrl = info.thumbnailUrl,
+            )
+            downloadId = job.id
+            queue.workState(job.id).collect { work -> _state.update { it.copy(download = work) } }
         }
     }
 
@@ -284,22 +289,8 @@ class HomeViewModel @Inject constructor(
      */
     fun onCancelDownload() {
         if (!_state.value.canCancelDownload) return
-        downloadJob?.cancel()
-        downloadJob = null
-        _state.update { it.copy(download = WorkState.Cancelled) }
-    }
-
-    private suspend fun save(file: OutputFile) {
-        _state.update { it.copy(download = WorkState.Saving) }
-        val result = library.save(file)
-        _state.update {
-            it.copy(
-                download = when (result) {
-                    is Outcome.Success -> WorkState.Saved(result.value)
-                    is Outcome.Failure -> WorkState.Failed(result.error)
-                },
-            )
-        }
+        val id = downloadId ?: return
+        viewModelScope.launch { queue.cancel(id) }
     }
 
     /** Cancelar la corrutina termina también el proceso de yt-dlp (ADR-005). */

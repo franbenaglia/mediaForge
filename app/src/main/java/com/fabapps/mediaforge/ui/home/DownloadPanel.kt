@@ -82,7 +82,7 @@ internal fun DownloadPanel(
                         Text(stringResource(R.string.download_cancel))
                     }
                 })
-                Hint(stringResource(R.string.download_keep_open))
+                Hint(stringResource(R.string.download_background))
             }
             WorkState.Saving -> {
                 Text(stringResource(R.string.download_saving), style = MaterialTheme.typography.bodyMedium)
@@ -100,6 +100,10 @@ internal fun DownloadPanel(
             }
             WorkState.Cancelled -> {
                 Hint(stringResource(R.string.download_cancelled))
+                DownloadButton(state.canDownload, onDownload, again = true)
+            }
+            WorkState.Interrupted -> {
+                Hint(stringResource(R.string.download_interrupted))
                 DownloadButton(state.canDownload, onDownload, again = true)
             }
             WorkState.PermissionDenied -> {

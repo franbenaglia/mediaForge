@@ -19,17 +19,17 @@ Las capas de main.md §6.4 se mapean así: Presentation y Platform → `:app`; D
 UI (URL) ──► ViewModel ──► MediaExtractor.extract(url) ──► YtDlpExtractor
                                                             └─ python + yt-dlp --dump-json (proceso)
          ◄── MediaInfo (formatos reales) ◄──────────────────┘
-UI (elige formato) ──► JobRepository.enqueue(DownloadRequest) ──► Room (Pending)
-Foreground service ──► MediaDownloader.download(req): Flow<JobState>
+UI (elige formato) ──► JobQueue.enqueue(Download) ──► Room (QUEUED)
+JobScheduler (con JobService en primer plano) ──► MediaDownloader.download(req): Flow<JobState>
                          ├─ Downloading(progress, bytes, speed)   ← stdout de yt-dlp
                          ├─ Processing(MERGE / EXTRACT_AUDIO / TRANSCODE)  ← ffmpeg
                          └─ Completed(outputs) / Failed(error) / Cancelled
-                       ──► Room (estado) ──► notificación + UI
+                       ──► MediaLibrary.save ──► Room (COMPLETED) ──► notificación + UI
 ```
 
 Para cancelar, se cancela la corrutina del trabajo; el adaptador mata el proceso y sus hijos (ADR-005).
 
-**Hoy (Etapa 4)**, sin cola ni servicio: `HomeViewModel` colecta `MediaDownloader.download()` en su `viewModelScope` y, al llegar `Completed`, llama a `MediaLibrary.save()`. Si se cierra la app, la descarga se cancela (la UI lo avisa). La cola, Room y el servicio en primer plano llegan en la Etapa 7.
+Desde la Etapa 7, Inicio y Conversor no corren el trabajo: lo encolan en `JobQueue` (`JobScheduler`) y siguen su estado con `JobQueue.workState(id)` hasta que termina. El guardado en la galería lo hace la cola. Salir de la app no corta nada; el conversor conserva el permiso de lectura del archivo elegido (`InputAccess`) hasta que la conversión se guarda.
 
 Calidades: `VideoOptions` arma una opción por altura con formatos concretos (`299+258`) para que el tamaño mostrado sea el que se baja; el comando agrega un respaldo por altura por si el sitio ya no ofrece esos IDs.
 

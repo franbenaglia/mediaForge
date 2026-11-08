@@ -6,24 +6,33 @@ import com.fabapps.mediaforge.domain.convert.MediaInspector
 import com.fabapps.mediaforge.domain.convert.StreamPlan
 import com.fabapps.mediaforge.domain.convert.VideoStream
 import com.fabapps.mediaforge.domain.engine.MediaConverter
+import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.jobs.JobScheduler
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.ConversionTarget
+import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
+import com.fabapps.mediaforge.jobs.InputAccess
+import com.fabapps.mediaforge.testing.InMemoryJobStore
 import com.fabapps.mediaforge.ui.common.WorkState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -69,6 +78,22 @@ class ConverterViewModelTest {
     private val inspector = FakeInspector()
     private val converter = FakeConverter()
     private val library = FakeLibrary()
+    private class FakeInputAccess : InputAccess {
+        val kept = mutableListOf<String>()
+        override fun keep(uri: String) {
+            kept += uri
+        }
+        override fun release(uri: String) = Unit
+    }
+
+    private val inputAccess = FakeInputAccess()
+    private val store = InMemoryJobStore()
+
+    /** La cola real, con el conversor falso. */
+    private val queueScope = CoroutineScope(dispatcher + SupervisorJob())
+    private val noDownloader = object : MediaDownloader {
+        override fun download(request: DownloadRequest) = emptyFlow<JobState>()
+    }
     private lateinit var vm: ConverterViewModel
     private val state get() = vm.state.value
 
@@ -84,11 +109,16 @@ class ConverterViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = ConverterViewModel(inspector, converter, library)
+        val queue =
+            JobScheduler(store, noDownloader, converter, library, queueScope, clock = {
+                dispatcher.scheduler.currentTime
+            })
+        vm = ConverterViewModel(inspector, queue, library, inputAccess)
     }
 
     @After
     fun tearDown() {
+        queueScope.cancel()
         Dispatchers.resetMain()
     }
 
@@ -193,6 +223,9 @@ class ConverterViewModelTest {
         assertEquals(ConversionTarget.Video(VideoContainer.MP4, null), request.target)
         assertEquals(listOf(output), library.saved)
         assertEquals(WorkState.Saved(output.copy(location = "content://media/9")), state.work)
+        // La cola puede correr o reintentar la conversión cuando esta pantalla ya no está.
+        assertEquals(listOf("content://docs/1"), inputAccess.kept)
+        assertEquals("Mis vacaciones", store.jobs.value.values.single().title)
     }
 
     @Test

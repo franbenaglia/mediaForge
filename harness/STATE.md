@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; T7.3 hecha salvo la prueba del DAO en el teléfono (va con T7.7). T7.4 hecha, sin probar en el teléfono. Próxima T7.5 (Inicio y Conversor encolan). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
+Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; T7.3 hecha salvo la prueba del DAO en el teléfono (va con T7.7). T7.4 hecha, sin probar en el teléfono. T7.5 hecha. Próxima T7.6 (pantalla Descargas). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
 
 ## Etapas
 

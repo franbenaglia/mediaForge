@@ -50,7 +50,7 @@ class JobScheduler(
     private val scope: CoroutineScope,
     private val clock: () -> Long = System::currentTimeMillis,
     private val limits: Limits = Limits(),
-) {
+) : JobQueue {
     data class Limits(
         val downloads: Int = 2,
         val conversions: Int = 1,
@@ -75,7 +75,7 @@ class JobScheduler(
     private val _live = MutableStateFlow<Map<String, JobState>>(emptyMap())
 
     /** Último estado del motor de cada trabajo en curso (progreso, velocidad, fase). */
-    val live: StateFlow<Map<String, JobState>> = _live.asStateFlow()
+    override val live: StateFlow<Map<String, JobState>> = _live.asStateFlow()
 
     private val _activity = MutableStateFlow(SchedulerActivity())
     val activity: StateFlow<SchedulerActivity> = _activity.asStateFlow()
@@ -85,9 +85,9 @@ class JobScheduler(
     /** Trabajos que terminaron (completados, fallidos sin más reintentos o interrumpidos), para avisar. */
     val finished: SharedFlow<Job> = _finished.asSharedFlow()
 
-    fun observeAll(): Flow<List<Job>> = store.observeAll()
+    override fun observeAll(): Flow<List<Job>> = store.observeAll()
 
-    fun observe(id: String): Flow<Job?> = store.observe(id)
+    override fun observe(id: String): Flow<Job?> = store.observe(id)
 
     /**
      * Arranca o reanuda la cola. La primera vez recupera los trabajos que figuraban en curso: el proceso
@@ -105,12 +105,7 @@ class JobScheduler(
         pump()
     }
 
-    suspend fun enqueue(
-        request: JobRequest,
-        title: String,
-        sourceName: String? = null,
-        thumbnailUrl: String? = null,
-    ): Job {
+    override suspend fun enqueue(request: JobRequest, title: String, sourceName: String?, thumbnailUrl: String?): Job {
         val job = Job(request, title, sourceName, thumbnailUrl, createdAt = clock())
         store.put(job)
         mutex.withLock { paused = false }
@@ -119,7 +114,7 @@ class JobScheduler(
     }
 
     /** Corta un trabajo en cola o en curso. No hace nada mientras se guarda en la galería. */
-    suspend fun cancel(id: String) {
+    override suspend fun cancel(id: String) {
         val coroutine = mutex.withLock {
             running[id]?.let { current ->
                 if (id in saving) return
@@ -139,7 +134,7 @@ class JobScheduler(
     }
 
     /** Vuelve a poner en cola un trabajo fallido, cancelado o interrumpido, con los intentos en cero. */
-    suspend fun retry(id: String) {
+    override suspend fun retry(id: String) {
         val job = store.get(id) ?: return
         if (!job.status.canRetry) return
         store.put(job.copy(status = JobStatus.QUEUED, error = null, output = null, attempts = 0, updatedAt = clock()))
@@ -148,7 +143,7 @@ class JobScheduler(
     }
 
     /** Quita de la lista un trabajo terminado. El archivo de la galería queda. */
-    suspend fun delete(id: String) {
+    override suspend fun delete(id: String) {
         val job = store.get(id) ?: return
         if (!job.status.canDelete) return
         store.delete(id)

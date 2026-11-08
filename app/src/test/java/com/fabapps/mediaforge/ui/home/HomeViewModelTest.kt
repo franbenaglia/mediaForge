@@ -1,9 +1,11 @@
 package com.fabapps.mediaforge.ui.home
 
 import com.fabapps.mediaforge.domain.engine.ExtractorEngine
+import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.jobs.JobScheduler
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
@@ -16,13 +18,18 @@ import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.SourceSite
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.UrlCheck
+import com.fabapps.mediaforge.testing.InMemoryJobStore
 import com.fabapps.mediaforge.ui.common.WorkState
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -95,6 +102,13 @@ class HomeViewModelTest {
     private val engine = FakeEngine()
     private val downloader = FakeDownloader()
     private val library = FakeLibrary()
+    private val store = InMemoryJobStore()
+
+    /** La cola real, con el descargador falso: la descarga pasa por la cola como en la app. */
+    private val queueScope = CoroutineScope(dispatcher + SupervisorJob())
+    private val noConverter = object : MediaConverter {
+        override fun convert(request: com.fabapps.mediaforge.domain.model.ConversionRequest) = emptyFlow<JobState>()
+    }
     private lateinit var vm: HomeViewModel
     private val state get() = vm.state.value
 
@@ -114,11 +128,16 @@ class HomeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = HomeViewModel(extractor, engine, downloader, library)
+        val queue =
+            JobScheduler(store, downloader, noConverter, library, queueScope, clock = {
+                dispatcher.scheduler.currentTime
+            })
+        vm = HomeViewModel(extractor, engine, queue, library)
     }
 
     @After
     fun tearDown() {
+        queueScope.cancel()
         Dispatchers.resetMain()
     }
 
@@ -438,7 +457,7 @@ class HomeViewModelTest {
     fun analyzingAgainClearsThePreviousDownload() = test {
         analyzed()
         vm.onDownload()
-        downloader.events.send(JobState.Failed(MediaError.Network()))
+        downloader.events.send(JobState.Failed(MediaError.AccessDenied()))
         downloader.events.close()
         advanceUntilIdle()
         extractor.pending = CompletableDeferred()
