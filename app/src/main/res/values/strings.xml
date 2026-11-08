@@ -215,4 +215,8 @@
     <string name="settings_privacy">No ads, no analytics, no accounts. Everything runs on your device.</string>
     <string name="settings_source">Source code</string>
     <string name="settings_source_url" translatable="false">https://github.com/franbenaglia/mediaForge</string>
+    <string name="notification_waiting_wifi">Waiting for Wi‑Fi</string>
+    <string name="download_waiting_wifi">Waiting for Wi‑Fi: it starts by itself when you connect. You can turn this off in Settings.</string>
+    <string name="settings_wifi_only">Wi‑Fi only</string>
+    <string name="settings_wifi_only_note">On mobile data, new downloads wait. Downloads already running go on.</string>
 </resources>

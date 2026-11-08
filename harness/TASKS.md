@@ -241,9 +241,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.2
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `SettingsViewModel` (7 pruebas) y `SettingsScreen`; `MainActivity` aplica tema y colores; El idioma sigue al del teléfono (inglés por defecto, español si el teléfono está en español): el ajuste de idioma por app del sistema no guardaba la elección en el teléfono de prueba y se quitó el botón. "Solo Wi‑Fi" y la carpeta de destino no se muestran hasta T9.7 y T9.8. Se borró `NotImplementedScreen`: ya no queda ninguna sección sin hacer.
-- [ ] **T9.7** · P2 · Política de conexión "Solo Wi‑Fi": con datos móviles las descargas nuevas esperan ("Esperando Wi‑Fi") y arrancan solas al volver el Wi‑Fi; las que ya corren siguen; las conversiones no dependen de la red.
+- [~] **T9.7** · P2 · Política de conexión "Solo Wi‑Fi": con datos móviles las descargas nuevas esperan ("Esperando Wi‑Fi") y arrancan solas al volver el Wi‑Fi; las que ya corren siguen; las conversiones no dependen de la red.
   *Depende de:* T9.3
   *Acepta:* pruebas de `JobScheduler` con una red falsa; `[~]` hasta probarlo en el teléfono.
+  *Hecho:* `JobScheduler.setDownloadsAllowed` y `downloadsAllowed` (en `JobQueue`), `SchedulerActivity.waitingForNetwork`; `UnmeteredNetwork` (red por defecto con internet y sin cobro por datos, solo se escucha con el ajuste activo); `QueueSettings`; notificación "Esperando Wi‑Fi" (el servicio sigue vivo mientras espera); estado en Descargas, aviso en Inicio, interruptor en Ajustes. Permiso `ACCESS_NETWORK_STATE`. 4 pruebas.
 - [ ] **T9.8** · P2 · Carpeta de destino elegida con el selector de carpetas del sistema (permiso persistente); si se pierde el permiso, vuelve a la galería y avisa. La galería sigue siendo el predeterminado.
   *Depende de:* T9.6
   *Acepta:* prueba en el teléfono (guardar en una carpeta elegida y abrir el archivo).

@@ -82,6 +82,7 @@ internal fun DownloadPanel(
                         Text(stringResource(R.string.download_cancel))
                     }
                 })
+                if (state.waitingForWifi) Hint(stringResource(R.string.download_waiting_wifi))
                 Hint(stringResource(R.string.download_background))
             }
             WorkState.Saving -> {

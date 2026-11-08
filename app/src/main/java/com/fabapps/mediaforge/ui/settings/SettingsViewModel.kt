@@ -76,6 +76,8 @@ class SettingsViewModel @Inject constructor(private val store: SettingsStore, pr
 
     fun onMaxDownloadsChange(count: Int) = edit { it.copy(maxDownloads = count) }
 
+    fun onWifiOnlyChange(enabled: Boolean) = edit { it.copy(wifiOnly = enabled) }
+
     fun onThemeChange(theme: ThemeMode) = edit { it.copy(theme = theme) }
 
     fun onDynamicColorChange(enabled: Boolean) = edit { it.copy(dynamicColor = enabled) }

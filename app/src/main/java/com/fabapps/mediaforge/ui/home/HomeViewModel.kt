@@ -57,6 +57,8 @@ data class HomeUiState(
     /** Nombre del archivo sin extensión; arranca con el título. */
     val fileName: String = "",
     val download: WorkState = WorkState.None,
+    /** "Solo Wi‑Fi" con red medida: la descarga encolada espera. */
+    val downloadsAllowed: Boolean = true,
 ) {
     val canAnalyze: Boolean
         get() = status == InputStatus.READY &&
@@ -79,6 +81,9 @@ data class HomeUiState(
     val audioEstimatedBytes: Long? get() = audioOption?.estimatedBytes(audioBitrate, audioSourceBytes)
 
     val canCancelDownload: Boolean get() = download is WorkState.Running
+
+    /** La descarga de esta pantalla está en cola esperando una red sin cobro por datos. */
+    val waitingForWifi: Boolean get() = !downloadsAllowed && download == WorkState.Running(JobState.Pending)
 
     /** Se ofrece actualizar solo cuando el error lo sugiere. */
     val canUpdateEngine: Boolean
@@ -138,6 +143,9 @@ class HomeViewModel @Inject constructor(
 
     init {
         // Un enlace compartido desde otra app, aunque haya llegado antes de abrir Inicio (ADR-018).
+        viewModelScope.launch {
+            queue.downloadsAllowed.collect { allowed -> _state.update { it.copy(downloadsAllowed = allowed) } }
+        }
         viewModelScope.launch {
             shareInbox.pending.filterNotNull().collect { shareInbox.take()?.let(::onShared) }
         }

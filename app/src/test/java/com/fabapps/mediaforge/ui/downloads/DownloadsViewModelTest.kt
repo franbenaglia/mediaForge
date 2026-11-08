@@ -210,6 +210,22 @@ class DownloadsViewModelTest {
     }
 
     @Test
+    fun queuedDownloadsShowTheyWaitForWifi() = test {
+        queue.setDownloadsAllowed(false)
+        queue.enqueue(download("a"), "A")
+        queue.enqueue(conversion("c"), "C")
+        advanceUntilIdle()
+        assertTrue(item("a").waitingWifi)
+        assertFalse(item("c").waitingWifi)
+        assertFalse(item("c").isQueued)
+
+        queue.setDownloadsAllowed(true)
+        advanceUntilIdle()
+        assertFalse(item("a").waitingWifi)
+        assertEquals(JobStatus.RUNNING, item("a").job.status)
+    }
+
+    @Test
     fun detailsOpenOneAtATime() = test {
         queue.enqueue(download("a"), "A")
         queue.enqueue(download("b"), "B")

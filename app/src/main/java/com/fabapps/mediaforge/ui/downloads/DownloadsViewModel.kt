@@ -19,13 +19,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Un trabajo de la lista, con su estado para la pantalla. */
-data class JobItem(val job: Job, val work: WorkState) {
+data class JobItem(val job: Job, val work: WorkState, private val downloadsAllowed: Boolean = true) {
     val id: String get() = job.id
     val isConversion: Boolean get() = job.request is JobRequest.Conversion
 
     /** En cola esperando un reintento automático después de un error de red. */
     val waitingRetry: Boolean get() = job.status == JobStatus.QUEUED && job.error != null
     val isQueued: Boolean get() = job.status == JobStatus.QUEUED
+
+    /** Descarga en cola frenada por "Solo Wi‑Fi". */
+    val waitingWifi: Boolean get() = isQueued && !isConversion && !downloadsAllowed && job.error == null
     val canCancel: Boolean get() = job.status.canCancel
     val canRetry: Boolean get() = job.status.canRetry
     val canRemove: Boolean get() = job.status.canDelete
@@ -49,10 +52,10 @@ class DownloadsViewModel @Inject constructor(private val queue: JobQueue, privat
     private val expanded = MutableStateFlow<String?>(null)
 
     val state: StateFlow<DownloadsUiState> =
-        combine(queue.observeAll(), queue.live, expanded) { jobs, live, open ->
+        combine(queue.observeAll(), queue.live, queue.downloadsAllowed, expanded) { jobs, live, allowed, open ->
             DownloadsUiState(
                 loading = false,
-                items = jobs.map { JobItem(it, WorkState.of(it, live[it.id])) },
+                items = jobs.map { JobItem(it, WorkState.of(it, live[it.id]), allowed) },
                 expandedId = open?.takeIf { id -> jobs.any { it.id == id } },
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), DownloadsUiState())

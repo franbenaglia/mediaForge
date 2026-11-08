@@ -57,6 +57,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onAudioFormatChange = viewModel::onAudioFormatChange,
             onAudioBitrateChange = viewModel::onAudioBitrateChange,
             onMaxDownloadsChange = viewModel::onMaxDownloadsChange,
+            onWifiOnlyChange = viewModel::onWifiOnlyChange,
             onThemeChange = viewModel::onThemeChange,
             onDynamicColorChange = viewModel::onDynamicColorChange,
             onCheckEngine = viewModel::onCheckEngine,
@@ -73,6 +74,7 @@ data class SettingsActions(
     val onAudioFormatChange: (AudioFormat) -> Unit = {},
     val onAudioBitrateChange: (Int?) -> Unit = {},
     val onMaxDownloadsChange: (Int) -> Unit = {},
+    val onWifiOnlyChange: (Boolean) -> Unit = {},
     val onThemeChange: (ThemeMode) -> Unit = {},
     val onDynamicColorChange: (Boolean) -> Unit = {},
     val onCheckEngine: () -> Unit = {},
@@ -152,6 +154,12 @@ fun SettingsContent(
             onSelect = actions.onMaxDownloadsChange,
             note = stringResource(R.string.settings_max_downloads_note),
         )
+        Toggle(
+            title = stringResource(R.string.settings_wifi_only),
+            checked = settings.wifiOnly,
+            onChange = actions.onWifiOnlyChange,
+            note = stringResource(R.string.settings_wifi_only_note),
+        )
 
         HorizontalDivider()
         Section(stringResource(R.string.settings_section_appearance))
@@ -163,14 +171,11 @@ fun SettingsContent(
             onSelect = actions.onThemeChange,
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.settings_dynamic_color),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f),
-                )
-                Switch(checked = settings.dynamicColor, onCheckedChange = actions.onDynamicColorChange)
-            }
+            Toggle(
+                title = stringResource(R.string.settings_dynamic_color),
+                checked = settings.dynamicColor,
+                onChange = actions.onDynamicColorChange,
+            )
         }
 
         HorizontalDivider()
@@ -224,6 +229,17 @@ private fun Engine(state: SettingsUiState, actions: SettingsActions) {
         if (state.busyEngine) CircularProgressIndicator(modifier = Modifier.padding(4.dp))
     }
     Note(stringResource(R.string.settings_engine_note))
+}
+
+@Composable
+private fun Toggle(title: String, checked: Boolean, onChange: (Boolean) -> Unit, note: String? = null) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            note?.let { Note(it) }
+        }
+        Switch(checked = checked, onCheckedChange = onChange)
+    }
 }
 
 @Composable

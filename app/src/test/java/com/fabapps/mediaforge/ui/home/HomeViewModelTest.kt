@@ -116,6 +116,7 @@ class HomeViewModelTest {
     private val noConverter = object : MediaConverter {
         override fun convert(request: com.fabapps.mediaforge.domain.model.ConversionRequest) = emptyFlow<JobState>()
     }
+    private lateinit var queue: JobScheduler
     private lateinit var vm: HomeViewModel
     private val state get() = vm.state.value
 
@@ -135,7 +136,7 @@ class HomeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        val queue =
+        queue =
             JobScheduler(store, downloader, noConverter, library, queueScope, clock = {
                 dispatcher.scheduler.currentTime
             })
@@ -244,6 +245,21 @@ class HomeViewModelTest {
         assertEquals(null, state.audioBitrate)
     }
 
+    @Test
+    fun queuedDownloadExplainsItWaitsForWifi() = test {
+        queue.setDownloadsAllowed(false)
+        analyzed()
+        vm.onDownload()
+        advanceUntilIdle()
+        assertTrue(state.waitingForWifi)
+        assertTrue(downloader.requests.isEmpty())
+
+        queue.setDownloadsAllowed(true)
+        advanceUntilIdle()
+        assertFalse(state.waitingForWifi)
+        assertEquals(1, downloader.requests.size)
+    }
+
     // Compartir (ADR-018)
 
     @Test
@@ -259,8 +275,8 @@ class HomeViewModelTest {
     @Test
     fun linkSharedBeforeHomeOpensIsTaken() = test {
         val early = ShareInbox().apply { offer(SharedContent(null, "https://vimeo.com/1")) }
-        val queue = JobScheduler(store, downloader, noConverter, library, queueScope)
-        val home = HomeViewModel(extractor, engine, queue, library, early, settings)
+        val otherQueue = JobScheduler(store, downloader, noConverter, library, queueScope)
+        val home = HomeViewModel(extractor, engine, otherQueue, library, early, settings)
         advanceUntilIdle()
         assertEquals("https://vimeo.com/1", home.state.value.input)
         assertEquals(listOf("https://vimeo.com/1"), extractor.calls)

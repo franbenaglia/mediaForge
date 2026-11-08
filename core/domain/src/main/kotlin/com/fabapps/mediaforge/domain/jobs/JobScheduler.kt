@@ -30,7 +30,13 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /** Qué está haciendo la cola. Con `isBusy` la app decide si el servicio en primer plano tiene que estar vivo. */
-data class SchedulerActivity(val runningDownloads: Int = 0, val runningConversions: Int = 0, val waiting: Int = 0) {
+data class SchedulerActivity(
+    val runningDownloads: Int = 0,
+    val runningConversions: Int = 0,
+    val waiting: Int = 0,
+    /** Descargas en cola frenadas por "Solo Wi‑Fi" (incluidas en [waiting]). */
+    val waitingForNetwork: Int = 0,
+) {
     val isBusy: Boolean get() = runningDownloads + runningConversions + waiting > 0
 }
 
@@ -81,6 +87,9 @@ class JobScheduler(
 
     /** Último estado del motor de cada trabajo en curso (progreso, velocidad, fase). */
     override val live: StateFlow<Map<String, JobState>> = _live.asStateFlow()
+
+    private val _downloadsAllowed = MutableStateFlow(true)
+    override val downloadsAllowed: StateFlow<Boolean> = _downloadsAllowed.asStateFlow()
 
     private val _activity = MutableStateFlow(SchedulerActivity())
     val activity: StateFlow<SchedulerActivity> = _activity.asStateFlow()
@@ -164,6 +173,16 @@ class JobScheduler(
     }
 
     /**
+     * "Solo Wi‑Fi" con una red medida: las descargas en cola esperan y arrancan solas cuando vuelve a
+     * permitirse. Las que corren siguen: cortarlas perdería lo bajado (no hay pausa real, ADR-019).
+     * Las conversiones no usan la red.
+     */
+    suspend fun setDownloadsAllowed(allowed: Boolean) {
+        mutex.withLock { _downloadsAllowed.value = allowed }
+        pump()
+    }
+
+    /**
      * Android cortó el servicio (`onTimeout`): todo lo que corre queda interrumpido y la cola no sigue
      * hasta el próximo [start] o [enqueue].
      */
@@ -200,6 +219,7 @@ class JobScheduler(
             if (job.id in running) return@forEach
             if ((retryAt[job.id] ?: 0) > now) return@forEach
             val isConversion = job.request is JobRequest.Conversion
+            if (!isConversion && !_downloadsAllowed.value) return@forEach
             val busy = running.values.count { it.isConversion == isConversion }
             if (busy >= if (isConversion) limits.conversions else limits.downloads) return@forEach
             retryAt.remove(job.id)
@@ -217,11 +237,12 @@ class JobScheduler(
     }
 
     private suspend fun updateActivityLocked() {
-        val waiting = if (paused) 0 else store.withStatus(setOf(JobStatus.QUEUED)).count { it.id !in running }
+        val queued = if (paused) emptyList() else store.withStatus(setOf(JobStatus.QUEUED)).filter { it.id !in running }
         _activity.value = SchedulerActivity(
             runningDownloads = running.values.count { !it.isConversion },
             runningConversions = running.values.count { it.isConversion },
-            waiting = waiting,
+            waiting = queued.size,
+            waitingForNetwork = if (_downloadsAllowed.value) 0 else queued.count { it.request is JobRequest.Download },
         )
     }
 

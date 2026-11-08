@@ -64,7 +64,11 @@ class JobService : Service() {
             val running = snapshot.jobs.filter { it.status == JobStatus.RUNNING || it.status == JobStatus.SAVING }
             val main = running.lastOrNull()
             val others = snapshot.jobs.count { it.status.isActive } - 1
-            promote(snapshot.activity, notifications.progress(main, main?.let { snapshot.live[it.id] }, others))
+            val waitingForWifi = snapshot.activity.waitingForNetwork > 0
+            promote(
+                snapshot.activity,
+                notifications.progress(main, main?.let { snapshot.live[it.id] }, others, waitingForWifi),
+            )
             // La notificación no necesita más de dos actualizaciones por segundo.
             delay(UPDATE_INTERVAL_MS)
         }

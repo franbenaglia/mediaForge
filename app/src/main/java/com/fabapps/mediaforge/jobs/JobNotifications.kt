@@ -49,7 +49,7 @@ class JobNotifications @Inject constructor(@ApplicationContext private val conte
      * Progreso del trabajo en curso más viejo, con Cancelar. Si no corre ninguno (espera de un
      * reintento), un texto genérico.
      */
-    fun progress(main: Job?, state: JobState?, others: Int): Notification {
+    fun progress(main: Job?, state: JobState?, others: Int, waitingForWifi: Boolean = false): Notification {
         val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_nav_downloads)
             .setOngoing(true)
@@ -59,7 +59,8 @@ class JobNotifications @Inject constructor(@ApplicationContext private val conte
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setContentIntent(openApp())
         if (main == null) {
-            return builder.setContentTitle(context.getString(R.string.notification_waiting_retry)).build()
+            val title = if (waitingForWifi) R.string.notification_waiting_wifi else R.string.notification_waiting_retry
+            return builder.setContentTitle(context.getString(title)).build()
         }
         val fraction = state?.progressFraction
         builder

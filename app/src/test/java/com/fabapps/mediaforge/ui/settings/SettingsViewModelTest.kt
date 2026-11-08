@@ -78,6 +78,7 @@ class SettingsViewModelTest {
         vm.onMaxDownloadsChange(3)
         vm.onThemeChange(ThemeMode.DARK)
         vm.onDynamicColorChange(false)
+        vm.onWifiOnlyChange(true)
         advanceUntilIdle()
         val saved = store.settings.value
         assertEquals(PreferredMode.AUDIO, saved.mode)
@@ -87,6 +88,7 @@ class SettingsViewModelTest {
         assertEquals(3, saved.maxDownloads)
         assertEquals(ThemeMode.DARK, saved.theme)
         assertFalse(saved.dynamicColor)
+        assertTrue(saved.wifiOnly)
         assertEquals(saved, state.settings)
         assertEquals(listOf(96, 128, 160), state.bitrates)
     }

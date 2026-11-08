@@ -9,6 +9,9 @@ interface JobQueue {
     /** Último estado del motor de cada trabajo en curso. */
     val live: StateFlow<Map<String, JobState>>
 
+    /** `false` con "Solo Wi‑Fi" y una red medida: las descargas en cola esperan (ADR-019). */
+    val downloadsAllowed: StateFlow<Boolean>
+
     fun observeAll(): Flow<List<Job>>
 
     fun observe(id: String): Flow<Job?>

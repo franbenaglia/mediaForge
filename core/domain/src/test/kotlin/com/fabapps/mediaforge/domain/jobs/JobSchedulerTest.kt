@@ -206,6 +206,30 @@ class JobSchedulerTest {
     }
 
     @Test
+    fun `without an allowed network downloads wait, running ones and conversions go on`() = runTest {
+        val scheduler = scheduler()
+        scheduler.enqueue(download("d1"), "d1")
+        runCurrent()
+        scheduler.setDownloadsAllowed(false)
+        scheduler.enqueue(download("d2"), "d2")
+        scheduler.enqueue(conversion("c1"), "c1")
+        runCurrent()
+
+        assertEquals(listOf("d1", "c1"), engine.started)
+        assertTrue(engine.cancelled.isEmpty())
+        assertEquals(JobStatus.QUEUED, store.status("d2"))
+        assertFalse(scheduler.downloadsAllowed.value)
+        assertEquals(1, scheduler.activity.value.waitingForNetwork)
+        // Sigue ocupada: el servicio se queda esperando la red.
+        assertTrue(scheduler.activity.value.isBusy)
+
+        scheduler.setDownloadsAllowed(true)
+        runCurrent()
+        assertEquals(listOf("d1", "c1", "d2"), engine.started)
+        assertEquals(0, scheduler.activity.value.waitingForNetwork)
+    }
+
+    @Test
     fun `at most two downloads and one conversion run at once, in order`() = runTest {
         val scheduler = scheduler()
         listOf("d1", "d2", "d3").forEach { scheduler.enqueue(download(it), it) }

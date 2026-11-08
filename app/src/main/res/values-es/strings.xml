@@ -203,4 +203,8 @@
     <string name="settings_license">Software libre con licencia GPL-3.0.</string>
     <string name="settings_privacy">Sin anuncios, sin analítica, sin cuentas. Todo corre en tu dispositivo.</string>
     <string name="settings_source">Código fuente</string>
+    <string name="notification_waiting_wifi">Esperando Wi‑Fi</string>
+    <string name="download_waiting_wifi">Esperando Wi‑Fi: empieza sola cuando te conectes. Se puede desactivar en Ajustes.</string>
+    <string name="settings_wifi_only">Solo Wi‑Fi</string>
+    <string name="settings_wifi_only_note">Con datos móviles, las descargas nuevas esperan. Las que ya están bajando siguen.</string>
 </resources>

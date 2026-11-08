@@ -171,6 +171,7 @@ private fun Status(item: JobItem) {
     val (text, isError) = when (val work = item.work) {
         is WorkState.Running -> when {
             item.waitingRetry -> stringResource(R.string.notification_waiting_retry) to false
+            item.waitingWifi -> stringResource(R.string.notification_waiting_wifi) to false
             item.isQueued -> stringResource(R.string.downloads_queued) to false
             else -> listOfNotNull(stringResource(work.job.statusRes()), jobDetail(work.job)).joinToString(separator) to
                 false
