@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; T7.3 hecha salvo la prueba del DAO en el teléfono (va con T7.7). T7.4 hecha, sin probar en el teléfono. T7.5 hecha. Próxima T7.6 (pantalla Descargas). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
+Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; T7.3 hecha salvo la prueba del DAO en el teléfono (va con T7.7). T7.4 hecha, sin probar en el teléfono. T7.5 hecha; T7.6 hecha, sin probar en el teléfono. Próxima T7.7: prueba en el teléfono (incluye `RoomJobStoreDeviceTest` de T7.3). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
 
 ## Etapas
 
@@ -25,7 +25,7 @@ Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T
 ## Implementado
 
 - Proyecto Gradle (`:app`, `:core:domain`), Hilt, tema Material 3 claro/oscuro.
-- Navegación tipada con barra inferior (Inicio, Descargas, Conversor, Historial, Ajustes). Inicio funciona; las otras cuatro muestran "todavía no disponible".
+- Navegación tipada con barra inferior (Inicio, Descargas, Conversor, Historial, Ajustes). Inicio, Descargas y Conversor funcionan; Historial y Ajustes muestran "todavía no disponible".
 - Componentes: `MediaCard` (miniatura como slot), `JobRow` (estado, progreso, tamaño y velocidad), `EmptyState`, `ErrorState`; textos de estados y errores; `Formatters` (bytes, duración).
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.

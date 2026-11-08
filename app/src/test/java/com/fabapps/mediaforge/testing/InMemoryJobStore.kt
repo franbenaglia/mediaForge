@@ -20,7 +20,9 @@ class InMemoryJobStore : JobStore {
     override suspend fun withStatus(statuses: Set<JobStatus>): List<Job> =
         jobs.value.values.filter { it.status in statuses }.sortedBy { it.createdAt }
 
-    override fun observeAll(): Flow<List<Job>> = jobs.map { all -> all.values.sortedByDescending { it.createdAt } }
+    /** Como Room (`createdAt DESC, rowid DESC`): a igual fecha, el último insertado primero. */
+    override fun observeAll(): Flow<List<Job>> =
+        jobs.map { all -> all.values.reversed().sortedByDescending { it.createdAt } }
 
     override fun observe(id: String): Flow<Job?> = jobs.map { it[id] }
 

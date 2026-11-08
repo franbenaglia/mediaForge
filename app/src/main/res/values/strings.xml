@@ -150,4 +150,20 @@
         <item quantity="one">%d more in the queue</item>
         <item quantity="other">%d more in the queue</item>
     </plurals>
+
+    <!-- Administrador de descargas -->
+    <string name="downloads_empty_title">No downloads yet</string>
+    <string name="downloads_empty_message">Downloads and conversions you start show up here, even after closing the app.</string>
+    <string name="downloads_conversion">Conversion</string>
+    <string name="downloads_queued">In the queue</string>
+    <string name="downloads_interrupted">Interrupted</string>
+    <string name="downloads_remove">Remove</string>
+    <string name="downloads_details">Details</string>
+    <string name="downloads_hide_details">Hide details</string>
+    <string name="downloads_detail_added">Added: %1$s</string>
+    <string name="downloads_detail_attempts">Attempts: %1$d</string>
+    <string name="downloads_detail_file">File: %1$s (%2$s)</string>
+    <string name="downloads_remove_note">Removing it from the list does not delete the saved file.</string>
+    <string name="downloads_height">%1$dp</string>
+    <string name="downloads_kbps">%1$d kbps</string>
 </resources>

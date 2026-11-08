@@ -80,7 +80,7 @@ fun JobRow(
 
 /** Tamaño, velocidad o motivo del error, según el estado. `null` si no hay nada útil para mostrar. */
 @Composable
-private fun jobDetail(state: JobState): String? {
+fun jobDetail(state: JobState): String? {
     val locale = LocalConfiguration.current.locales[0]
     return when (state) {
         is JobState.Downloading -> {

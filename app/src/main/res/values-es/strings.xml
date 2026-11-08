@@ -140,4 +140,20 @@
         <item quantity="many">%d más en la cola</item>
         <item quantity="other">%d más en la cola</item>
     </plurals>
+
+    <!-- Administrador de descargas -->
+    <string name="downloads_empty_title">Todavía no hay descargas</string>
+    <string name="downloads_empty_message">Acá aparecen las descargas y conversiones que empieces, aunque cierres la app.</string>
+    <string name="downloads_conversion">Conversión</string>
+    <string name="downloads_queued">En cola</string>
+    <string name="downloads_interrupted">Interrumpido</string>
+    <string name="downloads_remove">Quitar</string>
+    <string name="downloads_details">Detalles</string>
+    <string name="downloads_hide_details">Ocultar detalles</string>
+    <string name="downloads_detail_added">Agregado: %1$s</string>
+    <string name="downloads_detail_attempts">Intentos: %1$d</string>
+    <string name="downloads_detail_file">Archivo: %1$s (%2$s)</string>
+    <string name="downloads_remove_note">Quitarlo de la lista no borra el archivo guardado.</string>
+    <string name="downloads_height">%1$dp</string>
+    <string name="downloads_kbps">%1$d kbps</string>
 </resources>

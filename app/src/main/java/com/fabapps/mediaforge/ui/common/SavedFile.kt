@@ -32,17 +32,20 @@ fun SavedFile(file: OutputFile) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(onClick = {
-            val intent = Intent(Intent.ACTION_VIEW).setDataAndType(file.location.toUri(), file.mimeType)
-            context.launch(intent, noApp)
-        }) { Text(stringResource(R.string.download_open)) }
-        OutlinedButton(onClick = {
-            val send = Intent(Intent.ACTION_SEND)
-                .setType(file.mimeType)
-                .putExtra(Intent.EXTRA_STREAM, file.location.toUri())
-            context.launch(Intent.createChooser(send, null), noApp)
-        }) { Text(stringResource(R.string.download_share)) }
+        Button(onClick = { context.openFile(file, noApp) }) { Text(stringResource(R.string.download_open)) }
+        OutlinedButton(onClick = { context.shareFile(file, noApp) }) { Text(stringResource(R.string.download_share)) }
     }
+}
+
+/** Abre el archivo guardado con la app que elija el sistema. */
+fun Context.openFile(file: OutputFile, noAppMessage: String) =
+    launch(Intent(Intent.ACTION_VIEW).setDataAndType(file.location.toUri(), file.mimeType), noAppMessage)
+
+fun Context.shareFile(file: OutputFile, noAppMessage: String) {
+    val send = Intent(Intent.ACTION_SEND)
+        .setType(file.mimeType)
+        .putExtra(Intent.EXTRA_STREAM, file.location.toUri())
+    launch(Intent.createChooser(send, null), noAppMessage)
 }
 
 private fun Context.launch(intent: Intent, noAppMessage: String) {
