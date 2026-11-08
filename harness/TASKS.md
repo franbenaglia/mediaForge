@@ -168,9 +168,10 @@ Descargas y conversiones pasan a una cola persistente que corre fuera de las pan
   *Depende de:* —
   *Acepta:* reglas de estado probadas (qué se puede cancelar, reintentar, borrar).
   *Hecho:* `domain/jobs/Job.kt` (`JobRequest`, `JobStatus`, `Job`, `JobStore`). 5 pruebas.
-- [ ] **T7.2** · P1 · Dominio: `JobScheduler`. Cola en orden de llegada; hasta 2 descargas y 1 conversión a la vez; corre `MediaDownloader`/`MediaConverter` y guarda con `MediaLibrary`; estado en vivo en memoria y en el `JobStore` solo los cambios (progreso como mucho cada 1 s); cancelar, reintentar a mano, borrar; reintento automático solo para errores de red (2 veces, a los 5 s y 15 s); al arrancar, lo que quedó "en curso" vuelve a la cola (hasta 3 intentos) y si no, queda "interrumpido".
+- [x] **T7.2** · P1 · Dominio: `JobScheduler`. Cola en orden de llegada; hasta 2 descargas y 1 conversión a la vez; corre `MediaDownloader`/`MediaConverter` y guarda con `MediaLibrary`; progreso en vivo en memoria y en el `JobStore` solo los cambios de estado; cancelar, reintentar a mano, borrar; reintento automático solo para errores de red (2 veces, a los 5 s y 15 s); al arrancar, lo que quedó "en curso" vuelve a la cola (hasta 3 intentos) y si no, queda "interrumpido".
   *Depende de:* T7.1
   *Acepta:* pruebas en la JVM con motores falsos y tiempo virtual (concurrencia, orden, cancelación, reintentos, recuperación).
+  *Hecho:* `JobScheduler` (`live`, `activity`, `finished`; `start`, `enqueue`, `cancel`, `retry`, `delete`, `interruptAll`). 12 pruebas.
 - [ ] **T7.3** · P1 · `:core:data`: Room 2.8.5 (`JobEntity`, DAO con `Flow`, migraciones exportadas), pedidos guardados como JSON versionado, `RoomJobStore`; registrado en Hilt.
   *Depende de:* T7.1
   *Acepta:* pruebas del mapeo en la JVM (ida y vuelta de cada tipo de pedido y error) y prueba instrumentada del DAO en el teléfono.

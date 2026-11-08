@@ -197,7 +197,7 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 
 **Decisión:**
 - `JobScheduler` vive en `:core:domain`: Kotlin puro sobre `MediaDownloader`, `MediaConverter`, `MediaLibrary` y un `JobStore`. Se prueba en la JVM con tiempo virtual. Es un singleton con su propio `CoroutineScope`; cancelar un trabajo sigue siendo cancelar su corrutina (ADR-005).
-- Room (2.8.5) implementa `JobStore` en `:core:data` (ADR-006). Los pedidos se guardan como JSON con versión. En Room van los cambios de estado; el progreso fino queda en memoria y se persiste como mucho cada 1 s.
+- Room (2.8.5) implementa `JobStore` en `:core:data` (ADR-006). Los pedidos se guardan como JSON con versión. En Room van solo los cambios de estado; el progreso queda en memoria (`JobScheduler.live`): un trabajo recuperado empieza de cero, así que guardarlo no serviría.
 - `JobService` (en `:app`) solo mantiene vivo el proceso y muestra la notificación. Lo arranca el scheduler cuando entra trabajo, que siempre es por una acción del usuario con la app visible, y se detiene cuando la cola queda vacía. Tipo `dataSync`, más `mediaProcessing` en Android 15+ mientras hay una conversión.
 - Concurrencia: 2 descargas y 1 conversión a la vez (constantes hasta los ajustes de la Etapa 9).
 - Reintento automático solo para errores de red (2 veces, a los 5 s y 15 s). El resto se reintenta a mano.

@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 hecha; próxima T7.2 (`JobScheduler`). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
+Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; próxima T7.3 (`:core:data` con Room). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
 
 ## Etapas
 
