@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 9 (historial y configuración): detallar las tareas en `TASKS.md` a partir de main.md §14. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 9 (historial y configuración, ADR-019): tareas T9.1–T9.10 en `TASKS.md`. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -17,7 +17,7 @@ Etapa 9 (historial y configuración): detallar las tareas en `TASKS.md` a partir
 - [x] 6. Conversor multimedia (validado en el teléfono: MP4 → MP3, remux, recodificar y cancelar, WAV/FLAC)
 - [x] 7. Gestor de trabajos (validado en el teléfono: varias a la vez, notificación con Cancelar, cerrar desde recientes, reintentar)
 - [x] 8. Android Sharesheet (validado en el teléfono: Chrome, YouTube, otras apps, app cerrada o abierta, texto sin enlace, giro)
-- [ ] 9. Historial y configuración
+- [ ] 9. Historial y configuración (en curso)
 - [ ] 10. Funciones avanzadas
 - [ ] 11. Calidad
 - [ ] 12. Distribución

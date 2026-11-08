@@ -228,3 +228,23 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Una actividad aparte, transparente, para recibir: agrega una pantalla sin necesidad; la app ya tiene una sola actividad.
 - Encolar la descarga directamente al compartir: el usuario tiene que elegir calidad y formato (main.md §7.2).
 
+---
+
+## ADR-019 · Historial en su propia tabla y ajustes en DataStore
+
+**Fecha:** 2026-11-08 · **Estado:** aceptada
+
+**Contexto:** main.md §9 pide historial de descargas y conversiones y preferencias (formato y calidad predeterminados, descargas simultáneas, interfaz, conexión, almacenamiento). La lista de Descargas ya guarda los trabajos en Room, pero el usuario puede quitarlos y ahí también están los fallidos y cancelados.
+
+**Decisión:**
+- El historial es una tabla aparte (`history`, base de datos versión 2, migración automática). La cola anota una entrada cuando un trabajo se completa, con lo necesario para mostrarlo sin el trabajo: tipo, título, sitio, enlace u original, formato y archivo guardado. Quitar un trabajo de Descargas no toca el historial; quitar una entrada del historial no borra el archivo, salvo que se elija "Borrar archivo".
+- Borrar un archivo pasa por MediaStore. Si la app ya no es dueña del archivo (por ejemplo, después de reinstalar), Android 11+ pide confirmación con `createDeleteRequest` y Android 10 con `RecoverableSecurityException`.
+- Los ajustes viven en DataStore Preferences 1.3.0 dentro de `:core:data`, detrás de `SettingsStore` (dominio). Un valor desconocido o fuera de rango vuelve al predeterminado.
+- El límite de descargas simultáneas (1 a 3) se aplica en vivo: bajarlo no corta lo que ya corre, solo frena lo que espera.
+- "Solo Wi‑Fi" frena las descargas nuevas con red medida; las que corren siguen, porque cortarlas perdería lo bajado (no hay pausa real, T7.8).
+- El idioma de la app se elige en el ajuste del sistema (Android 13+, `localeConfig`), no con un selector propio.
+
+**Descartadas:**
+- Historial como filtro de la tabla `jobs`: quitar un trabajo de la lista borraría su historial, y la lista de trabajos se llenaría de entradas viejas.
+- Proto DataStore: los ajustes son pocos valores sueltos; Preferences alcanza y no necesita esquema.
+

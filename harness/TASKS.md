@@ -213,6 +213,41 @@ Recibir enlaces con "Compartir" desde el navegador, apps multimedia u otras apps
   *Acepta:* validación manual registrada.
   *Hecho:* el usuario validó todos los casos en 24115RA8EG (Android 15, 2026-11-08).
 
-## Etapas 9–12
+## Etapa 9 · Historial y configuración (en curso)
+
+Historial persistente de descargas y conversiones, ajustes con DataStore y administración de los archivos guardados (main.md §9, §8.2, §10, §15 punto 16). Diseño en ADR-019.
+
+- [ ] **T9.1** · P1 · Dominio: `HistoryEntry` (tipo video, audio o conversión; título, sitio, enlace de origen u original, formato, archivo guardado, miniatura, fecha) armado desde un `Job` completado; contrato `HistoryStore`; búsqueda y filtro por tipo. `Settings` (modo, calidad y audio predeterminados, descargas simultáneas 1–3, solo Wi‑Fi, tema, colores del sistema, carpeta de destino) con valores fuera de rango corregidos; contrato `SettingsStore`.
+  *Depende de:* —
+  *Acepta:* pruebas en la JVM (armado de la entrada por tipo, filtro y búsqueda, rangos de los ajustes).
+- [ ] **T9.2** · P1 · `:core:data`: tabla `history` en Room (versión 2, migración automática desde la 1, esquema exportado) y `RoomHistoryStore`; DataStore Preferences 1.3.0 en `DataStoreSettingsStore` (un valor desconocido vuelve al predeterminado); todo en Hilt.
+  *Depende de:* T9.1
+  *Acepta:* pruebas en la JVM (mapeo del historial; ajustes con un archivo temporal) y prueba de la migración 1 → 2 en el teléfono.
+- [ ] **T9.3** · P1 · La cola anota en el historial cada trabajo completado y toma de los ajustes el límite de descargas simultáneas (bajar el límite no corta lo que ya corre).
+  *Depende de:* T9.2
+  *Acepta:* pruebas de `JobScheduler` (entrada al completar, nada al fallar o cancelar; cambio de límite en vivo).
+- [ ] **T9.4** · P1 · Inicio arranca con el modo, la calidad (la mayor que no supere la elegida) y el formato y bitrate de audio de los ajustes.
+  *Depende de:* T9.2
+  *Acepta:* pruebas de `HomeViewModel`.
+- [ ] **T9.5** · P1 · Pantalla Historial: lista del más nuevo al más viejo, búsqueda, filtro (todo, video, audio, conversiones), Abrir, Compartir, Descargar de nuevo (carga el enlace en Inicio), Quitar del historial, Borrar archivo (con confirmación y, si Android lo pide, el permiso del sistema); marca los archivos que ya no existen. En Descargas, "Quitar terminados".
+  *Depende de:* T9.3
+  *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T9.6** · P1 · Pantalla Ajustes: predeterminados de descarga, descargas simultáneas, tema y colores del sistema, motor (versión instalada, buscar e instalar actualización verificada), idioma de la app (ajuste del sistema, Android 13+), acerca de (versión, licencia GPL-3.0, código fuente, sin rastreo).
+  *Depende de:* T9.2
+  *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T9.7** · P2 · Política de conexión "Solo Wi‑Fi": con datos móviles las descargas nuevas esperan ("Esperando Wi‑Fi") y arrancan solas al volver el Wi‑Fi; las que ya corren siguen; las conversiones no dependen de la red.
+  *Depende de:* T9.3
+  *Acepta:* pruebas de `JobScheduler` con una red falsa; `[~]` hasta probarlo en el teléfono.
+- [ ] **T9.8** · P2 · Carpeta de destino elegida con el selector de carpetas del sistema (permiso persistente); si se pierde el permiso, vuelve a la galería y avisa. La galería sigue siendo el predeterminado.
+  *Depende de:* T9.6
+  *Acepta:* prueba en el teléfono (guardar en una carpeta elegida y abrir el archivo).
+- [ ] **T9.9** · P2 · Archivos temporales: tamaño de las carpetas privadas de trabajos y botón para limpiar las que no pertenecen a un trabajo activo.
+  *Depende de:* T9.6
+  *Acepta:* pruebas de la regla de qué se puede borrar.
+- [ ] **T9.10** · P1 · Prueba en el teléfono: el historial sobrevive a cerrar la app y a actualizarla (migración), búsqueda y filtros, borrar un archivo, descargar de nuevo; los ajustes se aplican y se conservan.
+  *Depende de:* T9.5, T9.6
+  *Acepta:* validación manual registrada.
+
+## Etapas 10–12
 
 Ver main.md §14. Se detallan al llegar.
