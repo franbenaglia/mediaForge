@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; T7.3 hecha salvo la prueba del DAO en el teléfono (va con T7.7). T7.4 hecha, sin probar en el teléfono. T7.5 hecha; T7.6 hecha, sin probar en el teléfono. T7.3 validada en el teléfono. App instalada; falta la prueba manual T7.7. T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
+Etapa 8 (Android Sharesheet): detallar las tareas en `TASKS.md` a partir de main.md §14. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -15,7 +15,7 @@ Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T
 - [x] 4. Descarga de video (validada en el teléfono: YouTube y Dailymotion)
 - [x] 5. Extracción de audio (validada en el teléfono: MP3, M4A, Opus)
 - [x] 6. Conversor multimedia (validado en el teléfono: MP4 → MP3, remux, recodificar y cancelar, WAV/FLAC)
-- [ ] 7. Gestor de trabajos (en curso)
+- [x] 7. Gestor de trabajos (validado en el teléfono: varias a la vez, notificación con Cancelar, cerrar desde recientes, reintentar)
 - [ ] 8. Android Sharesheet
 - [ ] 9. Historial y configuración
 - [ ] 10. Funciones avanzadas
@@ -30,7 +30,7 @@ Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T
 - Contratos de dominio: `MediaExtractor`, `MediaDownloader`, `MediaConverter`, `ExtractorEngine`, `JobState`, `MediaError`.
 - `FileNames`: saneado de nombres y nombres únicos, con 14 pruebas.
 - `UrlValidator`: solo http/https, sin credenciales, sin direcciones locales, nada que empiece con `-`, hosts internacionales y búsqueda de URL en texto compartido, con 20 pruebas. Hecho antes de tiempo (Etapa 3) porque lo necesita T2.2.
-- Pantalla Inicio (descarga, T4.7): elegir calidad, nombre, descargar con progreso, cancelar, guardar en la galería y abrir/compartir. Corre en el `viewModelScope`: cerrar la app cancela la descarga hasta la Etapa 7.
+- Pantalla Inicio (descarga, T4.7): elegir calidad, nombre, descargar con progreso, cancelar, guardar en la galería y abrir/compartir. Desde la Etapa 7 encola en la cola de trabajos.
 - Pantalla Inicio: campo de enlace, pegar (extrae la URL de un texto), borrar y analizar. `HomeViewModel` con estados vacío/escribiendo/inválido/listo y motivo del error. "Analizar" ejecuta el análisis real: cargando → `MediaCard` con la cantidad de formatos, o error con reintento. Cambiar el enlace cancela el análisis en curso (y el proceso). Miniatura con Coil (T4.1). Si el error es "motor desactualizado", ofrece "Actualizar motor" y reintenta solo (T3.9, validado en el teléfono).
 - `:core:media`: youtubedl-android 0.18.1 (Python, FFmpeg, QuickJS), un APK por ABI y `EngineInitializer` (una sola vez, fuera del hilo principal, chequea antes el espacio libre; estado observable). Todavía nadie lo llama: lo usa T3.6.
 - `YtDlpInfoParser`: `--dump-json` → `MediaInfo` con la lista completa de formatos (descarta storyboards), tamaños exactos o aproximados, playlists rechazadas, JSON inválido como error. 13 pruebas.
@@ -42,6 +42,7 @@ Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T
 - `MediaLibrary` / `MediaStoreLibrary` (T4.6): copia a `Movies/MediaForge` o `Music/MediaForge` con `IS_PENDING` (Android 10+) o permiso de escritura (8–9), nombre único, y borra la copia privada.
 - Audio (Etapa 5, ADR-015): `AudioOptions` (copia sin recodificar, bitrates, automático), comando `-x` con portada y metadatos (mutagen 1.47 en el APK), modo "Solo audio" en Inicio con avisos de calidad. Se guarda en `Music/MediaForge`.
 - Conversor (Etapa 6, ADR-016): `ConversionPlanner` (copia o recodifica por pista), `FfmpegConverter` (copia la entrada a una carpeta privada, `ffprobe`, FFmpeg con progreso y cancelación), `ExtractorInspector` (análisis rápido con `MediaExtractor`) y pantalla Conversor. FFmpeg usa las librerías de Python, FFmpeg y aria2c en `LD_LIBRARY_PATH`.
+- Gestor de trabajos (Etapa 7, ADR-017): `JobScheduler` (dominio; 2 descargas y 1 conversión a la vez, reintento automático por red, recuperación al abrir la app), Room en `:core:data`, `JobService` en primer plano con notificaciones, pantalla Descargas. Inicio y Conversor encolan y dejan seguir agregando trabajos.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).
 - `scripts/verify.sh`, `scripts/test-device.sh`, `scripts/build-release.sh`.
 
@@ -51,10 +52,12 @@ Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T
 |---|---|---|
 | `./scripts/verify.sh` | OK: 299 pruebas (89 dominio + 71 app + 133 media + 6 data), lint sin errores, ktlint OK | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
+| `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
+| T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
 | `ConverterDeviceTest` en 24115RA8EG | OK: análisis y casos de main.md §5.1, cancelación sin procesos ni archivos | 2026-11-08 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 
-Último commit validado: ver `git log -1` (commit de cierre de la Etapa 6).
+Último commit validado: ver `git log -1` (commit de cierre de la Etapa 7).
 
 ## Dependencias importantes
 

@@ -4,6 +4,18 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-08 · Etapa 7
+
+**Hecho:** T7.1–T7.7 (ADR-017). `Job`/`JobStore`, `JobScheduler` con cola, límites y reintentos, Room en `:core:data`, `JobService` en primer plano con notificaciones, Inicio y Conversor encolan, pantalla Descargas.
+
+**Teléfono:** `RoomJobStoreDeviceTest` OK. El usuario validó todos los pasos de T7.7.
+
+**Problemas:** en la prueba no se podía encolar una segunda descarga (el campo quedaba bloqueado); se quitó el bloqueo en Inicio y Conversor.
+
+**Verificación:** `./scripts/verify.sh` OK.
+
+---
+
 ## 2026-11-08 · Etapa 6
 
 **Hecho:** T6.1–T6.6. `LocalMedia` y `ConversionPlanner` (ADR-016), `ffprobe` y comando de FFmpeg, `FfmpegConverter`, `ExtractorInspector`, pantalla Conversor.

@@ -160,7 +160,7 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
   *Depende de:* T6.3
   *Acepta:* prueba en el teléfono con un archivo grande; sin cambio de resultado.
 
-## Etapa 7 · Gestor de trabajos (en curso)
+## Etapa 7 · Gestor de trabajos (hecha; T7.8 queda pendiente, P3)
 
 Descargas y conversiones pasan a una cola persistente que corre fuera de las pantallas, en un servicio en primer plano con notificación (main.md §7.3, §7.4, §8.3, §9). Diseño en ADR-017: la cola es lógica de dominio (probada en la JVM), Room vive en `:core:data` y el servicio en `:app`. Sin WorkManager: Android no deja arrancar el servicio desde segundo plano, así que los trabajos interrumpidos se recuperan al abrir la app.
 
@@ -176,21 +176,22 @@ Descargas y conversiones pasan a una cola persistente que corre fuera de las pan
   *Depende de:* T7.1
   *Acepta:* pruebas del mapeo en la JVM (ida y vuelta de cada tipo de pedido y error) y prueba instrumentada del DAO en el teléfono.
   *Hecho:* `JobEntity`/`JobDao`/`MediaForgeDatabase` (esquema en `core/data/schemas/`), `RequestJson` (DTOs propios, versión 1), `JobMapper`, `RoomJobStore`, `DataModule`. 6 pruebas en la JVM. `RoomJobStoreDeviceTest` OK en el teléfono (2/2, 2026-11-08).
-- [~] **T7.4** · P1 · `:app`: `JobService` en primer plano (`dataSync`; `mediaProcessing` para conversiones en Android 15+), que arranca cuando hay trabajo y se detiene al vaciarse la cola. Notificación con progreso y botón Cancelar; aviso al terminar o fallar cada trabajo. `onTimeout` (Android 15) marca lo que corre como interrumpido. Permiso de notificaciones (Android 13+) pedido al encolar por primera vez.
+- [x] **T7.4** · P1 · `:app`: `JobService` en primer plano (`dataSync`; `mediaProcessing` para conversiones en Android 15+), que arranca cuando hay trabajo y se detiene al vaciarse la cola. Notificación con progreso y botón Cancelar; aviso al terminar o fallar cada trabajo. `onTimeout` (Android 15) marca lo que corre como interrumpido. Permiso de notificaciones (Android 13+) pedido al encolar por primera vez.
   *Depende de:* T7.2, T7.3
   *Acepta:* compila y pasa lint; se valida en T7.7.
-  *Hecho:* `JobsModule` (scheduler y `@ApplicationScope`), `JobServiceStarter`, `JobService`, `JobNotifications` (dos canales, progreso con Cancelar, aviso que abre el archivo). El permiso de notificaciones se pide en T7.5, al encolar.
+  *Hecho:* `JobsModule` (scheduler y `@ApplicationScope`), `JobServiceStarter`, `JobService`, `JobNotifications` (dos canales, progreso con Cancelar, aviso que abre el archivo). El permiso de notificaciones se pide en T7.5, al encolar. Validado en el teléfono (T7.7).
 - [x] **T7.5** · P1 · Inicio y Conversor encolan en lugar de correr en el `viewModelScope` y siguen el trabajo por id (el progreso se sigue viendo en la pantalla). El conversor conserva el permiso de lectura de la URI (`takePersistableUriPermission`) y lo suelta al terminar el trabajo.
   *Depende de:* T7.2
   *Acepta:* pruebas de `HomeViewModel` y `ConverterViewModel` con un scheduler falso.
   *Hecho:* `JobQueue` (dominio) implementada por `JobScheduler`; `WorkState.of` y `JobQueue.workState(id)`; estado `Interrupted`; `InputAccess` (permiso persistente, se suelta al guardar); permiso de notificaciones al encolar. Mientras un trabajo corre se puede pegar otro enlace o elegir otro archivo y encolar más (pedido del usuario en la prueba de T7.7). Las pruebas usan el `JobScheduler` real con motores falsos y `InMemoryJobStore`.
-- [~] **T7.6** · P1 · Pantalla Descargas (administrador): lista de trabajos con nombre, sitio, progreso, velocidad, tamaños, estado y fase (descarga o procesamiento), error con detalle; acciones Cancelar, Reintentar, Eliminar de la lista, Abrir, Compartir y Ver detalles.
+- [x] **T7.6** · P1 · Pantalla Descargas (administrador): lista de trabajos con nombre, sitio, progreso, velocidad, tamaños, estado y fase (descarga o procesamiento), error con detalle; acciones Cancelar, Reintentar, Eliminar de la lista, Abrir, Compartir y Ver detalles.
   *Depende de:* T7.2
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
-  *Hecho:* `DownloadsViewModel` (6 pruebas) y `DownloadsScreen` (tarjeta por trabajo: sitio y formato, fase con progreso, Abrir, Compartir, Cancelar, Reintentar, Quitar, Detalles con fecha, intentos, archivo y error técnico).
-- [ ] **T7.7** · P1 · Prueba en el teléfono: dos descargas a la vez y una conversión en cola; salir de la app y volver; cancelar desde la notificación; cerrar la app desde recientes a mitad y reabrirla (el trabajo vuelve a la cola); reintentar uno fallido.
+  *Hecho:* `DownloadsViewModel` (6 pruebas) y `DownloadsScreen` (tarjeta por trabajo: sitio y formato, fase con progreso, Abrir, Compartir, Cancelar, Reintentar, Quitar, Detalles con fecha, intentos, archivo y error técnico). Validado en el teléfono (T7.7).
+- [x] **T7.7** · P1 · Prueba en el teléfono: dos descargas a la vez y una conversión en cola; salir de la app y volver; cancelar desde la notificación; cerrar la app desde recientes a mitad y reabrirla (el trabajo vuelve a la cola); reintentar uno fallido.
   *Depende de:* T7.4, T7.5, T7.6
   *Acepta:* validación manual registrada.
+  *Hecho:* el usuario validó en 24115RA8EG (Android 15, 2026-11-08): permiso de notificaciones, varias descargas y una conversión a la vez, salir y volver, aviso final que abre el archivo, cancelar desde la notificación, cerrar desde recientes y reabrir, reintentar y Detalles.
 - [ ] **T7.8** · P3 · Pausa real de descargas: cancelar el proceso conservando el `.part` y relanzar con `--continue` (FEASIBILITY §10); también para retomar después de una interrupción. Documentar los casos en que reinicia (streams fragmentados).
   *Depende de:* T7.7
   *Acepta:* prueba en el teléfono con una descarga HTTP grande.
