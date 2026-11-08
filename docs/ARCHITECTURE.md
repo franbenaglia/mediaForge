@@ -9,9 +9,9 @@ Clean Architecture pragmática: el dominio no conoce Android, yt-dlp ni FFmpeg. 
 | `:app` | ✅ Inicio con análisis y descarga | Compose + Material 3, navegación, ViewModels, foreground service, notificaciones, Sharesheet, Hilt | todos |
 | `:core:domain` | ✅ contratos | Modelos (`MediaInfo`, `MediaFormat`, `JobState`, `MediaError`), contratos de motores y de `MediaLibrary`, `VideoOptions`, `FileNames`, `UrlValidator` | coroutines |
 | `:core:media` | 🟡 sin conversor | `YtDlpExtractor`, `YtDlpDownloader`, `ProcessRunner`, actualizador de yt-dlp, `MediaStoreLibrary`; `FfmpegConverter` en la Etapa 6 | domain, youtubedl-android |
-| `:core:data` | Etapa 7/9 | Room (trabajos, historial), DataStore (preferencias), repositorios | domain |
+| `:core:data` | 🟡 trabajos | Room: `JobEntity`, `JobDao`, `RoomJobStore` (implementa `JobStore`), pedidos en JSON con versión; DataStore en la Etapa 9 | domain |
 
-Las capas de main.md §6.4 se mapean así: Presentation y Platform → `:app`; Domain → `:core:domain`; Media Engine → `:core:media`; Data y Download Engine → `:core:data` (o `:core:jobs`, según la Etapa 7).
+Las capas de main.md §6.4 se mapean así: Presentation y Platform → `:app`; Domain → `:core:domain`; Media Engine → `:core:media`; Data → `:core:data`; Download Engine (la cola, `JobScheduler`) → `:core:domain` (ADR-017).
 
 ## Flujo de una descarga
 

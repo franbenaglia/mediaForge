@@ -24,3 +24,4 @@ rootProject.name = "MediaForge"
 include(":app")
 include(":core:domain")
 include(":core:media")
+include(":core:data")

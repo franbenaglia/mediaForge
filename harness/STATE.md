@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; próxima T7.3 (`:core:data` con Room). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
+Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T7.2 hechas; T7.3 hecha salvo la prueba del DAO en el teléfono (va con T7.7). Próxima T7.4 (`JobService`). T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
 
 ## Etapas
 
@@ -59,7 +59,7 @@ Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T
 ## Dependencias importantes
 
 AGP 9.4.1 · Gradle 9.8.1 · Kotlin 2.4.21 · Compose BOM 2026.09.00 · Hilt 2.60.1 · ktlint plugin 14.2.0.
-youtubedl-android 0.18.1 (ADR-001) · Coil 3.6.3 (miniaturas).
+youtubedl-android 0.18.1 (ADR-001) · Coil 3.6.3 (miniaturas) · Room 2.8.5 (ADR-017).
 
 ## Bloqueos
 
