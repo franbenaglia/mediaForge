@@ -18,6 +18,8 @@ import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.SourceSite
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.UrlCheck
+import com.fabapps.mediaforge.share.ShareInbox
+import com.fabapps.mediaforge.share.SharedContent
 import com.fabapps.mediaforge.testing.InMemoryJobStore
 import com.fabapps.mediaforge.ui.common.WorkState
 import kotlinx.coroutines.CompletableDeferred
@@ -103,6 +105,7 @@ class HomeViewModelTest {
     private val downloader = FakeDownloader()
     private val library = FakeLibrary()
     private val store = InMemoryJobStore()
+    private val inbox = ShareInbox()
 
     /** La cola real, con el descargador falso: la descarga pasa por la cola como en la app. */
     private val queueScope = CoroutineScope(dispatcher + SupervisorJob())
@@ -132,7 +135,7 @@ class HomeViewModelTest {
             JobScheduler(store, downloader, noConverter, library, queueScope, clock = {
                 dispatcher.scheduler.currentTime
             })
-        vm = HomeViewModel(extractor, engine, queue, library)
+        vm = HomeViewModel(extractor, engine, queue, library, inbox)
     }
 
     @After
@@ -204,6 +207,67 @@ class HomeViewModelTest {
         vm.onPaste(null)
         vm.onPaste("  ")
         assertEquals("https://example.com/v", state.input)
+    }
+
+    // Compartir (ADR-018)
+
+    @Test
+    fun sharedLinkIsLoadedAndAnalyzed() = test {
+        inbox.offer(SharedContent("Mirá esto https://www.dailymotion.com/video/x8abc ¡genial!", null))
+        advanceUntilIdle()
+        assertEquals("https://www.dailymotion.com/video/x8abc", state.input)
+        assertEquals(AnalysisState.Loading, state.analysis)
+        assertEquals(listOf("https://www.dailymotion.com/video/x8abc"), extractor.calls)
+        assertEquals(null, inbox.pending.value)
+    }
+
+    @Test
+    fun linkSharedBeforeHomeOpensIsTaken() = test {
+        val early = ShareInbox().apply { offer(SharedContent(null, "https://vimeo.com/1")) }
+        val queue = JobScheduler(store, downloader, noConverter, library, queueScope)
+        val home = HomeViewModel(extractor, engine, queue, library, early)
+        advanceUntilIdle()
+        assertEquals("https://vimeo.com/1", home.state.value.input)
+        assertEquals(listOf("https://vimeo.com/1"), extractor.calls)
+        assertEquals(null, early.pending.value)
+    }
+
+    @Test
+    fun sharedTextWithoutLinkShowsWhy() = test {
+        vm.onInputChange("https://example.com/v")
+        inbox.offer(SharedContent("solo un mensaje", null))
+        advanceUntilIdle()
+        assertEquals("solo un mensaje", state.input)
+        assertEquals(InputStatus.INVALID, state.status)
+        assertEquals(UrlCheck.Reason.NOT_A_URL, state.invalidReason)
+        assertTrue(extractor.calls.isEmpty())
+    }
+
+    @Test
+    fun sharingWhileDownloadingKeepsTheDownloadQueued() = test {
+        analyzed()
+        vm.onDownload()
+        downloader.events.send(JobState.Downloading(0.1f, 10, 100, null))
+        advanceUntilIdle()
+
+        extractor.pending = CompletableDeferred()
+        inbox.offer(SharedContent("https://example.com/other", null))
+        advanceUntilIdle()
+        assertEquals("https://example.com/other", state.input)
+        assertEquals(WorkState.None, state.download)
+        assertEquals(AnalysisState.Loading, state.analysis)
+        assertEquals(0, downloader.cancelled)
+    }
+
+    @Test
+    fun aNewShareReplacesAnAnalysisInProgress() = test {
+        inbox.offer(SharedContent("https://a.com/1", null))
+        advanceUntilIdle()
+        inbox.offer(SharedContent("https://b.com/2", null))
+        advanceUntilIdle()
+        assertEquals(1, extractor.cancelled)
+        assertEquals(listOf("https://a.com/1", "https://b.com/2"), extractor.calls)
+        assertEquals("https://b.com/2", state.input)
     }
 
     // Análisis

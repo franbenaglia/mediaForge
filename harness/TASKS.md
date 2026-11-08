@@ -204,9 +204,10 @@ Recibir enlaces con "Compartir" desde el navegador, apps multimedia u otras apps
   *Depende de:* —
   *Acepta:* pruebas en la JVM (YouTube, TikTok con texto, URL sin esquema, asunto, solo texto, `file://`, localhost, vacío, texto gigante).
   *Hecho:* `domain/url/SharedText.kt` sobre `UrlValidator`. 10 pruebas.
-- [ ] **T8.2** · P1 · `:app`: `MainActivity` recibe `ACTION_SEND` `text/plain` (`singleTask`; `onCreate` solo la primera vez y no desde recientes, y `onNewIntent`). `ShareIntents` lee `EXTRA_TEXT`, `ClipData` y `EXTRA_SUBJECT` sin fallar con extras rotos. `ShareInbox` (singleton) guarda el último enlace hasta que Inicio lo toma; la app pasa a Inicio, carga el enlace y lo analiza. Un trabajo en curso sigue en la cola.
+- [~] **T8.2** · P1 · `:app`: `MainActivity` recibe `ACTION_SEND` `text/plain` (`singleTask`; `onCreate` solo la primera vez y no desde recientes, y `onNewIntent`). `ShareIntents` lee `EXTRA_TEXT`, `ClipData` y `EXTRA_SUBJECT` sin fallar con extras rotos. `ShareInbox` (singleton) guarda el último enlace hasta que Inicio lo toma; la app pasa a Inicio, carga el enlace y lo analiza. Un trabajo en curso sigue en la cola.
   *Depende de:* T8.1
   *Acepta:* pruebas de `HomeViewModel` (enlace compartido antes y después de abrir Inicio, texto sin URL, con una descarga en curso); compila y pasa lint.
+  *Hecho:* `share/ShareIntents.kt`, `share/ShareInbox.kt`, `MainActivity` (`singleTask`, `onNewIntent`, contador que lleva a Inicio), filtro `SEND` en el manifest, `HomeViewModel.onShared`. 5 pruebas nuevas. `[~]` hasta T8.3.
 - [ ] **T8.3** · P1 · Prueba en el teléfono: compartir desde Chrome, desde la app de YouTube y desde otra app (por ejemplo, un mensaje o una nota con texto y enlace); con la app cerrada, abierta en otra pestaña y con una descarga en curso; un texto sin enlace muestra el motivo; girar la pantalla no vuelve a analizar.
   *Depende de:* T8.2
   *Acepta:* validación manual registrada.

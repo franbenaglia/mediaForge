@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. T8.1 hecha; T8.2 hecha, falta probarla en el teléfono (T8.3). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -50,7 +50,7 @@ Etapa 8 (Android Sharesheet, ADR-018): tareas T8.1–T8.3 en `TASKS.md`. Quedan 
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 299 pruebas (89 dominio + 71 app + 133 media + 6 data), lint sin errores, ktlint OK | 2026-11-08 |
+| `./scripts/verify.sh` | OK: 315 pruebas (99 dominio + 77 app + 133 media + 6 data), lint sin errores, ktlint OK | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
 | T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |

@@ -9,6 +9,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -25,12 +26,19 @@ import com.fabapps.mediaforge.navigation.MediaForgeNavHost
 import com.fabapps.mediaforge.navigation.TopLevelDestination
 import com.fabapps.mediaforge.ui.theme.MediaForgeTheme
 
-/** Estructura de la app: barra superior con el título del destino, contenido y barra inferior. */
+/**
+ * Estructura de la app: barra superior con el título del destino, contenido y barra inferior.
+ * Cada vez que [openHomeRequest] sube (llegó un enlace compartido) pasa a Inicio.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MediaForgeApp(navController: NavHostController = rememberNavController()) {
+fun MediaForgeApp(navController: NavHostController = rememberNavController(), openHomeRequest: Int = 0) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val current = backStackEntry?.destination.toTopLevel()
+
+    LaunchedEffect(openHomeRequest) {
+        if (openHomeRequest > 0) navController.navigateToTopLevel(TopLevelDestination.HOME)
+    }
 
     Scaffold(
         topBar = {

@@ -16,8 +16,11 @@ import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaInfo
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
+import com.fabapps.mediaforge.domain.url.SharedText
 import com.fabapps.mediaforge.domain.url.UrlCheck
 import com.fabapps.mediaforge.domain.url.UrlValidator
+import com.fabapps.mediaforge.share.ShareInbox
+import com.fabapps.mediaforge.share.SharedContent
 import com.fabapps.mediaforge.ui.common.WorkState
 import com.fabapps.mediaforge.ui.common.workState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -114,6 +118,7 @@ class HomeViewModel @Inject constructor(
     private val engine: ExtractorEngine,
     private val queue: JobQueue,
     private val library: MediaLibrary,
+    private val shareInbox: ShareInbox,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
@@ -126,6 +131,13 @@ class HomeViewModel @Inject constructor(
 
     /** En Android 8–9 hay que pedir el permiso de escritura antes de [onDownload]. */
     val needsStoragePermission: Boolean get() = library.needsWritePermission()
+
+    init {
+        // Un enlace compartido desde otra app, aunque haya llegado antes de abrir Inicio (ADR-018).
+        viewModelScope.launch {
+            shareInbox.pending.filterNotNull().collect { shareInbox.take()?.let(::onShared) }
+        }
+    }
 
     fun onInputChange(text: String) {
         if (text == _state.value.input) return
@@ -152,6 +164,26 @@ class HomeViewModel @Inject constructor(
             HomeUiState(input = found.url, status = InputStatus.READY)
         } else {
             HomeUiState(input = text, status = InputStatus.INVALID, invalidReason = reasonFor(text))
+        }
+    }
+
+    /**
+     * Enlace compartido con "Compartir" (main.md §8.1): se carga y se analiza solo. Si no trae una
+     * URL válida se muestra el motivo, como al pegar. Una descarga en curso sigue en la cola.
+     */
+    private fun onShared(content: SharedContent) {
+        cancelAnalysis()
+        stopTracking()
+        when (val check = SharedText.findUrl(content.text, content.subject)) {
+            is UrlCheck.Valid -> {
+                _state.value = HomeUiState(input = check.url, status = InputStatus.READY)
+                onAnalyze()
+            }
+            is UrlCheck.Invalid -> _state.value = HomeUiState(
+                input = (content.text ?: content.subject).orEmpty().trim().take(UrlValidator.MAX_LENGTH),
+                status = if (check.reason == UrlCheck.Reason.EMPTY) InputStatus.EMPTY else InputStatus.INVALID,
+                invalidReason = check.reason.takeIf { it != UrlCheck.Reason.EMPTY },
+            )
         }
     }
 

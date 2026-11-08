@@ -7,7 +7,7 @@ Clean Architecture pragmática: el dominio no conoce Android, yt-dlp ni FFmpeg. 
 | Módulo | Estado | Contenido | Depende de |
 |---|---|---|---|
 | `:app` | ✅ Inicio con análisis y descarga | Compose + Material 3, navegación, ViewModels, foreground service, notificaciones, Sharesheet, Hilt | todos |
-| `:core:domain` | ✅ contratos | Modelos (`MediaInfo`, `MediaFormat`, `JobState`, `MediaError`), contratos de motores y de `MediaLibrary`, `VideoOptions`, `FileNames`, `UrlValidator` | coroutines |
+| `:core:domain` | ✅ contratos | Modelos (`MediaInfo`, `MediaFormat`, `JobState`, `MediaError`), contratos de motores y de `MediaLibrary`, `VideoOptions`, `FileNames`, `UrlValidator`, `SharedText` | coroutines |
 | `:core:media` | 🟡 sin conversor | `YtDlpExtractor`, `YtDlpDownloader`, `ProcessRunner`, actualizador de yt-dlp, `MediaStoreLibrary`; `FfmpegConverter` en la Etapa 6 | domain, youtubedl-android |
 | `:core:data` | 🟡 trabajos | Room: `JobEntity`, `JobDao`, `RoomJobStore` (implementa `JobStore`), pedidos en JSON con versión; DataStore en la Etapa 9 | domain |
 
@@ -54,3 +54,7 @@ ADR-017. `JobScheduler` (dominio) es un singleton con un alcance propio del proc
 - `JobServiceStarter` (se instala en `MediaForgeApplication`) arranca `JobService` cuando `activity.isBusy` pasa a `true` y publica el aviso de cada trabajo terminado.
 - `JobService` solo mantiene el proceso en primer plano y actualiza la notificación (dos veces por segundo como mucho), con Cancelar. Tipo `dataSync`, más `mediaProcessing` en Android 15+ mientras corre una conversión. Se detiene solo cuando la cola queda vacía. `onTimeout` (6 h por día en Android 15+) interrumpe lo que corre.
 - `MainActivity.onStart` llama a `JobScheduler.start()`: la primera vez recupera lo que quedó a medias si el proceso murió. Sin WorkManager: Android no deja arrancar el servicio desde segundo plano.
+
+## Enlaces compartidos
+
+Otra app comparte texto (`ACTION_SEND`, `text/plain`) → `MainActivity` (`singleTask`, una sola ventana) → `ShareIntents.read` (texto, `ClipData`, asunto) → `ShareInbox` (en memoria) → la app pasa a Inicio y `HomeViewModel` toma el contenido, busca la URL con `SharedText.findUrl` y la analiza. El intent se procesa una vez: en `onCreate` sin estado guardado y sin venir de recientes, y en `onNewIntent` (ADR-018).
