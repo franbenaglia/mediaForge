@@ -186,3 +186,26 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Una conversión a la vez hasta la Etapa 7.
 
 **Descartadas:** MediaCodec (no se puede usar desde el binario; requeriría un pipeline propio con `MediaCodec`/`MediaMuxer`, se reevalúa si la velocidad no alcanza); pasar la entrada por un pipe (MP4 con el índice al final no se puede leer sin buscar).
+
+---
+
+## ADR-017 · Gestor de trabajos: cola en el dominio, Room y servicio en primer plano sin WorkManager
+
+**Fecha:** 2026-11-08 · **Estado:** aceptada
+
+**Contexto:** hasta la Etapa 6 cada pantalla corre su trabajo en el `viewModelScope`: cerrar la app lo cancela. main.md §8.3 y §9 piden cola, persistencia, reintentos, notificaciones y recuperación. En Android 12+ un servicio en primer plano solo puede arrancar con la app visible (o por excepciones que no aplican), y en Android 15 un receptor de `BOOT_COMPLETED` no puede arrancar los tipos `dataSync` ni `mediaProcessing`.
+
+**Decisión:**
+- `JobScheduler` vive en `:core:domain`: Kotlin puro sobre `MediaDownloader`, `MediaConverter`, `MediaLibrary` y un `JobStore`. Se prueba en la JVM con tiempo virtual. Es un singleton con su propio `CoroutineScope`; cancelar un trabajo sigue siendo cancelar su corrutina (ADR-005).
+- Room (2.8.5) implementa `JobStore` en `:core:data` (ADR-006). Los pedidos se guardan como JSON con versión. En Room van los cambios de estado; el progreso fino queda en memoria y se persiste como mucho cada 1 s.
+- `JobService` (en `:app`) solo mantiene vivo el proceso y muestra la notificación. Lo arranca el scheduler cuando entra trabajo, que siempre es por una acción del usuario con la app visible, y se detiene cuando la cola queda vacía. Tipo `dataSync`, más `mediaProcessing` en Android 15+ mientras hay una conversión.
+- Concurrencia: 2 descargas y 1 conversión a la vez (constantes hasta los ajustes de la Etapa 9).
+- Reintento automático solo para errores de red (2 veces, a los 5 s y 15 s). El resto se reintenta a mano.
+- Recuperación: al iniciar la app, lo que figuraba "en curso" o "guardando" vuelve a la cola (hasta 3 intentos) y se corre desde cero; si no, queda "interrumpido". `onTimeout` de Android 15 marca lo que corre como interrumpido.
+- El conversor toma permiso persistente sobre la URI elegida, para poder correr o reintentar el trabajo más tarde.
+
+**Descartadas:**
+- WorkManager para reanudar después de que muere el proceso o se reinicia el teléfono (FEASIBILITY §10): no puede levantar el servicio en primer plano desde segundo plano y agregaría una dependencia para algo que no funcionaría.
+- Cola dentro del servicio: atarla al ciclo de vida del servicio complica las pruebas y la consulta del estado desde la UI.
+- Retomar la descarga desde el `.part` al recuperar: el descargador hoy empieza con la carpeta vacía. Queda para la pausa real (T7.8).
+

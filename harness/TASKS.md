@@ -160,9 +160,34 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
   *Depende de:* T6.3
   *Acepta:* prueba en el teléfono con un archivo grande; sin cambio de resultado.
 
-## Etapa 7 · Gestor de trabajos (resumen)
+## Etapa 7 · Gestor de trabajos (en curso)
 
-Room para trabajos, foreground service (`dataSync`/`mediaProcessing`), límite de concurrencia, reintentos, recuperación después de que muere el proceso, `onTimeout` de Android 15.
+Descargas y conversiones pasan a una cola persistente que corre fuera de las pantallas, en un servicio en primer plano con notificación (main.md §7.3, §7.4, §8.3, §9). Diseño en ADR-017: la cola es lógica de dominio (probada en la JVM), Room vive en `:core:data` y el servicio en `:app`. Sin WorkManager: Android no deja arrancar el servicio desde segundo plano, así que los trabajos interrumpidos se recuperan al abrir la app.
+
+- [ ] **T7.1** · P1 · Dominio: `Job` (id, pedido de descarga o conversión, título, sitio, miniatura, estado persistido, error, archivo guardado, intentos, fechas), `JobStatus` (en cola, en curso, guardando, completado, fallido, cancelado, interrumpido) y contrato `JobStore` (guardar, observar todos, observar uno, borrar).
+  *Depende de:* —
+  *Acepta:* reglas de estado probadas (qué se puede cancelar, reintentar, borrar).
+- [ ] **T7.2** · P1 · Dominio: `JobScheduler`. Cola en orden de llegada; hasta 2 descargas y 1 conversión a la vez; corre `MediaDownloader`/`MediaConverter` y guarda con `MediaLibrary`; estado en vivo en memoria y en el `JobStore` solo los cambios (progreso como mucho cada 1 s); cancelar, reintentar a mano, borrar; reintento automático solo para errores de red (2 veces, a los 5 s y 15 s); al arrancar, lo que quedó "en curso" vuelve a la cola (hasta 3 intentos) y si no, queda "interrumpido".
+  *Depende de:* T7.1
+  *Acepta:* pruebas en la JVM con motores falsos y tiempo virtual (concurrencia, orden, cancelación, reintentos, recuperación).
+- [ ] **T7.3** · P1 · `:core:data`: Room 2.8.5 (`JobEntity`, DAO con `Flow`, migraciones exportadas), pedidos guardados como JSON versionado, `RoomJobStore`; registrado en Hilt.
+  *Depende de:* T7.1
+  *Acepta:* pruebas del mapeo en la JVM (ida y vuelta de cada tipo de pedido y error) y prueba instrumentada del DAO en el teléfono.
+- [ ] **T7.4** · P1 · `:app`: `JobService` en primer plano (`dataSync`; `mediaProcessing` para conversiones en Android 15+), que arranca cuando hay trabajo y se detiene al vaciarse la cola. Notificación con progreso y botón Cancelar; aviso al terminar o fallar cada trabajo. `onTimeout` (Android 15) marca lo que corre como interrumpido. Permiso de notificaciones (Android 13+) pedido al encolar por primera vez.
+  *Depende de:* T7.2, T7.3
+  *Acepta:* compila y pasa lint; se valida en T7.7.
+- [ ] **T7.5** · P1 · Inicio y Conversor encolan en lugar de correr en el `viewModelScope` y siguen el trabajo por id (el progreso se sigue viendo en la pantalla). El conversor conserva el permiso de lectura de la URI (`takePersistableUriPermission`) y lo suelta al terminar el trabajo.
+  *Depende de:* T7.2
+  *Acepta:* pruebas de `HomeViewModel` y `ConverterViewModel` con un scheduler falso.
+- [ ] **T7.6** · P1 · Pantalla Descargas (administrador): lista de trabajos con nombre, sitio, progreso, velocidad, tamaños, estado y fase (descarga o procesamiento), error con detalle; acciones Cancelar, Reintentar, Eliminar de la lista, Abrir, Compartir y Ver detalles.
+  *Depende de:* T7.2
+  *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+- [ ] **T7.7** · P1 · Prueba en el teléfono: dos descargas a la vez y una conversión en cola; salir de la app y volver; cancelar desde la notificación; cerrar la app desde recientes a mitad y reabrirla (el trabajo vuelve a la cola); reintentar uno fallido.
+  *Depende de:* T7.4, T7.5, T7.6
+  *Acepta:* validación manual registrada.
+- [ ] **T7.8** · P3 · Pausa real de descargas: cancelar el proceso conservando el `.part` y relanzar con `--continue` (FEASIBILITY §10); también para retomar después de una interrupción. Documentar los casos en que reinicia (streams fragmentados).
+  *Depende de:* T7.7
+  *Acepta:* prueba en el teléfono con una descarga HTTP grande.
 
 ## Etapas 8–12
 

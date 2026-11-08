@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 7 (gestor de trabajos): detallar las tareas en `TASKS.md` antes de empezar. T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
+Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; próxima T7.1. T6.7 (leer la entrada sin copiarla, P3) queda pendiente.
 
 ## Etapas
 
@@ -15,7 +15,7 @@ Etapa 7 (gestor de trabajos): detallar las tareas en `TASKS.md` antes de empezar
 - [x] 4. Descarga de video (validada en el teléfono: YouTube y Dailymotion)
 - [x] 5. Extracción de audio (validada en el teléfono: MP3, M4A, Opus)
 - [x] 6. Conversor multimedia (validado en el teléfono: MP4 → MP3, remux, recodificar y cancelar, WAV/FLAC)
-- [ ] 7. Gestor de trabajos
+- [ ] 7. Gestor de trabajos (en curso)
 - [ ] 8. Android Sharesheet
 - [ ] 9. Historial y configuración
 - [ ] 10. Funciones avanzadas

@@ -144,7 +144,7 @@ Medido: la cancelación con `destroyProcessById` funcionó (`CanceledException` 
 
 - Las descargas y conversiones corren en un **foreground service** con notificación (`dataSync` para descargas, `mediaProcessing` para conversiones en Android 15+).
 - **Límite de Android 15+:** cada uno de esos tipos tiene 6 h por cada 24 h en segundo plano. Al vencer, el sistema llama a `onTimeout()` y hay que detener el servicio en segundos. → El trabajo se persiste en Room y se marca como "interrumpido, reintentable".
-- WorkManager se usa para reanudar trabajos pendientes después de que el proceso muere o el teléfono se reinicia, no para la transferencia en sí.
+- WorkManager se usa para reanudar trabajos pendientes después de que el proceso muere o el teléfono se reinicia, no para la transferencia en sí. *(Revisado en ADR-017: no se usa WorkManager; los trabajos se recuperan al abrir la app.)*
 - **Pausa real:** yt-dlp reanuda archivos `.part` con `--continue` en descargas HTTP. "Pausar" = cancelar el proceso conservando el `.part`, y "reanudar" = relanzar el mismo comando. Se documenta que no funciona en todos los casos (algunos streams fragmentados reinician).
 
 ---
