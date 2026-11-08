@@ -2,6 +2,7 @@ package com.fabapps.mediaforge.media.di
 
 import android.content.Context
 import androidx.core.content.edit
+import com.fabapps.mediaforge.domain.convert.MediaInspector
 import com.fabapps.mediaforge.domain.engine.ExtractorEngine
 import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
@@ -12,6 +13,7 @@ import com.fabapps.mediaforge.media.engine.IoDispatcher
 import com.fabapps.mediaforge.media.engine.NativeEngine
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
 import com.fabapps.mediaforge.media.ffmpeg.ContentInputSource
+import com.fabapps.mediaforge.media.ffmpeg.ExtractorInspector
 import com.fabapps.mediaforge.media.ffmpeg.FfmpegConverter
 import com.fabapps.mediaforge.media.process.ProcessRunner
 import com.fabapps.mediaforge.media.storage.MediaStoreLibrary
@@ -87,6 +89,13 @@ internal abstract class MediaModule {
             workRoot = File(context.noBackupFilesDir, "mediaforge/jobs"),
             io = io,
         )
+
+        @Provides
+        @Singleton
+        fun mediaInspector(
+            @ApplicationContext context: Context,
+            @IoDispatcher io: CoroutineDispatcher,
+        ): MediaInspector = ExtractorInspector(context, ContentInputSource(context), io)
 
         /** Comparte la carpeta de trabajos con las descargas; cada trabajo tiene su propio ID. */
         @Provides

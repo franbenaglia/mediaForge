@@ -1,5 +1,7 @@
 package com.fabapps.mediaforge.domain.convert
 
+import com.fabapps.mediaforge.domain.engine.Outcome
+
 /**
  * Un archivo local, descrito por `ffprobe` o por `MediaExtractor`. Los códecs usan los nombres de
  * FFmpeg (`h264`, `hevc`, `vp9`, `av1`, `aac`, `mp3`, `opus`, `vorbis`, `flac`, `pcm_s16le`…).
@@ -20,3 +22,8 @@ data class AudioStream(
     val channels: Int? = null,
     val sampleRate: Int? = null,
 )
+
+/** Describe un archivo local sin copiarlo, para mostrar el plan antes de convertir. */
+interface MediaInspector {
+    suspend fun inspect(input: String): Outcome<LocalMedia>
+}

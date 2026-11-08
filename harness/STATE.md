@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 6: sigue T6.4 (análisis rápido con `MediaExtractor`).
+Etapa 6: sigue T6.5 (pantalla Conversor). Pendiente en el teléfono: `ConverterDeviceTest` (T6.3, T6.4, T6.6).
 
 ## Etapas
 
