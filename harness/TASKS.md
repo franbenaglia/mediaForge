@@ -217,9 +217,10 @@ Recibir enlaces con "Compartir" desde el navegador, apps multimedia u otras apps
 
 Historial persistente de descargas y conversiones, ajustes con DataStore y administración de los archivos guardados (main.md §9, §8.2, §10, §15 punto 16). Diseño en ADR-019.
 
-- [ ] **T9.1** · P1 · Dominio: `HistoryEntry` (tipo video, audio o conversión; título, sitio, enlace de origen u original, formato, archivo guardado, miniatura, fecha) armado desde un `Job` completado; contrato `HistoryStore`; búsqueda y filtro por tipo. `Settings` (modo, calidad y audio predeterminados, descargas simultáneas 1–3, solo Wi‑Fi, tema, colores del sistema, carpeta de destino) con valores fuera de rango corregidos; contrato `SettingsStore`.
+- [x] **T9.1** · P1 · Dominio: `HistoryEntry` (tipo video, audio o conversión; título, sitio, enlace de origen u original, formato, archivo guardado, miniatura, fecha) armado desde un `Job` completado; contrato `HistoryStore`; búsqueda y filtro por tipo. `Settings` (modo, calidad y audio predeterminados, descargas simultáneas 1–3, solo Wi‑Fi, tema, colores del sistema, carpeta de destino) con valores fuera de rango corregidos; contrato `SettingsStore`.
   *Depende de:* —
   *Acepta:* pruebas en la JVM (armado de la entrada por tipo, filtro y búsqueda, rangos de los ajustes).
+  *Hecho:* `domain/history/History.kt` (`HistoryEntry.from`, `HistorySearch`, `HistoryStore`) y `domain/settings/Settings.kt` (`Settings.normalized`, `SettingsStore`). 11 pruebas.
 - [ ] **T9.2** · P1 · `:core:data`: tabla `history` en Room (versión 2, migración automática desde la 1, esquema exportado) y `RoomHistoryStore`; DataStore Preferences 1.3.0 en `DataStoreSettingsStore` (un valor desconocido vuelve al predeterminado); todo en Hilt.
   *Depende de:* T9.1
   *Acepta:* pruebas en la JVM (mapeo del historial; ajustes con un archivo temporal) y prueba de la migración 1 → 2 en el teléfono.
