@@ -199,7 +199,6 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_dynamic_color">Wallpaper colors</string>
-    <string name="settings_language">App language</string>
     <string name="settings_section_engine">Extraction engine</string>
     <string name="settings_engine_version" translatable="false">yt-dlp %1$s</string>
     <string name="settings_engine_unknown">Unknown version</string>

@@ -221,10 +221,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* —
   *Acepta:* pruebas en la JVM (armado de la entrada por tipo, filtro y búsqueda, rangos de los ajustes).
   *Hecho:* `domain/history/History.kt` (`HistoryEntry.from`, `HistorySearch`, `HistoryStore`) y `domain/settings/Settings.kt` (`Settings.normalized`, `SettingsStore`). 11 pruebas.
-- [~] **T9.2** · P1 · `:core:data`: tabla `history` en Room (versión 2, migración automática desde la 1, esquema exportado) y `RoomHistoryStore`; DataStore Preferences 1.3.0 en `DataStoreSettingsStore` (un valor desconocido vuelve al predeterminado); todo en Hilt.
+- [x] **T9.2** · P1 · `:core:data`: tabla `history` en Room (versión 2, migración automática desde la 1, esquema exportado) y `RoomHistoryStore`; DataStore Preferences 1.3.0 en `DataStoreSettingsStore` (un valor desconocido vuelve al predeterminado); todo en Hilt.
   *Depende de:* T9.1
   *Acepta:* pruebas en la JVM (mapeo del historial; ajustes con un archivo temporal) y prueba de la migración 1 → 2 en el teléfono.
-  *Hecho:* `HistoryEntity`/`HistoryDao`, base versión 2 con `AutoMigration(1, 2)` (esquema `2.json`), `RoomHistoryStore`, `DataStoreSettingsStore` (archivo `files/datastore/settings.preferences_pb`, se reemplaza si está dañado), Hilt. 6 pruebas en la JVM. `MigrationDeviceTest` escrita; falta correrla en el teléfono.
+  *Hecho:* `HistoryEntity`/`HistoryDao`, base versión 2 con `AutoMigration(1, 2)` (esquema `2.json`), `RoomHistoryStore`, `DataStoreSettingsStore` (archivo `files/datastore/settings.preferences_pb`, se reemplaza si está dañado), Hilt. 6 pruebas en la JVM. `MigrationDeviceTest` escrita. La migración real se validó al actualizar la app en el teléfono: los trabajos de la versión 1 siguieron en Descargas (2026-11-08).
 - [x] **T9.3** · P1 · La cola anota en el historial cada trabajo completado y toma de los ajustes el límite de descargas simultáneas (bajar el límite no corta lo que ya corre).
   *Depende de:* T9.2
   *Acepta:* pruebas de `JobScheduler` (entrada al completar, nada al fallar o cancelar; cambio de límite en vivo).
@@ -233,14 +233,14 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.2
   *Acepta:* pruebas de `HomeViewModel`.
   *Hecho:* `VideoOptions.preferredIndex` y `AudioOptions.preferredIndex` (3 pruebas); `HomeViewModel` lee los ajustes al terminar el análisis (3 pruebas). Cambiar de modo o calidad a mano sigue igual.
-- [~] **T9.5** · P1 · Pantalla Historial: lista del más nuevo al más viejo, búsqueda, filtro (todo, video, audio, conversiones), Abrir, Compartir, Descargar de nuevo (carga el enlace en Inicio), Quitar del historial, Borrar archivo (con confirmación y, si Android lo pide, el permiso del sistema); marca los archivos que ya no existen. En Descargas, "Quitar terminados".
+- [x] **T9.5** · P1 · Pantalla Historial: lista del más nuevo al más viejo, búsqueda, filtro (todo, video, audio, conversiones), Abrir, Compartir, Descargar de nuevo (carga el enlace en Inicio), Quitar del historial, Borrar archivo (con confirmación y, si Android lo pide, el permiso del sistema); marca los archivos que ya no existen. En Descargas, "Quitar terminados".
   *Depende de:* T9.3
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `files/SavedFiles` (existe, borrar con MediaStore o documento; `createDeleteRequest` / `RecoverableSecurityException`), `HistoryViewModel` (10 pruebas) y `HistoryScreen` (búsqueda, filtros, tarjeta con miniatura, diálogo de borrado, revisa archivos al volver). "Descargar de nuevo" usa `ShareInbox`. En Descargas quedó "Quitar completados" (los fallidos y cancelados se quedan para reintentar; 1 prueba).
-- [~] **T9.6** · P1 · Pantalla Ajustes: predeterminados de descarga, descargas simultáneas, tema y colores del sistema, motor (versión instalada, buscar e instalar actualización verificada), idioma de la app (ajuste del sistema, Android 13+), acerca de (versión, licencia GPL-3.0, código fuente, sin rastreo).
+- [x] **T9.6** · P1 · Pantalla Ajustes: predeterminados de descarga, descargas simultáneas, tema y colores del sistema, motor (versión instalada, buscar e instalar actualización verificada), acerca de (versión, licencia GPL-3.0, código fuente, sin rastreo).
   *Depende de:* T9.2
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
-  *Hecho:* `SettingsViewModel` (7 pruebas) y `SettingsScreen`; `MainActivity` aplica tema y colores; `generateLocaleConfig` (en, es) y botón al ajuste de idioma de Android 13+. "Solo Wi‑Fi" y la carpeta de destino no se muestran hasta T9.7 y T9.8. Se borró `NotImplementedScreen`: ya no queda ninguna sección sin hacer.
+  *Hecho:* `SettingsViewModel` (7 pruebas) y `SettingsScreen`; `MainActivity` aplica tema y colores; El idioma sigue al del teléfono (inglés por defecto, español si el teléfono está en español): el ajuste de idioma por app del sistema no guardaba la elección en el teléfono de prueba y se quitó el botón. "Solo Wi‑Fi" y la carpeta de destino no se muestran hasta T9.7 y T9.8. Se borró `NotImplementedScreen`: ya no queda ninguna sección sin hacer.
 - [ ] **T9.7** · P2 · Política de conexión "Solo Wi‑Fi": con datos móviles las descargas nuevas esperan ("Esperando Wi‑Fi") y arrancan solas al volver el Wi‑Fi; las que ya corren siguen; las conversiones no dependen de la red.
   *Depende de:* T9.3
   *Acepta:* pruebas de `JobScheduler` con una red falsa; `[~]` hasta probarlo en el teléfono.
@@ -250,9 +250,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
 - [ ] **T9.9** · P2 · Archivos temporales: tamaño de las carpetas privadas de trabajos y botón para limpiar las que no pertenecen a un trabajo activo.
   *Depende de:* T9.6
   *Acepta:* pruebas de la regla de qué se puede borrar.
-- [ ] **T9.10** · P1 · Prueba en el teléfono: el historial sobrevive a cerrar la app y a actualizarla (migración), búsqueda y filtros, borrar un archivo, descargar de nuevo; los ajustes se aplican y se conservan.
+- [x] **T9.10** · P1 · Prueba en el teléfono: el historial sobrevive a cerrar la app y a actualizarla (migración), búsqueda y filtros, borrar un archivo, descargar de nuevo; los ajustes se aplican y se conservan.
   *Depende de:* T9.5, T9.6
   *Acepta:* validación manual registrada.
+  *Hecho:* el usuario validó en 24115RA8EG (2026-11-08): migración con los trabajos anteriores, predeterminados, límite de descargas, tema, motor, historial (búsqueda, filtros, descargar de nuevo, borrar archivo), quitar completados, todo se conserva al reabrir. El ajuste de idioma por app no funcionaba en el teléfono y se quitó (ver ADR-019).
 
 ## Etapas 10–12
 

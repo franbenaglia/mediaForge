@@ -3,9 +3,7 @@ package com.fabapps.mediaforge.ui.settings
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings as AndroidSettings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -63,7 +61,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onDynamicColorChange = viewModel::onDynamicColorChange,
             onCheckEngine = viewModel::onCheckEngine,
             onInstallEngine = viewModel::onInstallEngine,
-            onOpenLanguage = { context.openAppLanguageSettings() },
             onOpenSource = { context.openLink(sourceUrl) },
         ),
         appVersion = context.appVersion(),
@@ -80,7 +77,6 @@ data class SettingsActions(
     val onDynamicColorChange: (Boolean) -> Unit = {},
     val onCheckEngine: () -> Unit = {},
     val onInstallEngine: () -> Unit = {},
-    val onOpenLanguage: () -> Unit = {},
     val onOpenSource: () -> Unit = {},
 )
 
@@ -175,9 +171,6 @@ fun SettingsContent(
                 )
                 Switch(checked = settings.dynamicColor, onCheckedChange = actions.onDynamicColorChange)
             }
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            OutlinedButton(onClick = actions.onOpenLanguage) { Text(stringResource(R.string.settings_language)) }
         }
 
         HorizontalDivider()
@@ -276,12 +269,6 @@ private fun Context.appVersion(): String = try {
     packageManager.getPackageInfo(packageName, 0).versionName.orEmpty()
 } catch (_: Exception) {
     ""
-}
-
-/** Ajuste de idioma por app de Android 13+ (las traducciones salen de `localeConfig`). */
-private fun Context.openAppLanguageSettings() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-    startSafely(Intent(AndroidSettings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", packageName, null)))
 }
 
 private fun Context.openLink(url: String) = startSafely(Intent(Intent.ACTION_VIEW, url.toUri()))

@@ -242,7 +242,7 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Los ajustes viven en DataStore Preferences 1.3.0 dentro de `:core:data`, detrás de `SettingsStore` (dominio). Un valor desconocido o fuera de rango vuelve al predeterminado.
 - El límite de descargas simultáneas (1 a 3) se aplica en vivo: bajarlo no corta lo que ya corre, solo frena lo que espera.
 - "Solo Wi‑Fi" frena las descargas nuevas con red medida; las que corren siguen, porque cortarlas perdería lo bajado (no hay pausa real, T7.8).
-- El idioma de la app se elige en el ajuste del sistema (Android 13+, `localeConfig`), no con un selector propio.
+- El idioma sigue al del teléfono: español si está en español, inglés en cualquier otro caso (`values/` es inglés). Sin selector propio ni `localeConfig`: en el teléfono de prueba (HyperOS, Android 15) el ajuste de idioma por app del sistema mostraba los idiomas pero no guardaba la elección (2026-11-08).
 
 **Descartadas:**
 - Historial como filtro de la tabla `jobs`: quitar un trabajo de la lista borraría su historial, y la lista de trabajos se llenaría de entradas viejas.

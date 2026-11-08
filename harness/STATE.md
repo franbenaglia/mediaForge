@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 hechas (T9.2, T9.5 y T9.6 sin probar en el teléfono; falta correr `MigrationDeviceTest`). Siguen T9.7–T9.9 (P2) y la prueba T9.10. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 y T9.10 hechas y validadas en el teléfono. Siguen T9.7 (solo Wi‑Fi), T9.8 (carpeta de destino) y T9.9 (temporales), las tres P2. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -56,6 +56,7 @@ Etapa 9 (historial y configuración, ADR-019): T9.1–T9.6 hechas (T9.2, T9.5 y 
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
 | T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
 | T8.3 manual en 24115RA8EG | OK: todos los casos | 2026-11-08 |
+| T9.10 manual en 24115RA8EG | OK (idioma por app del sistema no funciona: se quitó) | 2026-11-08 |
 | `ConverterDeviceTest` en 24115RA8EG | OK: análisis y casos de main.md §5.1, cancelación sin procesos ni archivos | 2026-11-08 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
 

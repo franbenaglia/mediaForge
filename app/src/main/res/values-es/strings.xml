@@ -189,7 +189,6 @@
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_dark">Oscuro</string>
     <string name="settings_dynamic_color">Colores del fondo de pantalla</string>
-    <string name="settings_language">Idioma de la app</string>
     <string name="settings_section_engine">Motor de extracción</string>
     <string name="settings_engine_unknown">Versión desconocida</string>
     <string name="settings_engine_check">Buscar actualizaciones</string>
