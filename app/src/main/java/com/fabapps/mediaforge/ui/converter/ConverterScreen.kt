@@ -392,7 +392,7 @@ private fun ImageOptions(state: ConverterUiState, media: LocalMedia, actions: Co
         placeholder = { Text("0:00") },
         isError = state.frameError != null,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = TimeKeyboard,
         modifier = Modifier.fillMaxWidth(),
     )
     when (state.frameError) {
@@ -429,7 +429,7 @@ private fun Trim(state: ConverterUiState, media: LocalMedia, actions: ConverterA
             placeholder = { Text("0:00") },
             isError = error == TrimError.START,
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = TimeKeyboard,
             modifier = Modifier.weight(1f),
         )
         OutlinedTextField(
@@ -444,7 +444,7 @@ private fun Trim(state: ConverterUiState, media: LocalMedia, actions: ConverterA
             },
             isError = error == TrimError.END || error == TrimError.TOO_SHORT || error == TrimError.BEYOND_END,
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = TimeKeyboard,
             modifier = Modifier.weight(1f),
         )
     }
@@ -623,3 +623,6 @@ private fun ConverterReadyPreview() {
         }
     }
 }
+
+// El teclado numérico de muchos teléfonos no tiene ":", que hace falta para `1:23`.
+private val TimeKeyboard = KeyboardOptions(keyboardType = KeyboardType.Ascii, autoCorrectEnabled = false)
