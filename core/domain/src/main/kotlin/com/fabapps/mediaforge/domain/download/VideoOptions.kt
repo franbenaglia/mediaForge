@@ -31,6 +31,16 @@ object VideoOptions {
     const val LOW_QUALITY_AUDIO_KBPS = 160.0
     private const val HD_HEIGHT = 720
 
+    /**
+     * Opción a elegir de entrada con la calidad preferida de los ajustes: la mayor que no la supere.
+     * Si todas la superan, la más baja. Sin preferencia, la mejor.
+     */
+    fun preferredIndex(options: List<VideoOption>, maxHeight: Int?): Int {
+        if (maxHeight == null || options.isEmpty()) return 0
+        val fits = options.indexOfFirst { it.height != null && it.height <= maxHeight }
+        return if (fits >= 0) fits else options.lastIndex
+    }
+
     fun from(info: MediaInfo, container: VideoContainer = VideoContainer.MP4): List<VideoOption> {
         val videos = info.formats.filter { it.hasVideo && it.height != null }
         if (videos.isEmpty()) {

@@ -16,10 +16,13 @@ import com.fabapps.mediaforge.domain.model.MediaInfo
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.SourceSite
+import com.fabapps.mediaforge.domain.settings.PreferredMode
+import com.fabapps.mediaforge.domain.settings.Settings
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.UrlCheck
 import com.fabapps.mediaforge.share.ShareInbox
 import com.fabapps.mediaforge.share.SharedContent
+import com.fabapps.mediaforge.testing.FakeSettingsStore
 import com.fabapps.mediaforge.testing.InMemoryJobStore
 import com.fabapps.mediaforge.ui.common.WorkState
 import kotlinx.coroutines.CompletableDeferred
@@ -106,6 +109,7 @@ class HomeViewModelTest {
     private val library = FakeLibrary()
     private val store = InMemoryJobStore()
     private val inbox = ShareInbox()
+    private val settings = FakeSettingsStore()
 
     /** La cola real, con el descargador falso: la descarga pasa por la cola como en la app. */
     private val queueScope = CoroutineScope(dispatcher + SupervisorJob())
@@ -135,7 +139,7 @@ class HomeViewModelTest {
             JobScheduler(store, downloader, noConverter, library, queueScope, clock = {
                 dispatcher.scheduler.currentTime
             })
-        vm = HomeViewModel(extractor, engine, queue, library, inbox)
+        vm = HomeViewModel(extractor, engine, queue, library, inbox, settings)
     }
 
     @After
@@ -209,6 +213,37 @@ class HomeViewModelTest {
         assertEquals("https://example.com/v", state.input)
     }
 
+    // Ajustes (ADR-019)
+
+    @Test
+    fun withoutPreferencesTheBestVideoIsChosen() = test {
+        analyzed()
+        assertEquals(DownloadMode.VIDEO, state.mode)
+        assertEquals(0, state.selectedOption)
+        assertEquals(AudioFormat.MP3, state.audioOption?.format)
+        assertEquals(null, state.audioBitrate)
+    }
+
+    @Test
+    fun preferredQualityAndAudioAreSelectedAfterAnalyzing() = test {
+        settings.settings.value =
+            Settings(mode = PreferredMode.AUDIO, maxHeight = 720, audioFormat = AudioFormat.MP3, audioBitrateKbps = 320)
+        analyzed()
+        assertEquals(DownloadMode.AUDIO, state.mode)
+        // 1080 supera 720: queda 360, la mayor que no la supera.
+        assertEquals(360, state.options[state.selectedOption].height)
+        assertEquals(AudioFormat.MP3, state.audioOption?.format)
+        assertEquals(320, state.audioBitrate)
+    }
+
+    @Test
+    fun preferredAudioFormatWithoutBitrateUsesAutomatic() = test {
+        settings.settings.value = Settings(audioFormat = AudioFormat.M4A)
+        analyzed()
+        assertEquals(AudioFormat.M4A, state.audioOption?.format)
+        assertEquals(null, state.audioBitrate)
+    }
+
     // Compartir (ADR-018)
 
     @Test
@@ -225,7 +260,7 @@ class HomeViewModelTest {
     fun linkSharedBeforeHomeOpensIsTaken() = test {
         val early = ShareInbox().apply { offer(SharedContent(null, "https://vimeo.com/1")) }
         val queue = JobScheduler(store, downloader, noConverter, library, queueScope)
-        val home = HomeViewModel(extractor, engine, queue, library, early)
+        val home = HomeViewModel(extractor, engine, queue, library, early, settings)
         advanceUntilIdle()
         assertEquals("https://vimeo.com/1", home.state.value.input)
         assertEquals(listOf("https://vimeo.com/1"), extractor.calls)

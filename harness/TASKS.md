@@ -229,9 +229,10 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Depende de:* T9.2
   *Acepta:* pruebas de `JobScheduler` (entrada al completar, nada al fallar o cancelar; cambio de límite en vivo).
   *Hecho:* `JobScheduler(history = …)` anota al completar; `setDownloadLimit`; `QueueSettings` (en `MediaForgeApplication`) lleva el ajuste a la cola. 2 pruebas.
-- [ ] **T9.4** · P1 · Inicio arranca con el modo, la calidad (la mayor que no supere la elegida) y el formato y bitrate de audio de los ajustes.
+- [x] **T9.4** · P1 · Inicio arranca con el modo, la calidad (la mayor que no supere la elegida) y el formato y bitrate de audio de los ajustes.
   *Depende de:* T9.2
   *Acepta:* pruebas de `HomeViewModel`.
+  *Hecho:* `VideoOptions.preferredIndex` y `AudioOptions.preferredIndex` (3 pruebas); `HomeViewModel` lee los ajustes al terminar el análisis (3 pruebas). Cambiar de modo o calidad a mano sigue igual.
 - [ ] **T9.5** · P1 · Pantalla Historial: lista del más nuevo al más viejo, búsqueda, filtro (todo, video, audio, conversiones), Abrir, Compartir, Descargar de nuevo (carga el enlace en Inicio), Quitar del historial, Borrar archivo (con confirmación y, si Android lo pide, el permiso del sistema); marca los archivos que ya no existen. En Descargas, "Quitar terminados".
   *Depende de:* T9.3
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.

@@ -83,6 +83,10 @@ object AudioOptions {
         return list.firstOrNull { it >= sourceKbps - 8 } ?: list.last()
     }
 
+    /** Formato a elegir de entrada con el preferido de los ajustes; el primero si no está. */
+    fun preferredIndex(options: List<AudioOption>, format: AudioFormat): Int =
+        options.indexOfFirst { it.format == format }.coerceAtLeast(0)
+
     fun from(info: MediaInfo): List<AudioOption> {
         val audioOnly = info.formats.filter { it.hasAudio && !it.hasVideo }
         // Sin pistas de audio sueltas (Dailymotion), se usa el combinado más liviano: el video se descarta.

@@ -15,6 +15,8 @@ import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.settings.PreferredMode
+import com.fabapps.mediaforge.domain.settings.SettingsStore
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.domain.url.SharedText
 import com.fabapps.mediaforge.domain.url.UrlCheck
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -119,6 +122,7 @@ class HomeViewModel @Inject constructor(
     private val queue: JobQueue,
     private val library: MediaLibrary,
     private val shareInbox: ShareInbox,
+    private val settings: SettingsStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
@@ -202,18 +206,24 @@ class HomeViewModel @Inject constructor(
             when (val result = extractor.extract(url)) {
                 is Outcome.Success -> {
                     val info = result.value
+                    // Arranca con lo preferido en los ajustes (ADR-019).
+                    val prefs = settings.settings.first()
+                    val video = VideoOptions.from(info)
                     val audio = AudioOptions.from(info)
+                    val audioIndex = AudioOptions.preferredIndex(audio, prefs.audioFormat)
+                    val audioOption = audio.getOrNull(audioIndex)
                     _state.update {
                         it.copy(
                             analysis = AnalysisState.Loaded(info),
-                            options = VideoOptions.from(info),
-                            selectedOption = 0,
+                            mode = if (prefs.mode == PreferredMode.AUDIO) DownloadMode.AUDIO else DownloadMode.VIDEO,
+                            options = video,
+                            selectedOption = VideoOptions.preferredIndex(video, prefs.maxHeight),
                             audioOptions = audio,
-                            selectedAudio = 0,
-                            audioBitrate = null,
-                            audioSourceBytes = audio.firstOrNull()?.let { option ->
-                                AudioOptions.sourceBytes(info, option)
+                            selectedAudio = audioIndex,
+                            audioBitrate = prefs.audioBitrateKbps?.takeIf { kbps ->
+                                audioOption?.format == prefs.audioFormat && kbps in audioOption.bitrates
                             },
+                            audioSourceBytes = audioOption?.let { option -> AudioOptions.sourceBytes(info, option) },
                             fileName = info.title,
                         )
                     }
