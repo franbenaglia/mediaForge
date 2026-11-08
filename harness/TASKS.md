@@ -116,10 +116,10 @@ Criterio del MVP: punto 7 de main.md §15 (MP3 de contenido autorizado). El Pyth
   *Depende de:* T5.1
   *Acepta:* pruebas de argumentos y de líneas de salida.
   *Hecho:* origen `<id>/bestaudio/best`, `--audio-quality <k>K` solo al recodificar, OGG = `vorbis`; parser con `ExtractAudio` ("Not converting" = extracción sin recodificar), `EmbedThumbnail` y `ThumbnailsConvertor`. 6 pruebas nuevas.
-- [~] **T5.3** · P1 · `YtDlpDownloader` acepta `DownloadSelection.Audio`: salida por extensión esperada (no la portada ni el original) y MIME que MediaStore acepta.
+- [x] **T5.3** · P1 · `YtDlpDownloader` acepta `DownloadSelection.Audio`: salida por extensión esperada (no la portada ni el original) y MIME que MediaStore acepta.
   *Depende de:* T5.2
   *Acepta:* pruebas con yt-dlp falso; `MediaLibraryDeviceTest` guarda MP3, M4A, Opus, OGG, WAV y FLAC en `Music/MediaForge` sin cambiar el nombre.
-  *Hecho:* salida por extensión esperada (ignora portadas sueltas), MIME por formato (WAV = `audio/x-wav`). Prueba con yt-dlp falso OK; falta `savesEveryAudioFormatIntoMusic` en el teléfono.
+  *Hecho:* salida por extensión esperada (ignora portadas sueltas), MIME por formato (WAV = `audio/x-wav`). Prueba con yt-dlp falso OK; `savesEveryAudioFormatIntoMusic` OK en el teléfono (2026-11-08): los seis formatos en `Music/MediaForge/` sin cambio de nombre.
 - [~] **T5.4** · P1 · Inicio: elegir Video o Audio; en audio, formato, bitrate (con "Automático"), avisos de calidad y tamaño.
   *Depende de:* T5.1, T5.3
   *Acepta:* pruebas de `HomeViewModel`; `[~]` hasta probarlo en el teléfono.
