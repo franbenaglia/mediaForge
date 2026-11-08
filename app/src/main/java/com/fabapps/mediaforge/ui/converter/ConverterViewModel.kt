@@ -2,11 +2,14 @@ package com.fabapps.mediaforge.ui.converter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fabapps.mediaforge.domain.convert.Clip
+import com.fabapps.mediaforge.domain.convert.ClipProblem
 import com.fabapps.mediaforge.domain.convert.ConversionPlan
 import com.fabapps.mediaforge.domain.convert.ConversionPlanner
 import com.fabapps.mediaforge.domain.convert.LocalMedia
 import com.fabapps.mediaforge.domain.convert.MediaInspector
 import com.fabapps.mediaforge.domain.convert.StreamPlan
+import com.fabapps.mediaforge.domain.convert.TimeCodes
 import com.fabapps.mediaforge.domain.download.AudioOptions
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.jobs.JobQueue
@@ -33,6 +36,24 @@ import kotlinx.coroutines.launch
 
 enum class TargetKind { VIDEO, AUDIO }
 
+/** Recorte tal como lo escribe el usuario. Inicio vacío = desde el principio; fin vacío = hasta el final. */
+data class TrimInput(
+    val enabled: Boolean = false,
+    val start: String = "",
+    val end: String = "",
+    val exact: Boolean = false,
+)
+
+enum class TrimError {
+    /** El inicio no es un tiempo válido. */
+    START,
+
+    /** El fin no es un tiempo válido. */
+    END,
+    TOO_SHORT,
+    BEYOND_END,
+}
+
 sealed interface InputState {
     data object None : InputState
 
@@ -53,9 +74,36 @@ data class ConverterUiState(
     /** Nulo = automático. */
     val audioBitrate: Int? = null,
     val fileName: String = "",
+    val trim: TrimInput = TrimInput(),
     val work: WorkState = WorkState.None,
 ) {
     val media: LocalMedia? get() = (input as? InputState.Ready)?.media
+
+    /** Lo escrito en el recorte, leído: un fragmento, un error o nada (el archivo entero). */
+    private val trimResult: Pair<Clip?, TrimError?>
+        get() {
+            if (!trim.enabled) return null to null
+            val start = if (trim.start.isBlank()) 0.0 else TimeCodes.parse(trim.start) ?: return null to TrimError.START
+            val end = if (trim.end.isBlank()) null else TimeCodes.parse(trim.end) ?: return null to TrimError.END
+            val clip = Clip(start, end, trim.exact)
+            return when (clip.problem(media?.durationSeconds)) {
+                null -> (if (start == 0.0 && end == null) null else clip) to null
+                ClipProblem.INVALID -> null to TrimError.START
+                ClipProblem.TOO_SHORT -> null to TrimError.TOO_SHORT
+                ClipProblem.BEYOND_END -> null to TrimError.BEYOND_END
+            }
+        }
+
+    /** Fragmento a convertir; nulo = el archivo entero (o el recorte tiene un error). */
+    val clip: Clip? get() = trimResult.first
+
+    val trimError: TrimError? get() = trimResult.second
+
+    /** Duración del fragmento, si se sabe. */
+    val clipLength: Double? get() = clip?.lengthSeconds(media?.durationSeconds)
+
+    /** Se corta copiando el video: el inicio cae en un fotograma clave (ADR-020). */
+    val cutsAtKeyframe: Boolean get() = clip != null && readyPlan?.video == StreamPlan.Copy
 
     val target: ConversionTarget
         get() = when (kind) {
@@ -64,11 +112,12 @@ data class ConverterUiState(
         }
 
     /** Plan con los datos del análisis rápido; el conversor lo vuelve a calcular con `ffprobe`. */
-    val plan: Outcome<ConversionPlan>? get() = media?.let { ConversionPlanner.plan(it, target) }
+    val plan: Outcome<ConversionPlan>? get() = media?.let { ConversionPlanner.plan(it, target, clip) }
 
     val readyPlan: ConversionPlan? get() = (plan as? Outcome.Success)?.value
 
-    val estimatedBytes: Long? get() = media?.let { m -> readyPlan?.let { ConversionPlanner.estimateBytes(m, it) } }
+    val estimatedBytes: Long?
+        get() = media?.let { m -> readyPlan?.let { ConversionPlanner.estimateBytes(m, it, clip) } }
 
     /** Alturas menores que la del archivo, para reducir la resolución. */
     val heightOptions: List<Int> get() = HEIGHTS.filter { h -> (media?.video?.height ?: 0) > h }
@@ -85,7 +134,7 @@ data class ConverterUiState(
             return kind == TargetKind.AUDIO && (encode.bitrateKbps ?: 0) > source + 8
         }
 
-    val canConvert: Boolean get() = readyPlan != null && !work.isActive
+    val canConvert: Boolean get() = readyPlan != null && trimError == null && !work.isActive
 
     val canCancel: Boolean get() = work is WorkState.Running
 
@@ -152,6 +201,14 @@ class ConverterViewModel @Inject constructor(
 
     fun onFileNameChange(name: String) = edit { it.copy(fileName = name) }
 
+    fun onTrimEnabledChange(enabled: Boolean) = edit { it.copy(trim = it.trim.copy(enabled = enabled)) }
+
+    fun onTrimStartChange(text: String) = edit { it.copy(trim = it.trim.copy(start = text.take(TIME_CHARS))) }
+
+    fun onTrimEndChange(text: String) = edit { it.copy(trim = it.trim.copy(end = text.take(TIME_CHARS))) }
+
+    fun onExactCutChange(exact: Boolean) = edit { it.copy(trim = it.trim.copy(exact = exact)) }
+
     fun onConvert() {
         val current = _state.value
         val ready = current.input as? InputState.Ready ?: return
@@ -161,6 +218,7 @@ class ConverterViewModel @Inject constructor(
             input = ready.uri,
             target = current.target,
             fileName = current.fileName.ifBlank { ready.media.displayName.substringBeforeLast('.') },
+            clip = current.clip,
         )
         _state.update { it.copy(work = WorkState.Running(JobState.Pending)) }
         // La cola puede correrla o reintentarla cuando esta pantalla ya no existe.
@@ -202,5 +260,10 @@ class ConverterViewModel @Inject constructor(
     private fun edit(change: (ConverterUiState) -> ConverterUiState) {
         if (_state.value.locked) return
         _state.update { change(it).let { next -> if (next != it) next.copy(work = WorkState.None) else next } }
+    }
+
+    private companion object {
+        /** `1:02:03.500` y algo de margen. */
+        const val TIME_CHARS = 16
     }
 }

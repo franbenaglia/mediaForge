@@ -136,6 +136,18 @@
     <string name="converter_failed">The conversion failed.</string>
     <string name="converter_interrupted">The conversion was interrupted. You can start it again.</string>
     <string name="converter_cancelled">Conversion cancelled. Temporary files were deleted.</string>
+    <string name="converter_trim">Trim</string>
+    <string name="converter_trim_hint">Convert only part of the file, such as a song from a video.</string>
+    <string name="converter_trim_start">Start</string>
+    <string name="converter_trim_end">End</string>
+    <string name="converter_trim_to_end">To the end</string>
+    <string name="converter_trim_format_hint">Leave start or end empty to use the beginning or the end of the file. For example: 83, 1:23 or 1:02:03.</string>
+    <string name="converter_trim_error_format">Write a time like 83, 1:23 or 1:02:03.</string>
+    <string name="converter_trim_error_short">The end must be at least half a second after the start.</string>
+    <string name="converter_trim_error_beyond">The file lasts %1$s.</string>
+    <string name="converter_trim_exact">Exact cut (re-encodes the video, takes longer)</string>
+    <string name="converter_trim_length">Fragment: %1$s</string>
+    <string name="converter_trim_keyframe_note">Without an exact cut, the video is copied and starts at the previous keyframe: it may begin a few seconds before the chosen start.</string>
     <string name="converter_background">The conversion keeps going if you leave the app. You can pick another file to queue another conversion, and follow them all in Downloads.</string>
 
     <!-- Notificaciones de la cola -->

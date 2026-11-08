@@ -125,6 +125,18 @@
     <string name="converter_failed">La conversión falló.</string>
     <string name="converter_interrupted">La conversión se interrumpió. Podés empezarla de nuevo.</string>
     <string name="converter_cancelled">Conversión cancelada. Se borraron los archivos temporales.</string>
+    <string name="converter_trim">Recortar</string>
+    <string name="converter_trim_hint">Convertir solo una parte del archivo, por ejemplo una canción de un video.</string>
+    <string name="converter_trim_start">Inicio</string>
+    <string name="converter_trim_end">Fin</string>
+    <string name="converter_trim_to_end">Hasta el final</string>
+    <string name="converter_trim_format_hint">Si dejás el inicio o el fin vacíos, se usa el principio o el final del archivo. Por ejemplo: 83, 1:23 o 1:02:03.</string>
+    <string name="converter_trim_error_format">Escribí un tiempo como 83, 1:23 o 1:02:03.</string>
+    <string name="converter_trim_error_short">El fin tiene que estar al menos medio segundo después del inicio.</string>
+    <string name="converter_trim_error_beyond">El archivo dura %1$s.</string>
+    <string name="converter_trim_exact">Corte exacto (recodifica el video, tarda más)</string>
+    <string name="converter_trim_length">Fragmento: %1$s</string>
+    <string name="converter_trim_keyframe_note">Sin corte exacto, el video se copia y arranca en el fotograma clave anterior: puede empezar unos segundos antes del inicio elegido.</string>
     <string name="converter_background">La conversión sigue aunque salgas de la app. Podés elegir otro archivo para encolar otra conversión y seguirlas todas en Descargas.</string>
 
     <!-- Notificaciones de la cola -->

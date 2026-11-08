@@ -266,9 +266,10 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
   *Depende de:* —
   *Acepta:* pruebas en la JVM (tiempos, validación, plan, comando, JSON viejo sin recorte).
   *Hecho:* `convert/Clip.kt` (`Clip`, `ClipProblem`, `TimeCodes`), `ConversionPlanner.plan(…, clip)` y `estimateBytes(…, clip)`, `FfmpegCommand.convert(…, clip)` con `-avoid_negative_ts make_zero`, `FfmpegConverter` (progreso sobre el fragmento), `RequestJson` (`clip` opcional, misma versión). 13 pruebas.
-- [ ] **T10.2** · P1 · Recorte en la pantalla Conversor: inicio y fin, "Corte exacto" con su explicación, duración del fragmento, errores de rango; sirve también para extraer un fragmento de audio.
+- [~] **T10.2** · P1 · Recorte en la pantalla Conversor: inicio y fin, "Corte exacto" con su explicación, duración del fragmento, errores de rango; sirve también para extraer un fragmento de audio.
   *Depende de:* T10.1
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
+  *Hecho:* `TrimInput`/`TrimError` en `ConverterUiState` (inicio y fin vacíos = principio y final; recorte vacío = archivo entero), sección "Recortar" con interruptor, campos, "Corte exacto" y aviso del fotograma clave, duración del fragmento y tamaño proporcional. 5 pruebas.
 - [ ] **T10.3** · P1 · Extracción de un fotograma: destino "Imagen" (JPG o PNG) en un instante del video, con la resolución original; se guarda en `Pictures/MediaForge` (o en la carpeta elegida); historial como conversión.
   *Depende de:* T10.2
   *Acepta:* pruebas del plan, del comando y del ViewModel; `[~]` hasta probarlo en el teléfono.

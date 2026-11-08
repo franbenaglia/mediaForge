@@ -1,6 +1,7 @@
 package com.fabapps.mediaforge.ui.converter
 
 import com.fabapps.mediaforge.domain.convert.AudioStream
+import com.fabapps.mediaforge.domain.convert.Clip
 import com.fabapps.mediaforge.domain.convert.LocalMedia
 import com.fabapps.mediaforge.domain.convert.MediaInspector
 import com.fabapps.mediaforge.domain.convert.StreamPlan
@@ -267,6 +268,71 @@ class ConverterViewModelTest {
         assertEquals(WorkState.Failed(MediaError.Unknown("ffmpeg")), state.work)
         vm.onContainerChange(VideoContainer.MKV)
         assertEquals(WorkState.None, state.work)
+    }
+
+    @Test
+    fun trimIsOffUntilEnabled() = test {
+        pick(video)
+        vm.onTrimStartChange("10")
+        assertEquals(null, state.clip)
+        vm.onTrimEnabledChange(true)
+        assertEquals(Clip(10.0), state.clip)
+        assertEquals(90.0, state.clipLength!!, 0.0)
+    }
+
+    @Test
+    fun trimErrorsBlockTheConversion() = test {
+        pick(video)
+        vm.onTrimEnabledChange(true)
+        vm.onTrimStartChange("1:7x")
+        assertEquals(TrimError.START, state.trimError)
+        assertFalse(state.canConvert)
+        vm.onTrimStartChange("0:30")
+        vm.onTrimEndChange("0:30.2")
+        assertEquals(TrimError.TOO_SHORT, state.trimError)
+        vm.onTrimEndChange("2:00")
+        assertEquals(TrimError.BEYOND_END, state.trimError)
+        vm.onTrimEndChange("nope")
+        assertEquals(TrimError.END, state.trimError)
+        vm.onTrimEndChange("1:10")
+        assertEquals(null, state.trimError)
+        assertTrue(state.canConvert)
+    }
+
+    @Test
+    fun emptyTrimMeansTheWholeFile() = test {
+        pick(video)
+        vm.onTrimEnabledChange(true)
+        assertEquals(null, state.clip)
+        assertEquals(null, state.trimError)
+        assertTrue(state.canConvert)
+    }
+
+    @Test
+    fun quickCutWarnsAboutKeyframesAndExactCutEncodes() = test {
+        pick(video)
+        vm.onContainerChange(VideoContainer.MKV)
+        vm.onTrimEnabledChange(true)
+        vm.onTrimStartChange("10")
+        vm.onTrimEndChange("20")
+        assertTrue(state.cutsAtKeyframe)
+        assertEquals(StreamPlan.Copy, state.readyPlan!!.video)
+        // 10 s de 100: la décima parte de los 10 MB.
+        assertEquals(1_000_000L, state.estimatedBytes)
+        vm.onExactCutChange(true)
+        assertFalse(state.cutsAtKeyframe)
+        assertEquals(StreamPlan.Encode("h264"), state.readyPlan!!.video)
+    }
+
+    @Test
+    fun convertSendsTheClip() = test {
+        pick(song)
+        vm.onTrimEnabledChange(true)
+        vm.onTrimStartChange("1:00")
+        vm.onTrimEndChange("1:30")
+        vm.onConvert()
+        advanceUntilIdle()
+        assertEquals(Clip(60.0, 90.0), converter.requests.single().clip)
     }
 
     @Test

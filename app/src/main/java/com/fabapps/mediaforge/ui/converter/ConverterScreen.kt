@@ -6,13 +6,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
@@ -23,6 +26,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -41,6 +46,7 @@ import com.fabapps.mediaforge.domain.convert.AudioStream
 import com.fabapps.mediaforge.domain.convert.ConversionPlan
 import com.fabapps.mediaforge.domain.convert.LocalMedia
 import com.fabapps.mediaforge.domain.convert.StreamPlan
+import com.fabapps.mediaforge.domain.convert.TimeCodes
 import com.fabapps.mediaforge.domain.convert.VideoStream
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.AudioFormat
@@ -78,6 +84,10 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
             onAudioFormat = viewModel::onAudioFormatChange,
             onBitrate = viewModel::onBitrateChange,
             onFileName = viewModel::onFileNameChange,
+            onTrimEnabled = viewModel::onTrimEnabledChange,
+            onTrimStart = viewModel::onTrimStartChange,
+            onTrimEnd = viewModel::onTrimEndChange,
+            onExactCut = viewModel::onExactCutChange,
             onConvert = {
                 focus.clearFocus()
                 if (viewModel.needsStoragePermission) {
@@ -100,6 +110,10 @@ internal data class ConverterActions(
     val onAudioFormat: (AudioFormat) -> Unit = {},
     val onBitrate: (Int?) -> Unit = {},
     val onFileName: (String) -> Unit = {},
+    val onTrimEnabled: (Boolean) -> Unit = {},
+    val onTrimStart: (String) -> Unit = {},
+    val onTrimEnd: (String) -> Unit = {},
+    val onExactCut: (Boolean) -> Unit = {},
     val onConvert: () -> Unit = {},
     val onCancel: () -> Unit = {},
 )
@@ -246,6 +260,8 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
         }
     }
 
+    Trim(state, media, actions)
+
     when (val plan = state.plan) {
         is Outcome.Success -> PlanNotes(state, plan.value, media)
         is Outcome.Failure -> ErrorMessage(plan.error, modifier = Modifier.fillMaxWidth())
@@ -258,6 +274,66 @@ private fun Options(state: ConverterUiState, media: LocalMedia, actions: Convert
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+@Composable
+private fun Trim(state: ConverterUiState, media: LocalMedia, actions: ConverterActions) {
+    val trim = state.trim
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.converter_trim), style = MaterialTheme.typography.titleSmall)
+            Note(stringResource(R.string.converter_trim_hint))
+        }
+        Switch(checked = trim.enabled, onCheckedChange = actions.onTrimEnabled)
+    }
+    if (!trim.enabled) return
+    val error = state.trimError
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = trim.start,
+            onValueChange = actions.onTrimStart,
+            label = { Text(stringResource(R.string.converter_trim_start)) },
+            placeholder = { Text("0:00") },
+            isError = error == TrimError.START,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.weight(1f),
+        )
+        OutlinedTextField(
+            value = trim.end,
+            onValueChange = actions.onTrimEnd,
+            label = { Text(stringResource(R.string.converter_trim_end)) },
+            placeholder = {
+                Text(
+                    media.durationSeconds?.let { TimeCodes.format(it) }
+                        ?: stringResource(R.string.converter_trim_to_end),
+                )
+            },
+            isError = error == TrimError.END || error == TrimError.TOO_SHORT || error == TrimError.BEYOND_END,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.weight(1f),
+        )
+    }
+    when (error) {
+        TrimError.START, TrimError.END -> ErrorNote(stringResource(R.string.converter_trim_error_format))
+        TrimError.TOO_SHORT -> ErrorNote(stringResource(R.string.converter_trim_error_short))
+        TrimError.BEYOND_END -> ErrorNote(
+            media.durationSeconds?.let { stringResource(R.string.converter_trim_error_beyond, TimeCodes.format(it)) }
+                ?: stringResource(R.string.converter_trim_error_short),
+        )
+        null -> Note(stringResource(R.string.converter_trim_format_hint))
+    }
+    if (state.kind == TargetKind.VIDEO) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Checkbox(checked = trim.exact, onCheckedChange = actions.onExactCut)
+            Text(stringResource(R.string.converter_trim_exact), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 }
 
 @Composable
@@ -289,6 +365,8 @@ private fun PlanNotes(state: ConverterUiState, plan: ConversionPlan, media: Loca
             StreamPlan.Drop -> if (plan.video != StreamPlan.Drop) Note(stringResource(R.string.converter_audio_none))
         }
         Note(stringResource(if (plan.reencodes) R.string.converter_reencode_note else R.string.converter_fast_note))
+        state.clipLength?.let { Note(stringResource(R.string.converter_trim_length, TimeCodes.format(it))) }
+        if (state.cutsAtKeyframe) Note(stringResource(R.string.converter_trim_keyframe_note))
         if (state.bitrateExceedsSource) {
             Text(
                 stringResource(R.string.audio_exceeds_note, media.audio!!.bitrateKbps!!.roundToLong().toInt()),
@@ -357,6 +435,11 @@ private fun ConvertButton(enabled: Boolean, onClick: () -> Unit, again: Boolean 
 private fun Section(title: String, chips: @Composable () -> Unit) {
     Text(title, style = MaterialTheme.typography.titleSmall)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { chips() }
+}
+
+@Composable
+private fun ErrorNote(text: String) {
+    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
 }
 
 @Composable
