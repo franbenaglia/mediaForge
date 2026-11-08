@@ -49,7 +49,7 @@ Etapa 7 (gestor de trabajos, ADR-017): tareas detalladas en `TASKS.md`; T7.1 y T
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 268 pruebas (72 dominio + 63 app + 133 media), lint sin errores, ktlint OK | 2026-11-08 |
+| `./scripts/verify.sh` | OK: 299 pruebas (89 dominio + 71 app + 133 media + 6 data), lint sin errores, ktlint OK | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
 | `ConverterDeviceTest` en 24115RA8EG | OK: análisis y casos de main.md §5.1, cancelación sin procesos ni archivos | 2026-11-08 |
 | `EngineDeviceTest` en 24115RA8EG (Android 15, arm64) | 5/5 OK: init 2,7 s (primera vez) / 26 ms; actualización 2025.11.12 → 2026.10.26 en 7,7 s; YouTube 57 formatos; Dailymotion OK; cancelación sin procesos sueltos | 2026-11-07 |
