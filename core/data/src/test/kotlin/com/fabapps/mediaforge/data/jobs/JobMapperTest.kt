@@ -13,6 +13,7 @@ import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -98,6 +99,18 @@ class JobMapperTest {
                 ),
             ),
         )
+        roundTrip(
+            job(
+                JobRequest.Conversion(
+                    ConversionRequest(
+                        "g",
+                        "content://doc/5",
+                        ConversionTarget.Video(VideoContainer.MKV, 720, VideoQuality.SMALL),
+                        "g",
+                    ),
+                ),
+            ),
+        )
     }
 
     @Test
@@ -114,6 +127,12 @@ class JobMapperTest {
         val request = (JobMapper.toDomain(row.copy(requestJson = old))?.request as JobRequest.Conversion).request
         assertNull(request.clip)
         assertEquals(ConversionTarget.Audio(AudioFormat.MP3), request.target)
+        val oldVideo = old.replace(
+            """"target":{"type":"audio","format":"MP3"}""",
+            """"target":{"type":"video","container":"MP4"}""",
+        )
+        val video = (JobMapper.toDomain(row.copy(requestJson = oldVideo))?.request as JobRequest.Conversion).request
+        assertEquals(ConversionTarget.Video(VideoContainer.MP4, quality = VideoQuality.ORIGINAL), video.target)
     }
 
     @Test

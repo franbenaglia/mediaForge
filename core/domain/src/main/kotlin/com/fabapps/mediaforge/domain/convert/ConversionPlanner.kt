@@ -7,13 +7,14 @@ import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 
 /** Qué se hace con una pista. */
 sealed interface StreamPlan {
     data object Copy : StreamPlan
 
-    /** [codec] con nombre de FFmpeg; el comando elige el codificador. */
-    data class Encode(val codec: String, val bitrateKbps: Int? = null) : StreamPlan
+    /** [codec] con nombre de FFmpeg; el comando elige el codificador. [crf]: nulo = el predeterminado del códec. */
+    data class Encode(val codec: String, val bitrateKbps: Int? = null, val crf: Int? = null) : StreamPlan
 
     data object Drop : StreamPlan
 }
@@ -96,10 +97,15 @@ object ConversionPlanner {
         val container = target.container
         val scale = target.maxHeight?.takeIf { max -> video.height != null && video.height > max }
         val webm = container == VideoContainer.WEBM
-        val videoPlan = if (!forceEncode && scale == null && accepts(videoCodecs, container, video.codec)) {
+        val compress = target.quality != VideoQuality.ORIGINAL
+        val videoPlan = if (!forceEncode &&
+            !compress &&
+            scale == null &&
+            accepts(videoCodecs, container, video.codec)
+        ) {
             StreamPlan.Copy
         } else {
-            StreamPlan.Encode(if (webm) "vp9" else "h264")
+            StreamPlan.Encode(if (webm) "vp9" else "h264", crf = crfFor(target.quality, webm))
         }
         val audioPlan = when {
             media.audio == null -> StreamPlan.Drop
@@ -121,6 +127,13 @@ object ConversionPlanner {
             StreamPlan.Encode(codecOf(format), chosen ?: AudioOptions.autoBitrate(format, audio.bitrateKbps))
         }
         return Outcome.Success(ConversionPlan(StreamPlan.Drop, audioPlan, null, format.extension, format.mimeType))
+    }
+
+    /** CRF por calidad; nulo = el predeterminado (el mismo que [VideoQuality.HIGH]). */
+    private fun crfFor(quality: VideoQuality, vp9: Boolean): Int? = when (quality) {
+        VideoQuality.ORIGINAL, VideoQuality.HIGH -> null
+        VideoQuality.MEDIUM -> if (vp9) 36 else 26
+        VideoQuality.SMALL -> if (vp9) 40 else 30
     }
 
     /** Códec de FFmpeg que produce cada formato de audio. */

@@ -21,6 +21,7 @@ import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.jobs.InputAccess
 import com.fabapps.mediaforge.ui.common.WorkState
@@ -89,6 +90,7 @@ data class ConverterUiState(
     val container: VideoContainer = VideoContainer.MP4,
     /** Altura máxima; nulo = la original. */
     val maxHeight: Int? = null,
+    val videoQuality: VideoQuality = VideoQuality.ORIGINAL,
     val audioFormat: AudioFormat = AudioFormat.MP3,
     /** Nulo = automático. */
     val audioBitrate: Int? = null,
@@ -156,7 +158,7 @@ data class ConverterUiState(
 
     val target: ConversionTarget
         get() = when (kind) {
-            TargetKind.VIDEO -> ConversionTarget.Video(container, maxHeight)
+            TargetKind.VIDEO -> ConversionTarget.Video(container, maxHeight, videoQuality)
             TargetKind.AUDIO -> ConversionTarget.Audio(audioFormat, audioBitrate)
             // Con un instante inválido se planea igual (para mostrar el resto); no se puede convertir.
             TargetKind.IMAGE -> ConversionTarget.Image(if (frameError == null) frameAt ?: 0.0 else 0.0, imageFormat)
@@ -302,6 +304,8 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onContainerChange(container: VideoContainer) = edit { it.copy(container = container) }
+
+    fun onVideoQualityChange(quality: VideoQuality) = edit { it.copy(videoQuality = quality) }
 
     fun onMaxHeightChange(height: Int?) = edit {
         if (height == null || height in it.heightOptions) it.copy(maxHeight = height) else it

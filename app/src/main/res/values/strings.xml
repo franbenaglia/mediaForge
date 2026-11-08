@@ -121,6 +121,12 @@
     <string name="converter_target_audio">Audio only</string>
     <string name="converter_no_video_track">This file has no video track.</string>
     <string name="converter_container">Container</string>
+    <string name="converter_quality">Quality</string>
+    <string name="converter_quality_original">Original</string>
+    <string name="converter_quality_high">High</string>
+    <string name="converter_quality_medium">Medium</string>
+    <string name="converter_quality_small">Small file</string>
+    <string name="converter_quality_note">Compressing re-encodes the video: it takes longer, and the lower the quality, the smaller the file.</string>
     <string name="converter_resolution">Resolution</string>
     <string name="converter_resolution_original">Original</string>
     <string name="converter_video_copy">Video: copied without re-encoding (%1$s)</string>

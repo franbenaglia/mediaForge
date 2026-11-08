@@ -42,12 +42,25 @@ data class ConversionRequest(
 )
 
 sealed interface ConversionTarget {
-    data class Video(val container: VideoContainer, val maxHeight: Int? = null) : ConversionTarget
+    data class Video(
+        val container: VideoContainer,
+        val maxHeight: Int? = null,
+        val quality: VideoQuality = VideoQuality.ORIGINAL,
+    ) : ConversionTarget
 
     data class Audio(val format: AudioFormat, val bitrateKbps: Int? = null) : ConversionTarget
 
     /** Un fotograma del video en [atSeconds], con la resolución original (ADR-020). */
     data class Image(val atSeconds: Double, val format: ImageFormat = ImageFormat.JPG) : ConversionTarget
+}
+
+/** Compresión del video al convertir (ADR-020). Salvo [ORIGINAL], siempre recodifica. */
+enum class VideoQuality {
+    /** Copia el video si el contenedor lo admite; si no, recodifica con la calidad alta. */
+    ORIGINAL,
+    HIGH,
+    MEDIUM,
+    SMALL,
 }
 
 enum class ImageFormat(val extension: String, val mimeType: String) {

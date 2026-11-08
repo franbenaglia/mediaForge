@@ -91,6 +91,9 @@ object FfmpegCommand {
         addAll(listOf("-update", "1", output.absolutePath))
     }
 
+    private const val H264_CRF = 23
+    private const val VP9_CRF = 32
+
     /** Segundos con milésimas y punto decimal, sea cual sea el idioma del teléfono. */
     internal fun seconds(value: Double): String = String.format(Locale.ROOT, "%.3f", value)
 
@@ -100,10 +103,19 @@ object FfmpegCommand {
         is StreamPlan.Encode -> {
             val scale = plan.scaleToHeight?.let { listOf("-vf", "scale=-2:$it") }.orEmpty()
             val encoder = when (video.codec) {
-                "h264" -> listOf("-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p")
+                "h264" -> listOf(
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "veryfast",
+                    "-crf",
+                    "${video.crf ?: H264_CRF}",
+                    "-pix_fmt",
+                    "yuv420p",
+                )
                 "vp9" -> listOf(
                     "-c:v", "libvpx-vp9", "-deadline", "realtime", "-cpu-used", "8",
-                    "-crf", "32", "-b:v", "0", "-row-mt", "1",
+                    "-crf", "${video.crf ?: VP9_CRF}", "-b:v", "0", "-row-mt", "1",
                 )
                 else -> error("no encoder for ${video.codec}")
             }

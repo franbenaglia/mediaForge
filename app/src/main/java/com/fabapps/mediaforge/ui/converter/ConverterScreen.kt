@@ -53,6 +53,7 @@ import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.JobRow
 import com.fabapps.mediaforge.ui.common.SavedFile
@@ -83,6 +84,7 @@ fun ConverterScreen(viewModel: ConverterViewModel = hiltViewModel()) {
             onPick = { picker.launch(arrayOf("video/*", "audio/*")) },
             onKind = viewModel::onKindChange,
             onContainer = viewModel::onContainerChange,
+            onVideoQuality = viewModel::onVideoQualityChange,
             onMaxHeight = viewModel::onMaxHeightChange,
             onAudioFormat = viewModel::onAudioFormatChange,
             onBitrate = viewModel::onBitrateChange,
@@ -111,6 +113,7 @@ internal data class ConverterActions(
     val onPick: () -> Unit = {},
     val onKind: (TargetKind) -> Unit = {},
     val onContainer: (VideoContainer) -> Unit = {},
+    val onVideoQuality: (VideoQuality) -> Unit = {},
     val onMaxHeight: (Int?) -> Unit = {},
     val onAudioFormat: (AudioFormat) -> Unit = {},
     val onBitrate: (Int?) -> Unit = {},
@@ -291,6 +294,16 @@ private fun Options(state: ConverterUiState, media: LocalMedia?, actions: Conver
                 )
             }
         }
+        Section(stringResource(R.string.converter_quality)) {
+            VideoQuality.entries.forEach { quality ->
+                FilterChip(
+                    selected = state.videoQuality == quality,
+                    onClick = { actions.onVideoQuality(quality) },
+                    label = { Text(stringResource(quality.labelRes())) },
+                )
+            }
+        }
+        if (state.videoQuality != VideoQuality.ORIGINAL) Note(stringResource(R.string.converter_quality_note))
         if (state.heightOptions.isNotEmpty()) {
             Section(stringResource(R.string.converter_resolution)) {
                 FilterChip(
@@ -352,6 +365,13 @@ private fun Options(state: ConverterUiState, media: LocalMedia?, actions: Conver
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+private fun VideoQuality.labelRes() = when (this) {
+    VideoQuality.ORIGINAL -> R.string.converter_quality_original
+    VideoQuality.HIGH -> R.string.converter_quality_high
+    VideoQuality.MEDIUM -> R.string.converter_quality_medium
+    VideoQuality.SMALL -> R.string.converter_quality_small
 }
 
 @Composable

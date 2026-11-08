@@ -6,6 +6,7 @@ import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -118,6 +119,18 @@ class ClipTest {
             ConversionPlanner.plan(media, ConversionTarget.Image(100.0)),
             ConversionPlanner.plan(media, ConversionTarget.Image(-1.0)),
         ).forEach { assertTrue((it as Outcome.Failure).error is MediaError.UnsupportedConversion) }
+    }
+
+    @Test
+    fun compressionAlwaysEncodesWithItsCrf() {
+        fun videoPlan(container: VideoContainer, quality: VideoQuality) =
+            plan(ConversionTarget.Video(container, quality = quality), clip = null).video
+        assertEquals(StreamPlan.Copy, videoPlan(VideoContainer.MP4, VideoQuality.ORIGINAL))
+        assertEquals(StreamPlan.Encode("h264"), videoPlan(VideoContainer.MP4, VideoQuality.HIGH))
+        assertEquals(StreamPlan.Encode("h264", crf = 26), videoPlan(VideoContainer.MP4, VideoQuality.MEDIUM))
+        assertEquals(StreamPlan.Encode("h264", crf = 30), videoPlan(VideoContainer.MKV, VideoQuality.SMALL))
+        assertEquals(StreamPlan.Encode("vp9", crf = 40), videoPlan(VideoContainer.WEBM, VideoQuality.SMALL))
+        assertEquals(StreamPlan.Encode("vp9"), videoPlan(VideoContainer.WEBM, VideoQuality.ORIGINAL))
     }
 
     @Test

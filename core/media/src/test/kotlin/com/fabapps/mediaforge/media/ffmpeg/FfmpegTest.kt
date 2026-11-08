@@ -11,6 +11,7 @@ import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -173,6 +174,16 @@ class FfmpegTest {
         assertFalse("-ss" in png)
         assertEquals("png", png[png.indexOf("-c:v") + 1])
         assertFalse("-map_metadata" in png)
+    }
+
+    @Test
+    fun compressionChangesTheCrf() {
+        val default = command(plan(ConversionTarget.Video(VideoContainer.MP4, quality = VideoQuality.HIGH)))
+        assertEquals("23", default[default.indexOf("-crf") + 1])
+        val small = command(plan(ConversionTarget.Video(VideoContainer.MP4, quality = VideoQuality.SMALL)))
+        assertEquals("30", small[small.indexOf("-crf") + 1])
+        val webm = command(plan(ConversionTarget.Video(VideoContainer.WEBM, quality = VideoQuality.MEDIUM)))
+        assertEquals("36", webm[webm.indexOf("-crf") + 1])
     }
 
     @Test

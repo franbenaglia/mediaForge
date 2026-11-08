@@ -9,6 +9,7 @@ import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -85,7 +86,12 @@ object RequestJson {
 
     @Serializable
     @SerialName("video")
-    private data class VideoTargetDto(val container: String, val maxHeight: Int? = null) : TargetDto
+    private data class VideoTargetDto(
+        val container: String,
+        val maxHeight: Int? = null,
+        /** Desde la Etapa 10; falta en los pedidos guardados antes. */
+        val quality: String? = null,
+    ) : TargetDto
 
     @Serializable
     @SerialName("audio")
@@ -118,7 +124,11 @@ object RequestJson {
     }
 
     private fun ConversionTarget.toDto(): TargetDto = when (this) {
-        is ConversionTarget.Video -> VideoTargetDto(container.name, maxHeight)
+        is ConversionTarget.Video -> VideoTargetDto(
+            container.name,
+            maxHeight,
+            quality.takeIf { it != VideoQuality.ORIGINAL }?.name,
+        )
         is ConversionTarget.Audio -> AudioTargetDto(format.name, bitrateKbps)
         is ConversionTarget.Image -> ImageTargetDto(atSeconds, format.name)
     }
@@ -144,7 +154,11 @@ object RequestJson {
     }
 
     private fun TargetDto.toDomain(): ConversionTarget = when (this) {
-        is VideoTargetDto -> ConversionTarget.Video(VideoContainer.valueOf(container), maxHeight)
+        is VideoTargetDto -> ConversionTarget.Video(
+            VideoContainer.valueOf(container),
+            maxHeight,
+            quality?.let { VideoQuality.valueOf(it) } ?: VideoQuality.ORIGINAL,
+        )
         is AudioTargetDto -> ConversionTarget.Audio(AudioFormat.valueOf(format), bitrateKbps)
         is ImageTargetDto -> ConversionTarget.Image(atSeconds, ImageFormat.valueOf(format))
     }

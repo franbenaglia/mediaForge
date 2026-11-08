@@ -278,9 +278,10 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
   *Depende de:* T10.3
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* selector `OpenMultipleDocuments` (uno solo sigue el flujo de siempre); `InputState.Batch` con `BatchFile` (se leen de a uno), plan por archivo, destino de video si todos tienen video, sin "Imagen" ni recorte; "Convertir N archivos" encola un trabajo por archivo compatible y avisa cuántos se saltean. 5 pruebas.
-- [ ] **T10.5** · P2 · Compresión de video: calidad "Original (copia si se puede)", "Alta", "Media" o "Archivo chico" (recodifica con otro CRF), junto con la resolución.
+- [x] **T10.5** · P2 · Compresión de video: calidad "Original (copia si se puede)", "Alta", "Media" o "Archivo chico" (recodifica con otro CRF), junto con la resolución.
   *Depende de:* T10.2
   *Acepta:* pruebas del plan, del comando y del ViewModel.
+  *Hecho:* `VideoQuality` en `ConversionTarget.Video` (opcional en el JSON), `StreamPlan.Encode.crf`, sección "Calidad" en el Conversor (también para varios archivos). 4 pruebas. Se prueba en el teléfono con T10.8.
 - [ ] **T10.6** · P1 · Subtítulos: el análisis lista los idiomas disponibles (manuales y automáticos del idioma original); en video se puede elegir uno y se incrusta en el archivo (MP4, MKV o WebM). Un subtítulo que no se puede bajar no hace fallar el video (se avisa).
   *Depende de:* —
   *Acepta:* pruebas del parser, del comando y de `HomeViewModel`; `[~]` hasta probarlo en el teléfono.

@@ -21,6 +21,7 @@ import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.VideoContainer
+import com.fabapps.mediaforge.domain.model.VideoQuality
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.jobs.InputAccess
 import com.fabapps.mediaforge.testing.InMemoryJobStore
@@ -466,6 +467,14 @@ class ConverterViewModelTest {
         advanceUntilIdle()
         assertEquals(50, state.batch!!.files.size)
         assertTrue(state.batch!!.truncated)
+    }
+
+    @Test
+    fun qualityIsPartOfTheVideoTarget() = test {
+        pick(video)
+        vm.onVideoQualityChange(VideoQuality.MEDIUM)
+        assertEquals(ConversionTarget.Video(VideoContainer.MP4, null, VideoQuality.MEDIUM), state.target)
+        assertEquals(StreamPlan.Encode("h264", crf = 26), state.readyPlan!!.video)
     }
 
     @Test
