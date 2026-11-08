@@ -144,10 +144,10 @@ Criterio del MVP: MP4 → MP3 (main.md §15). Sin yt-dlp: solo `libffmpeg.so` y 
   *Depende de:* T6.2
   *Acepta:* pruebas en la JVM con ffmpeg/ffprobe falsos (éxito, error, cancelación sin parciales, entrada sin pistas).
   *Hecho:* `FfmpegConverter` + `InputSource` (`ContentInputSource` copia con cancelación por bloque), `FfmpegRuntime` desde `YoutubeDlNativeEngine`, registrado en Hilt. 8 pruebas.
-- [~] **T6.4** · P1 · Análisis rápido de un archivo local sin copiarlo (`MediaExtractor` de Android → `LocalMedia`), para mostrar el plan antes de convertir.
+- [x] **T6.4** · P1 · Análisis rápido de un archivo local sin copiarlo (`MediaExtractor` de Android → `LocalMedia`), para mostrar el plan antes de convertir.
   *Depende de:* T6.1
   *Acepta:* prueba instrumentada en el teléfono con archivos generados por FFmpeg.
-  *Hecho:* `MediaInspector` (dominio), `ExtractorInspector` + `MimeCodecs`; `ConverterDeviceTest` (análisis y los casos de §5.1 con URIs reales, cancelación) escrita, falta correrla en el teléfono.
+  *Hecho:* `MediaInspector` (dominio), `ExtractorInspector` + `MimeCodecs`; `ConverterDeviceTest` OK en el teléfono (2026-11-08): análisis de MP4/WebM/WAV y los casos de §5.1 con URIs reales (MP4 → MP3 0,56 s; → M4A copia 0,40 s; → MKV remux 0,45 s; WebM → MP4 1,2 s; 480p 3,0 s; WAV → FLAC 0,43 s), cancelación sin procesos ni archivos. Encontró que FFmpeg necesita también las librerías de Python (`libc++_shared.so`): corregido.
 - [~] **T6.5** · P1 · Pantalla Conversor: elegir archivo (SAF), datos del archivo, destino (contenedor de video o formato de audio con bitrate, resolución opcional), qué se copia y qué se recodifica, progreso, cancelar, guardar y abrir/compartir.
   *Depende de:* T6.3, T6.4
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.

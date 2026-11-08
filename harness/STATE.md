@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 6: código completo. Pendiente en el teléfono: `ConverterDeviceTest` (T6.3, T6.4) y prueba manual de la pantalla (T6.5, T6.6).
+Etapa 6: código completo. `ConverterDeviceTest` OK en el teléfono. Falta la prueba manual de la pantalla (T6.5, T6.6).
 
 ## Etapas
 

@@ -92,7 +92,8 @@ class ConverterDeviceTest {
 
     /** Genera un archivo y lo guarda en la galería para tener una URI de contenido. */
     private suspend fun generate(name: String, mime: String, vararg args: String): Uri {
-        val file = File(work, name)
+        // Carpeta propia: al guardar, la galería borra la copia privada y su carpeta si queda vacía.
+        val file = File(File(work, "gen-$name").apply { mkdirs() }, name)
         ffmpeg(*args, file.absolutePath)
         val saved = (
             library.save(

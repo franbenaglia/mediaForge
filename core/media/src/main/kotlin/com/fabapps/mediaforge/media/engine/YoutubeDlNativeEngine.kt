@@ -49,9 +49,6 @@ internal class YoutubeDlNativeEngine @Inject constructor(
      */
     override fun runtime(): YtDlpRuntime {
         val python = File(packagesDir, "python/usr")
-        val libs = listOf("python", "ffmpeg", "aria2c").joinToString(":") {
-            File(packagesDir, "$it/usr/lib").absolutePath
-        }
         return YtDlpRuntime(
             python = File(nativeDir, "libpython.so"),
             // La versión actualizada y verificada (T3.7), o la que vino con el APK.
@@ -60,7 +57,7 @@ internal class YoutubeDlNativeEngine @Inject constructor(
             quickJs = File(nativeDir, "libqjs.so"),
             cacheDir = File(context.cacheDir, "yt-dlp").apply { mkdirs() },
             environment = mapOf(
-                "LD_LIBRARY_PATH" to libs,
+                "LD_LIBRARY_PATH" to libraryPath(),
                 "SSL_CERT_FILE" to File(python, "etc/tls/cert.pem").absolutePath,
                 "PYTHONHOME" to python.absolutePath,
                 "HOME" to python.absolutePath,
@@ -70,12 +67,20 @@ internal class YoutubeDlNativeEngine @Inject constructor(
         )
     }
 
-    /** FFmpeg y ffprobe del APK, sin Python (el conversor no usa yt-dlp, ADR-002). */
+    /**
+     * Carpetas de librerías de los paquetes. FFmpeg también necesita la de Python: `librubberband.so`
+     * depende de `libc++_shared.so`, que viene en el paquete de Python (visto en el teléfono, 2026-11-08).
+     */
+    private fun libraryPath(): String = listOf("python", "ffmpeg", "aria2c").joinToString(":") {
+        File(packagesDir, "$it/usr/lib").absolutePath
+    }
+
+    /** FFmpeg y ffprobe del APK; el conversor no ejecuta yt-dlp ni Python (ADR-002). */
     override fun ffmpegRuntime(): FfmpegRuntime = FfmpegRuntime(
         ffmpeg = File(nativeDir, "libffmpeg.so"),
         ffprobe = File(nativeDir, "libffprobe.so"),
         environment = mapOf(
-            "LD_LIBRARY_PATH" to File(packagesDir, "ffmpeg/usr/lib").absolutePath,
+            "LD_LIBRARY_PATH" to libraryPath(),
             "TMPDIR" to context.cacheDir.absolutePath,
         ),
     )
