@@ -36,8 +36,11 @@ fun MediaForgeApp(navController: NavHostController = rememberNavController(), op
     val backStackEntry by navController.currentBackStackEntryAsState()
     val current = backStackEntry?.destination.toTopLevel()
 
-    LaunchedEffect(openHomeRequest) {
-        if (openHomeRequest > 0) navController.navigateToTopLevel(TopLevelDestination.HOME)
+    // Con la app cerrada, el enlace compartido llega antes de que el NavHost arme el grafo: se
+    // espera a que haya una pantalla (navegar antes tira la app, lo encontró AppDeviceTest).
+    val graphReady = backStackEntry != null
+    LaunchedEffect(openHomeRequest, graphReady) {
+        if (openHomeRequest > 0 && graphReady) navController.navigateToTopLevel(TopLevelDestination.HOME)
     }
 
     Scaffold(
