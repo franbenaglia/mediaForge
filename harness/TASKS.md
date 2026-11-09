@@ -318,7 +318,7 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
 - [~] **T11.5** · P2 · Pruebas sin red y con red separadas (main.md §12.4): las que necesitan Internet llevan una anotación y `test-device.sh` puede correr solo las otras; los archivos de prueba son propios o de uso libre y su origen está documentado.
   *Depende de:* T11.4
   *Acepta:* `./scripts/test-device.sh --offline` corre sin red; documentado en `ARCHITECTURE.md`.
-  *Hecho:* anotación `@RequiresNetwork` en las 5 pruebas del motor que usan Internet; `test-device.sh --offline` las filtra con `notAnnotation`. Los archivos de prueba ya tenían su origen documentado (README en cada carpeta); sección "Pruebas" en `ARCHITECTURE.md`. Falta correrlo en el teléfono sin red.
+  *Hecho:* anotación `@RequiresNetwork` en las 5 pruebas del motor que usan Internet; `test-device.sh --offline` las filtra con `notAnnotation`. Los archivos de prueba ya tenían su origen documentado (README en cada carpeta); sección "Pruebas" en `ARCHITECTURE.md`. Falta correrlo en el teléfono sin red: el modo avión corta también la conexión de la computadora (usa el celular como módem), así que queda para cuando haya otra red.
 - [ ] **T11.6** · P2 · Hilo principal y memoria: `StrictMode` en debug (disco y red en el hilo principal, objetos sin cerrar); corregir lo que aparezca al usar la app. Medir arranque en frío y memoria durante una conversión larga.
   *Depende de:* —
   *Acepta:* sin violaciones en un recorrido completo; mediciones anotadas en `STATE.md`.

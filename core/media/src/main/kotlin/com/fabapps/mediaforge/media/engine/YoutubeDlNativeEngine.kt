@@ -86,7 +86,7 @@ internal class YoutubeDlNativeEngine @Inject constructor(
     )
 
     /** Copia de yt-dlp que la librería deja al inicializar. Nunca la modifica la app. */
-    fun bundledYtDlp() = File(context.noBackupFilesDir, "youtubedl-android/yt-dlp/yt-dlp")
+    fun bundledYtDlp() = File(context.noBackupDir(), "youtubedl-android/yt-dlp/yt-dlp")
 
     private companion object {
         const val PREFS = "media_engine"

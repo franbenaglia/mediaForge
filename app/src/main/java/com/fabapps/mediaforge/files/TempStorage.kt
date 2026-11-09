@@ -3,6 +3,7 @@ package com.fabapps.mediaforge.files
 import android.content.Context
 import com.fabapps.mediaforge.domain.jobs.JobScheduler
 import com.fabapps.mediaforge.domain.jobs.TempFolders
+import com.fabapps.mediaforge.media.engine.noBackupDir
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -25,7 +26,7 @@ class JobFoldersTempStorage @Inject constructor(
     private val scheduler: JobScheduler,
 ) : TempStorage {
     /** La misma carpeta que usan el descargador y el conversor (MediaModule). */
-    private val root = File(context.noBackupFilesDir, "mediaforge/jobs")
+    private val root = File(context.noBackupDir(), "mediaforge/jobs")
 
     override suspend fun removableBytes(): Long = scheduler.withJobsFrozen { running ->
         withContext(Dispatchers.IO) { removable(running).sumOf(::size) }

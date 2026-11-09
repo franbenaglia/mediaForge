@@ -13,6 +13,7 @@ import com.fabapps.mediaforge.media.engine.EngineInitializer
 import com.fabapps.mediaforge.media.engine.IoDispatcher
 import com.fabapps.mediaforge.media.engine.NativeEngine
 import com.fabapps.mediaforge.media.engine.YoutubeDlNativeEngine
+import com.fabapps.mediaforge.media.engine.noBackupDir
 import com.fabapps.mediaforge.media.ffmpeg.ContentInputSource
 import com.fabapps.mediaforge.media.ffmpeg.ExtractorInspector
 import com.fabapps.mediaforge.media.ffmpeg.FfmpegConverter
@@ -63,12 +64,13 @@ internal abstract class MediaModule {
         @Provides
         @Singleton
         fun ytDlpVersions(@ApplicationContext context: Context): YtDlpVersions {
-            val prefs = context.getSharedPreferences("ytdlp_versions", Context.MODE_PRIVATE)
+            // Se abren al primer uso, que ya ocurre fuera del hilo principal (T11.6).
+            val prefs by lazy { context.getSharedPreferences("ytdlp_versions", Context.MODE_PRIVATE) }
             val store = object : KeyValueStore {
                 override fun get(key: String): String? = prefs.getString(key, null)
                 override fun set(key: String, value: String?) = prefs.edit { putString(key, value) }
             }
-            return YtDlpVersions(File(context.noBackupFilesDir, "mediaforge/yt-dlp"), store)
+            return YtDlpVersions(File(context.noBackupDir(), "mediaforge/yt-dlp"), store)
         }
 
         @Provides
@@ -95,7 +97,7 @@ internal abstract class MediaModule {
             engine = engine,
             runtimeProvider = native,
             runner = runner,
-            workRoot = File(context.noBackupFilesDir, "mediaforge/jobs"),
+            workRoot = File(context.noBackupDir(), "mediaforge/jobs"),
             io = io,
         )
 
@@ -120,7 +122,7 @@ internal abstract class MediaModule {
             runtimeProvider = native,
             runner = runner,
             inputs = ContentInputSource(context),
-            workRoot = File(context.noBackupFilesDir, "mediaforge/jobs"),
+            workRoot = File(context.noBackupDir(), "mediaforge/jobs"),
             io = io,
         )
 
