@@ -45,6 +45,14 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        // Igual que release (R8, recursos reducidos) pero firmada con la clave de debug: sirve para
+        // probar en el teléfono el código ofuscado sin el keystore. Convive con las otras dos (T11.1).
+        create("minified") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".minified"
+            matchingFallbacks += listOf("release")
+        }
     }
 
     compileOptions {
