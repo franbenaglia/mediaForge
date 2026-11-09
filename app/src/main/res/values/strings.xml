@@ -72,6 +72,10 @@
     <string name="download_quality">Quality</string>
     <string name="download_best">Best quality</string>
     <string name="download_no_audio">no audio</string>
+    <string name="download_subtitles">Subtitles</string>
+    <string name="download_subtitles_none">None</string>
+    <string name="download_subtitles_automatic">%1$s (automatic)</string>
+    <string name="download_subtitles_hint">Embedded in the video as a track you can turn on in the player. If it can\'t be downloaded, the video is saved without it.</string>
     <string name="download_size_approx">~%1$s</string>
     <string name="download_size_unknown">size unknown</string>
     <string name="download_file_name">File name</string>
@@ -190,6 +194,7 @@
     <string name="notification_waiting_retry">Waiting to retry</string>
     <string name="notification_cancel">Cancel</string>
     <string name="notification_done">Saved. Tap to open.</string>
+    <string name="notification_done_no_subtitles">Saved without subtitles: they couldn\'t be downloaded. Tap to open.</string>
     <string name="notification_failed">Failed: %1$s</string>
     <string name="notification_interrupted">Interrupted. Open MediaForge to retry.</string>
     <plurals name="notification_more">

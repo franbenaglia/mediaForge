@@ -2,6 +2,7 @@ package com.fabapps.mediaforge.domain.jobs
 
 import com.fabapps.mediaforge.domain.model.ConversionRequest
 import com.fabapps.mediaforge.domain.model.DownloadRequest
+import com.fabapps.mediaforge.domain.model.JobNote
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
 import kotlinx.coroutines.flow.Flow
@@ -54,6 +55,8 @@ data class Job(
     val error: MediaError? = null,
     /** Archivo guardado en la galería, solo en `COMPLETED`. */
     val output: OutputFile? = null,
+    /** Avisos del resultado. Solo en memoria (llegan en `JobScheduler.finished`); no se guardan. */
+    val notes: Set<JobNote> = emptySet(),
     /** Cuántas veces empezó a correr. */
     val attempts: Int = 0,
     val createdAt: Long,

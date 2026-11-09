@@ -3,6 +3,7 @@ package com.fabapps.mediaforge.media.ytdlp
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -180,5 +181,66 @@ class YtDlpInfoParserTest {
         assertTrue(format.hasVideo && format.hasAudio)
         assertNull(format.fps)
         assertNull(format.fileSizeBytes)
+    }
+
+    private fun parseJson(json: String): MediaInfo {
+        val result = YtDlpInfoParser.parse(json)
+        check(result is Outcome.Success) { "expected success, got $result" }
+        return result.value
+    }
+
+    @Test
+    fun subtitlesListManualThenOriginalAutomatic() {
+        val info = parseJson(
+            """
+            {"id": "x", "language": "en",
+             "subtitles": {
+               "live_chat": [{"ext": "json"}],
+               "es": [{"ext": "vtt", "name": "Spanish"}],
+               "de": [{"ext": "vtt", "name": "German"}],
+               "bad lang": [{"ext": "vtt"}],
+               "fr": []
+             },
+             "automatic_captions": {
+               "en-orig": [{"ext": "vtt", "name": "English (Original)"}],
+               "en": [{"ext": "vtt", "name": "English"}],
+               "ja": [{"ext": "vtt", "name": "Japanese"}]
+             }}
+            """.trimIndent(),
+        )
+        assertEquals(
+            listOf(
+                SubtitleTrack("de", "German"),
+                SubtitleTrack("es", "Spanish"),
+                SubtitleTrack("en-orig", "English (Original)", automatic = true),
+            ),
+            info.subtitles,
+        )
+    }
+
+    @Test
+    fun automaticSkippedWhenManualExistsForTheSameLanguage() {
+        val info = parseJson(
+            """
+            {"id": "x", "language": "en",
+             "subtitles": {"en": [{"ext": "vtt", "name": "English"}]},
+             "automatic_captions": {"en": [{"ext": "vtt"}], "es": [{"ext": "vtt"}]}}
+            """.trimIndent(),
+        )
+        assertEquals(listOf(SubtitleTrack("en", "English")), info.subtitles)
+    }
+
+    @Test
+    fun automaticWithoutLanguageUsesOrigKey() {
+        val info = parseJson(
+            """{"id": "x", "automatic_captions": {"es": [{"ext": "vtt"}], "pt-orig": [{"ext": "vtt"}]}}""",
+        )
+        assertEquals(listOf(SubtitleTrack("pt-orig", automatic = true)), info.subtitles)
+    }
+
+    @Test
+    fun oddSubtitleValuesDoNotBreakTheAnalysis() {
+        val info = parseJson("""{"id": "x", "subtitles": {"es": "nope", "en": [1, {"name": 3}]}}""")
+        assertEquals(listOf(SubtitleTrack("en")), info.subtitles)
     }
 }

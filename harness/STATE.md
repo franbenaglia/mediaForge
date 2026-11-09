@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), T10.3 (fotograma) y T10.4 (varios archivos) hechas y probadas en el teléfono. Siguen T10.6 (subtítulos) y T10.7 (listas de reproducción), con ADR-021 a escribir. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), T10.3 (fotograma) y T10.4 (varios archivos) hechas y probadas en el teléfono. T10.6 (subtítulos, ADR-021) hecha, falta probarla en el teléfono. Sigue T10.7 (listas de reproducción; agregar su parte a ADR-021). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -44,6 +44,7 @@ Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), 
 - Conversor (Etapa 6, ADR-016): `ConversionPlanner` (copia o recodifica por pista), `FfmpegConverter` (copia la entrada a una carpeta privada, `ffprobe`, FFmpeg con progreso y cancelación), `ExtractorInspector` (análisis rápido con `MediaExtractor`) y pantalla Conversor. FFmpeg usa las librerías de Python, FFmpeg y aria2c en `LD_LIBRARY_PATH`.
 - Gestor de trabajos (Etapa 7, ADR-017): `JobScheduler` (dominio; 2 descargas y 1 conversión a la vez, reintento automático por red, recuperación al abrir la app), Room en `:core:data`, `JobService` en primer plano con notificaciones, pantalla Descargas. Inicio y Conversor encolan y dejan seguir agregando trabajos.
 - Conversor avanzado (Etapa 10, ADR-020): recorte con corte rápido o exacto, fotograma JPG/PNG, varios archivos a la vez, compresión por calidad.
+- Subtítulos incrustados al descargar video (ADR-021); si fallan, el video se guarda sin ellos y se avisa.
 - Historial y ajustes (Etapa 9, ADR-019): tabla `history` (Room v2), DataStore, pantallas Historial y Ajustes, solo Wi‑Fi, carpeta de destino con el selector del sistema, limpieza de temporales. El idioma sigue al del teléfono.
 - Compartir enlaces (Etapa 8, ADR-018): `ACTION_SEND` de texto, `SharedText.findUrl`, `ShareInbox`; la app pasa a Inicio y analiza sola.
 - `VideoOptions` (dominio): una calidad por altura con formatos concretos y tamaño estimado (T4.2).

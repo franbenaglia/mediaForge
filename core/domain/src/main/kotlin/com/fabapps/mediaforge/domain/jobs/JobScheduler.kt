@@ -5,6 +5,7 @@ import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.history.HistoryEntry
 import com.fabapps.mediaforge.domain.history.HistoryStore
+import com.fabapps.mediaforge.domain.model.JobNote
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
@@ -282,7 +283,7 @@ class JobScheduler(
             }
         }
         when (val result = terminal) {
-            is JobState.Completed -> save(job, result.outputs.firstOrNull())
+            is JobState.Completed -> save(job, result.outputs.firstOrNull(), result.notes)
             is JobState.Failed -> fail(job, result.error)
             JobState.Cancelled -> finish(job, JobStatus.CANCELLED)
             else -> finish(job, JobStatus.FAILED, MediaError.Unknown("engine finished without a result"))
@@ -294,12 +295,12 @@ class JobScheduler(
         is JobRequest.Conversion -> converter.convert(request.request)
     }
 
-    private suspend fun save(job: Job, file: OutputFile?) {
+    private suspend fun save(job: Job, file: OutputFile?, notes: Set<JobNote>) {
         if (file == null) return finish(job, JobStatus.FAILED, MediaError.Unknown("engine produced no file"))
         saving.add(job.id)
         store.put(job.copy(status = JobStatus.SAVING, updatedAt = clock()))
         when (val saved = library.save(file)) {
-            is Outcome.Success -> finish(job, JobStatus.COMPLETED, output = saved.value)
+            is Outcome.Success -> finish(job.copy(notes = notes), JobStatus.COMPLETED, output = saved.value)
             is Outcome.Failure -> finish(job, JobStatus.FAILED, saved.error)
         }
     }

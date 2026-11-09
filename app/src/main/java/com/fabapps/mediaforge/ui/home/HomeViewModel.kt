@@ -15,6 +15,7 @@ import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import com.fabapps.mediaforge.domain.settings.PreferredMode
 import com.fabapps.mediaforge.domain.settings.SettingsStore
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
@@ -54,6 +55,10 @@ data class HomeUiState(
     val audioBitrate: Int? = null,
     /** Tamaño del audio de origen, para estimar una copia sin recodificar. */
     val audioSourceBytes: Long? = null,
+    /** Subtítulos que ofrece el recurso (ADR-021). */
+    val subtitles: List<SubtitleTrack> = emptyList(),
+    /** Índice en [subtitles]; nulo = sin subtítulos. Solo en video. */
+    val selectedSubtitle: Int? = null,
     /** Nombre del archivo sin extensión; arranca con el título. */
     val fileName: String = "",
     val download: WorkState = WorkState.None,
@@ -71,6 +76,8 @@ data class HomeUiState(
             (if (mode == DownloadMode.VIDEO) options.isNotEmpty() else audioOptions.isNotEmpty())
 
     val audioOption: AudioOption? get() = audioOptions.getOrNull(selectedAudio)
+
+    val subtitle: SubtitleTrack? get() = selectedSubtitle?.let(subtitles::getOrNull)
 
     /** Bitrate que se va a usar: el elegido o el automático; nulo si se copia o es sin pérdida. */
     val effectiveBitrate: Int? get() = audioOption?.selection(audioBitrate)?.bitrateKbps
@@ -232,6 +239,8 @@ class HomeViewModel @Inject constructor(
                                 audioOption?.format == prefs.audioFormat && kbps in audioOption.bitrates
                             },
                             audioSourceBytes = audioOption?.let { option -> AudioOptions.sourceBytes(info, option) },
+                            subtitles = info.subtitles,
+                            selectedSubtitle = null,
                             fileName = info.title,
                         )
                     }
@@ -294,6 +303,13 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(audioBitrate = kbps) }
     }
 
+    /** `null` = sin subtítulos. */
+    fun onSelectSubtitle(index: Int?) {
+        val current = _state.value
+        if (current.download.isActive || (index != null && index !in current.subtitles.indices)) return
+        _state.update { it.copy(selectedSubtitle = index) }
+    }
+
     fun onFileNameChange(name: String) {
         if (!_state.value.download.isActive) _state.update { it.copy(fileName = name) }
     }
@@ -304,7 +320,9 @@ class HomeViewModel @Inject constructor(
         if (!current.canDownload) return
         val info = (current.analysis as AnalysisState.Loaded).info
         val (selection, expected) = when (current.mode) {
-            DownloadMode.VIDEO -> current.options[current.selectedOption].let { it.selection to it.estimatedBytes }
+            DownloadMode.VIDEO -> current.options[current.selectedOption].let {
+                it.selection.copy(subtitle = current.subtitle) to it.estimatedBytes
+            }
             DownloadMode.AUDIO -> current.audioOption!!.selection(current.audioBitrate) to current.audioEstimatedBytes
         }
         val request = DownloadRequest(

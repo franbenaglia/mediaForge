@@ -8,6 +8,7 @@ import com.fabapps.mediaforge.domain.model.ConversionTarget
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.ImageFormat
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import com.fabapps.mediaforge.domain.model.VideoQuality
 import kotlinx.serialization.SerialName
@@ -71,7 +72,12 @@ object RequestJson {
         val formatIds: List<String>,
         val maxHeight: Int? = null,
         val container: String,
+        /** Desde la Etapa 10 (ADR-021); falta en los pedidos guardados antes. */
+        val subtitle: SubtitleDto? = null,
     ) : SelectionDto
+
+    @Serializable
+    private data class SubtitleDto(val language: String, val name: String? = null, val automatic: Boolean = false)
 
     @Serializable
     @SerialName("audio")
@@ -119,7 +125,12 @@ object RequestJson {
     }
 
     private fun DownloadSelection.toDto(): SelectionDto = when (this) {
-        is DownloadSelection.Video -> VideoSelectionDto(formatIds, maxHeight, container.name)
+        is DownloadSelection.Video -> VideoSelectionDto(
+            formatIds,
+            maxHeight,
+            container.name,
+            subtitle?.let { SubtitleDto(it.language, it.name, it.automatic) },
+        )
         is DownloadSelection.Audio -> AudioSelectionDto(format.name, bitrateKbps, formatIds)
     }
 
@@ -149,7 +160,12 @@ object RequestJson {
     }
 
     private fun SelectionDto.toDomain(): DownloadSelection = when (this) {
-        is VideoSelectionDto -> DownloadSelection.Video(formatIds, maxHeight, VideoContainer.valueOf(container))
+        is VideoSelectionDto -> DownloadSelection.Video(
+            formatIds,
+            maxHeight,
+            VideoContainer.valueOf(container),
+            subtitle?.let { SubtitleTrack(it.language, it.name, it.automatic) },
+        )
         is AudioSelectionDto -> DownloadSelection.Audio(AudioFormat.valueOf(format), bitrateKbps, formatIds)
     }
 

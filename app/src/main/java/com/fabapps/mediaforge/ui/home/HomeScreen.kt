@@ -101,6 +101,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             onModeChange = viewModel::onModeChange,
             onSelectAudioFormat = viewModel::onSelectAudioFormat,
             onSelectBitrate = viewModel::onSelectBitrate,
+            onSelectSubtitle = viewModel::onSelectSubtitle,
         ),
     )
 }
@@ -113,6 +114,7 @@ internal data class DownloadActions(
     val onModeChange: (DownloadMode) -> Unit = {},
     val onSelectAudioFormat: (Int) -> Unit = {},
     val onSelectBitrate: (Int?) -> Unit = {},
+    val onSelectSubtitle: (Int?) -> Unit = {},
 )
 
 @Composable
@@ -182,6 +184,7 @@ private fun HomeContent(
                 onModeChange = download.onModeChange,
                 onSelectAudioFormat = download.onSelectAudioFormat,
                 onSelectBitrate = download.onSelectBitrate,
+                onSelectSubtitle = download.onSelectSubtitle,
             )
         }
         if (state.canUpdateEngine) {

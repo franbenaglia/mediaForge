@@ -12,6 +12,7 @@ import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.ImageFormat
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import com.fabapps.mediaforge.domain.model.VideoQuality
 import org.junit.Assert.assertEquals
@@ -48,6 +49,20 @@ class JobMapperTest {
     @Test
     fun `video download round trips`() =
         roundTrip(job(video, output = OutputFile("content://media/1", "clip.mkv", "video/x-matroska", 99)))
+
+    @Test
+    fun `video with subtitles round trips`() = roundTrip(
+        job(
+            JobRequest.Download(
+                DownloadRequest(
+                    "s",
+                    "https://www.youtube.com/watch?v=x",
+                    DownloadSelection.Video(subtitle = SubtitleTrack("en-orig", "English", automatic = true)),
+                    "s",
+                ),
+            ),
+        ),
+    )
 
     @Test
     fun `audio download round trips`() = roundTrip(

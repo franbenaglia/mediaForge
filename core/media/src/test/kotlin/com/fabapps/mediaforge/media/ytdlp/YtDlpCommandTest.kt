@@ -2,9 +2,12 @@ package com.fabapps.mediaforge.media.ytdlp
 
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import com.fabapps.mediaforge.domain.model.VideoContainer
 import java.io.File
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class YtDlpCommandTest {
@@ -139,5 +142,40 @@ class YtDlpCommandTest {
     @Test(expected = IllegalArgumentException::class)
     fun audioFormatIdIsValidated() {
         download(DownloadSelection.Audio(AudioFormat.MP3, formatIds = listOf("251/worst")))
+    }
+
+    @Test
+    fun manualSubtitleIsEmbeddedBeforeTheUrl() {
+        val command = download(DownloadSelection.Video(subtitle = SubtitleTrack("es", "Spanish")))
+        val start = command.indexOf("--write-subs")
+        assertEquals(
+            listOf("--write-subs", "--sub-langs", "es", "--sub-format", "vtt/srt/best", "--embed-subs"),
+            command.subList(start, start + 6),
+        )
+        assertEquals(listOf("--", "https://example.com/v"), command.takeLast(2))
+        assertFalse("--write-auto-subs" in command)
+    }
+
+    @Test
+    fun automaticSubtitleUsesWriteAutoSubs() {
+        val command = download(DownloadSelection.Video(subtitle = SubtitleTrack("en-orig", automatic = true)))
+        assertTrue("--write-auto-subs" in command)
+        assertFalse("--write-subs" in command)
+        assertEquals("en-orig", command[command.indexOf("--sub-langs") + 1])
+    }
+
+    @Test
+    fun noSubtitleOptionsByDefault() {
+        assertTrue(download(DownloadSelection.Video()).none { it.contains("sub") })
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun subtitleLanguageCannotBeARegexOrOption() {
+        SubtitleTrack("-all")
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun movCannotCarrySubtitles() {
+        DownloadSelection.Video(container = VideoContainer.MOV, subtitle = SubtitleTrack("es"))
     }
 }

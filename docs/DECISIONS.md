@@ -269,3 +269,23 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 **Descartadas:**
 - Cortar sin recodificar solo el tramo inicial (recodificar hasta el siguiente fotograma clave y copiar el resto): es frágil con FFmpeg desde la línea de comandos (parámetros del codificador que tienen que coincidir) y no vale el riesgo.
 - Varios fotogramas por trabajo (uno cada N segundos): un trabajo produce un archivo (ADR-017); se puede agregar más adelante con un ZIP o una carpeta.
+
+
+---
+
+## ADR-021 · Subtítulos incrustados
+
+**Fecha:** 2026-11-08 · **Estado:** aceptada (la parte de listas de reproducción se agrega con T10.7)
+
+**Contexto:** main.md §5.1 pide descargar subtítulos cuando el sitio los ofrece. YouTube ofrece subtítulos manuales y automáticos (reconocimiento de voz), y además traducciones automáticas a ~150 idiomas. Sin `-i`, yt-dlp corta toda la descarga si un subtítulo falla, y con YouTube eso pasa seguido (HTTP 429).
+
+**Decisión:**
+- El análisis lista los subtítulos manuales (ordenados por nombre, sin `live_chat`) y un solo automático: el del idioma original (`xx-orig`, o el del campo `language`), y solo si no hay uno manual de ese idioma. No se listan las traducciones automáticas. Máximo 60.
+- Se elige uno, solo para video (`DownloadSelection.Video.subtitle`). Va incrustado como pista de texto (`--write-subs` o `--write-auto-subs`, `--sub-langs <idioma>`, `--sub-format vtt/srt/best`, `--embed-subs`), no como archivo aparte: un trabajo produce un archivo (ADR-017).
+- El idioma es la clave de yt-dlp y se valida (`[A-Za-z0-9][A-Za-z0-9_-]{0,31}`): `--sub-langs` es una expresión regular y no puede recibir ni `-all` ni comodines.
+- MOV no admite subtítulos de texto: el pedido lo rechaza (Inicio siempre baja MP4).
+- Si yt-dlp falla con "Unable to download video subtitles", el video se baja de nuevo sin subtítulos y el trabajo termina con `JobNote.SUBTITLES_SKIPPED`; el aviso de resultado lo dice. Cualquier otro error falla como siempre. La nota vive en memoria (no se guarda en Room).
+
+**Descartadas:**
+- `-i` (`--ignore-errors`): también ocultaría errores del video.
+- Varios idiomas a la vez o archivo `.srt` aparte: más opciones en la pantalla para un caso poco común; se puede agregar después.

@@ -16,6 +16,7 @@ import com.fabapps.mediaforge.MainActivity
 import com.fabapps.mediaforge.R
 import com.fabapps.mediaforge.domain.jobs.Job
 import com.fabapps.mediaforge.domain.jobs.JobStatus
+import com.fabapps.mediaforge.domain.model.JobNote
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.ui.common.messageRes
 import com.fabapps.mediaforge.ui.common.progressFraction
@@ -77,7 +78,15 @@ class JobNotifications @Inject constructor(@ApplicationContext private val conte
     /** Aviso de un trabajo que terminó: tocar abre el archivo guardado o la app. */
     fun showResult(job: Job) {
         val text = when (job.status) {
-            JobStatus.COMPLETED -> context.getString(R.string.notification_done)
+            JobStatus.COMPLETED -> context.getString(
+                if (JobNote.SUBTITLES_SKIPPED in
+                    job.notes
+                ) {
+                    R.string.notification_done_no_subtitles
+                } else {
+                    R.string.notification_done
+                },
+            )
             JobStatus.FAILED -> context.getString(
                 R.string.notification_failed,
                 context.getString(job.error?.messageRes() ?: R.string.error_unknown),
@@ -98,6 +107,7 @@ class JobNotifications @Inject constructor(@ApplicationContext private val conte
             .setSmallIcon(R.drawable.ic_nav_downloads)
             .setContentTitle(job.title)
             .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setAutoCancel(true)
             .setContentIntent(tap)
             .build()

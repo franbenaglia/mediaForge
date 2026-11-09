@@ -9,7 +9,13 @@ sealed interface DownloadSelection {
         val formatIds: List<String> = emptyList(),
         val maxHeight: Int? = null,
         val container: VideoContainer = VideoContainer.MP4,
-    ) : DownloadSelection
+        /** Subtítulo a incrustar; nulo = ninguno. MOV no admite subtítulos de texto (ADR-021). */
+        val subtitle: SubtitleTrack? = null,
+    ) : DownloadSelection {
+        init {
+            require(subtitle == null || container.embedsSubtitles) { "$container cannot embed subtitles" }
+        }
+    }
 
     data class Audio(
         val format: AudioFormat,
@@ -68,11 +74,11 @@ enum class ImageFormat(val extension: String, val mimeType: String) {
     PNG("png", "image/png"),
 }
 
-enum class VideoContainer(val extension: String, val mimeType: String) {
-    MP4("mp4", "video/mp4"),
-    MKV("mkv", "video/x-matroska"),
-    WEBM("webm", "video/webm"),
-    MOV("mov", "video/quicktime"),
+enum class VideoContainer(val extension: String, val mimeType: String, val embedsSubtitles: Boolean) {
+    MP4("mp4", "video/mp4", embedsSubtitles = true),
+    MKV("mkv", "video/x-matroska", embedsSubtitles = true),
+    WEBM("webm", "video/webm", embedsSubtitles = true),
+    MOV("mov", "video/quicktime", embedsSubtitles = false),
 }
 
 enum class AudioFormat(val extension: String, val mimeType: String, val lossless: Boolean) {

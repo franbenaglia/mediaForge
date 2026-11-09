@@ -67,6 +67,10 @@
     <string name="download_quality">Calidad</string>
     <string name="download_best">Mejor calidad</string>
     <string name="download_no_audio">sin audio</string>
+    <string name="download_subtitles">Subtítulos</string>
+    <string name="download_subtitles_none">Ninguno</string>
+    <string name="download_subtitles_automatic">%1$s (automáticos)</string>
+    <string name="download_subtitles_hint">Se incrustan en el video como una pista que se activa en el reproductor. Si no se pueden bajar, el video se guarda sin ellos.</string>
     <string name="download_size_approx">~%1$s</string>
     <string name="download_size_unknown">tamaño desconocido</string>
     <string name="download_file_name">Nombre del archivo</string>
@@ -183,6 +187,7 @@
     <string name="notification_waiting_retry">Esperando para reintentar</string>
     <string name="notification_cancel">Cancelar</string>
     <string name="notification_done">Guardado. Tocá para abrir.</string>
+    <string name="notification_done_no_subtitles">Guardado sin subtítulos: no se pudieron bajar. Tocá para abrir.</string>
     <string name="notification_failed">Falló: %1$s</string>
     <string name="notification_interrupted">Se interrumpió. Abrí MediaForge para reintentar.</string>
     <plurals name="notification_more">

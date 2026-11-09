@@ -5,6 +5,7 @@ import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.file.FileNames
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.JobNote
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.OutputFile
@@ -17,6 +18,7 @@ import com.fabapps.mediaforge.media.process.ProcessRunner
 import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
@@ -54,24 +56,22 @@ class YtDlpDownloader(
         var keep = false
         try {
             val runtime = runtimeProvider.runtime()
-            val command = YtDlpCommand.download(runtime, url, selection, workDir, request.embedMetadata)
-            val parser = YtDlpProgressParser(audioStep = audioStep(selection))
-            val stderr = ArrayDeque<String>()
-            var exit: ProcessEvent? = null
             emit(JobState.Downloading(null, null, null, null))
-            runner.run(command, runtime.environment, workingDir = workDir).collect { event ->
-                when (event) {
-                    is ProcessEvent.Stdout -> parser.feed(event.line)?.let { emit(it) }
-                    is ProcessEvent.Stderr -> {
-                        stderr.addLast(event.line)
-                        if (stderr.size > STDERR_LINES) stderr.removeFirst()
-                    }
-                    is ProcessEvent.Exited, ProcessEvent.TimedOut -> exit = event
-                }
+            var result = attempt(runtime, url, selection, request.embedMetadata, workDir)
+            val notes = mutableSetOf<JobNote>()
+            // Un subtítulo que no se puede bajar no hace fallar el video: se baja de nuevo sin él (ADR-021).
+            if (result.code != 0 &&
+                selection is DownloadSelection.Video &&
+                selection.subtitle != null &&
+                YtDlpCommand.SUBTITLE_FAILURE in result.stderr
+            ) {
+                notes += JobNote.SUBTITLES_SKIPPED
+                workDir.deleteRecursively()
+                workDir.mkdirs()
+                result = attempt(runtime, url, selection.copy(subtitle = null), request.embedMetadata, workDir)
             }
-            val code = (exit as? ProcessEvent.Exited)?.code
-            if (code != 0) {
-                emit(JobState.Failed(YtDlpErrorClassifier.classify(stderr.joinToString("\n"))))
+            if (result.code != 0) {
+                emit(JobState.Failed(YtDlpErrorClassifier.classify(result.stderr)))
                 return@flow
             }
             val output = findOutput(workDir, expectedExtension(selection))
@@ -80,11 +80,38 @@ class YtDlpDownloader(
                 return@flow
             }
             keep = true
-            emit(JobState.Completed(listOf(describe(output, request, selection))))
+            emit(JobState.Completed(listOf(describe(output, request, selection)), notes))
         } finally {
             if (!keep) workDir.deleteRecursively()
         }
     }.flowOn(io)
+
+    private class Attempt(val code: Int?, val stderr: String)
+
+    /** Una ejecución de yt-dlp; emite el progreso y devuelve el código de salida y el final de stderr. */
+    private suspend fun FlowCollector<JobState>.attempt(
+        runtime: YtDlpRuntime,
+        url: String,
+        selection: DownloadSelection,
+        embedMetadata: Boolean,
+        workDir: File,
+    ): Attempt {
+        val command = YtDlpCommand.download(runtime, url, selection, workDir, embedMetadata)
+        val parser = YtDlpProgressParser(audioStep = audioStep(selection))
+        val stderr = ArrayDeque<String>()
+        var exit: ProcessEvent? = null
+        runner.run(command, runtime.environment, workingDir = workDir).collect { event ->
+            when (event) {
+                is ProcessEvent.Stdout -> parser.feed(event.line)?.let { emit(it) }
+                is ProcessEvent.Stderr -> {
+                    stderr.addLast(event.line)
+                    if (stderr.size > STDERR_LINES) stderr.removeFirst()
+                }
+                is ProcessEvent.Exited, ProcessEvent.TimedOut -> exit = event
+            }
+        }
+        return Attempt((exit as? ProcessEvent.Exited)?.code, stderr.joinToString("\n"))
+    }
 
     private suspend fun precheck(request: DownloadRequest): MediaError? {
         if (!JOB_ID.matches(request.jobId)) return MediaError.Unknown(detail = "invalid job id")

@@ -16,6 +16,7 @@ import com.fabapps.mediaforge.domain.model.MediaInfo
 import com.fabapps.mediaforge.domain.model.OutputFile
 import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.SourceSite
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import com.fabapps.mediaforge.domain.settings.PreferredMode
 import com.fabapps.mediaforge.domain.settings.Settings
 import com.fabapps.mediaforge.domain.storage.MediaLibrary
@@ -45,6 +46,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -450,10 +452,10 @@ class HomeViewModelTest {
 
     private val privateFile = OutputFile("/data/jobs/1/media.mp4", "Big Buck Bunny.mp4", "video/mp4", 1050)
 
-    private suspend fun TestScope.analyzed() {
+    private suspend fun TestScope.analyzed(media: MediaInfo = info) {
         vm.onInputChange("https://www.youtube.com/watch?v=aqz-KE-bpKQ")
         vm.onAnalyze()
-        extractor.pending.complete(Outcome.Success(info))
+        extractor.pending.complete(Outcome.Success(media))
         advanceUntilIdle()
     }
 
@@ -481,6 +483,52 @@ class HomeViewModelTest {
         assertEquals("Conejo", request.fileName)
         assertEquals(150L, request.expectedBytes)
         assertEquals(info.sourceUrl, request.sourceUrl)
+    }
+
+    // Subtítulos (ADR-021)
+
+    private val withSubtitles = info.copy(
+        subtitles = listOf(SubtitleTrack("es", "Spanish"), SubtitleTrack("en-orig", automatic = true)),
+    )
+
+    @Test
+    fun analysisListsSubtitlesWithNoneSelected() = test {
+        analyzed(withSubtitles)
+        assertEquals(withSubtitles.subtitles, state.subtitles)
+        assertNull(state.subtitle)
+    }
+
+    @Test
+    fun chosenSubtitleGoesInTheVideoRequest() = test {
+        analyzed(withSubtitles)
+        vm.onSelectSubtitle(1)
+        vm.onDownload()
+        advanceUntilIdle()
+        val selection = downloader.requests.single().selection as DownloadSelection.Video
+        assertEquals(SubtitleTrack("en-orig", automatic = true), selection.subtitle)
+        assertEquals(listOf("299", "140"), selection.formatIds)
+    }
+
+    @Test
+    fun subtitleCanBeClearedAndInvalidIndexIsIgnored() = test {
+        analyzed(withSubtitles)
+        vm.onSelectSubtitle(0)
+        vm.onSelectSubtitle(5)
+        assertEquals(SubtitleTrack("es", "Spanish"), state.subtitle)
+        vm.onSelectSubtitle(null)
+        vm.onDownload()
+        advanceUntilIdle()
+        assertNull((downloader.requests.single().selection as DownloadSelection.Video).subtitle)
+    }
+
+    @Test
+    fun audioModeIgnoresSubtitles() = test {
+        analyzed(withSubtitles)
+        vm.onSelectSubtitle(0)
+        vm.onModeChange(DownloadMode.AUDIO)
+        vm.onDownload()
+        advanceUntilIdle()
+        assertTrue(downloader.requests.single().selection is DownloadSelection.Audio)
     }
 
     @Test

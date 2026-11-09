@@ -2,6 +2,7 @@ package com.fabapps.mediaforge.media.ytdlp
 
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import java.io.File
 
 /** Dónde están los binarios y con qué entorno se ejecutan. Lo provee la implementación nativa. */
@@ -81,7 +82,7 @@ object YtDlpCommand {
                 formatSelector(selection),
                 "--merge-output-format",
                 selection.container.extension,
-            )
+            ) + subtitleOptions(selection.subtitle)
             is DownloadSelection.Audio -> audioOptions(selection)
         }
         val metadata = if (embedMetadata) listOf("--embed-metadata") else emptyList()
@@ -93,6 +94,26 @@ object YtDlpCommand {
         }
         return base(runtime) + specific + common + metadata + cover + listOf("--", url)
     }
+
+    /**
+     * Un solo idioma, incrustado como pista de texto (ADR-021). WebVTT primero: lo aceptan los tres
+     * contenedores (en MP4 FFmpeg lo pasa a `mov_text`). yt-dlp borra el archivo suelto al incrustarlo.
+     */
+    internal fun subtitleOptions(track: SubtitleTrack?): List<String> {
+        if (track == null) return emptyList()
+        require(SubtitleTrack.LANGUAGE.matches(track.language)) { "invalid subtitle language" }
+        return listOf(
+            if (track.automatic) "--write-auto-subs" else "--write-subs",
+            "--sub-langs",
+            track.language,
+            "--sub-format",
+            "vtt/srt/best",
+            "--embed-subs",
+        )
+    }
+
+    /** Lo que escribe yt-dlp cuando no puede bajar un subtítulo (y sin `-i`, corta la descarga). */
+    const val SUBTITLE_FAILURE = "Unable to download video subtitles"
 
     private fun audioOptions(selection: DownloadSelection.Audio): List<String> {
         selection.formatIds.forEach { id -> require(FORMAT_ID.matches(id)) { "invalid format id: $id" } }

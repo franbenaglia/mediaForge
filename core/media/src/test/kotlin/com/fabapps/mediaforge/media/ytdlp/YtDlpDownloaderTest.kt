@@ -3,9 +3,11 @@ package com.fabapps.mediaforge.media.ytdlp
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.JobNote
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.ProcessingStep
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import com.fabapps.mediaforge.media.engine.EngineInitializer
 import com.fabapps.mediaforge.media.engine.NativeEngine
 import com.fabapps.mediaforge.media.process.ProcessRunner
@@ -64,6 +66,12 @@ class YtDlpDownloaderTest {
                     echo "MFPROG downloading 10 1000 NA NA"
                     sleep 30 ;;
                   nofile) echo "[info] nothing" ;;
+                  subfail)
+                    if grep -q -- '--embed-subs' "${argsFile.absolutePath}"; then
+                      echo "ERROR: Unable to download video subtitles for 'es': HTTP Error 429: Too Many Requests" >&2
+                      exit 1
+                    fi
+                    printf 'merged' > media.mp4 ;;
                   audio)
                     echo "[info] Writing video thumbnail 41 to: ${'$'}PWD/media.webp"
                     printf 'a-much-bigger-thumbnail-than-the-audio' > media.webp
@@ -193,5 +201,29 @@ class YtDlpDownloaderTest {
         val args = argsFile.readLines()
         assertEquals("320K", args[args.indexOf("--audio-quality") + 1])
         assertTrue("--embed-thumbnail" in args)
+    }
+
+    private fun withSubtitle(request: DownloadRequest) =
+        request.copy(selection = DownloadSelection.Video(subtitle = SubtitleTrack("es")))
+
+    @Test
+    fun subtitleFailureRetriesWithoutSubtitlesAndNotes() {
+        val states = run("subfail", withSubtitle(request()))
+        val done = states.last() as JobState.Completed
+        assertEquals(setOf(JobNote.SUBTITLES_SKIPPED), done.notes)
+        assertEquals("merged", File(done.outputs.single().location).readText())
+        assertFalse("--embed-subs" in argsFile.readLines())
+    }
+
+    @Test
+    fun otherErrorsWithSubtitlesAreNotRetried() {
+        val states = run("forbidden", withSubtitle(request()))
+        assertTrue(states.last() is JobState.Failed)
+        assertTrue("--embed-subs" in argsFile.readLines())
+    }
+
+    @Test
+    fun downloadWithoutProblemsHasNoNotes() {
+        assertEquals(emptySet<JobNote>(), (run("ok").last() as JobState.Completed).notes)
     }
 }

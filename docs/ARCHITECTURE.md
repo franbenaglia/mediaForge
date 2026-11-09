@@ -33,6 +33,8 @@ Desde la Etapa 7, Inicio y Conversor no corren el trabajo: lo encolan en `JobQue
 
 Recorte (Etapa 10, ADR-020): `ConversionRequest.clip` lleva inicio, fin y "corte exacto". `ConversionPlanner` lo valida contra la duración y recodifica el video solo si se pide corte exacto; `FfmpegCommand` pone `-ss` antes de `-i` y `-t` con la duración, y el progreso se mide sobre el fragmento. Un fotograma es `ConversionTarget.Image` (instante y JPG o PNG): el plan lleva `frameAtSeconds` y el comando saca un solo cuadro; se guarda en `Pictures/MediaForge`. Con varios archivos (`InputState.Batch`, hasta 50), el Conversor encola un trabajo por archivo compatible con el mismo destino.
 
+Subtítulos (ADR-021): el análisis llena `MediaInfo.subtitles`; Inicio pone el elegido en `DownloadSelection.Video.subtitle` y yt-dlp lo incrusta (`--embed-subs`). Si el subtítulo falla, `YtDlpDownloader` vuelve a bajar sin él y termina con `JobNote.SUBTITLES_SKIPPED`, que llega al aviso por `JobScheduler.finished`.
+
 Calidades: `VideoOptions` arma una opción por altura con formatos concretos (`299+258`) para que el tamaño mostrado sea el que se baja; el comando agrega un respaldo por altura por si el sitio ya no ofrece esos IDs.
 
 ## Procesos nativos

@@ -17,11 +17,17 @@ sealed interface JobState {
     /** Fase local de FFmpeg (merge, extracción de audio o conversión). Separada de la descarga. */
     data class Processing(val step: ProcessingStep, val progress: Float?) : JobState
 
-    data class Completed(val outputs: List<OutputFile>) : JobState
+    data class Completed(val outputs: List<OutputFile>, val notes: Set<JobNote> = emptySet()) : JobState
 
     data class Failed(val error: MediaError) : JobState
 
     data object Cancelled : JobState
+}
+
+/** Algo que salió distinto de lo pedido sin que el trabajo falle. Se avisa al terminar. */
+enum class JobNote {
+    /** El subtítulo elegido no se pudo bajar: se guardó el video sin él (ADR-021). */
+    SUBTITLES_SKIPPED,
 }
 
 enum class ProcessingStep {

@@ -5,6 +5,7 @@ import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaFormat
 import com.fabapps.mediaforge.domain.model.MediaInfo
 import com.fabapps.mediaforge.domain.model.SourceSite
+import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -12,7 +13,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Convierte la salida de `yt-dlp --dump-json` en [MediaInfo].
@@ -22,6 +26,10 @@ import kotlinx.serialization.json.JsonElement
  */
 object YtDlpInfoParser {
     const val MAX_DESCRIPTION_CHARS = 5_000
+    const val MAX_SUBTITLES = 60
+
+    /** Claves de `subtitles` que no son subtítulos (el chat de un directo). */
+    private val NOT_SUBTITLES = setOf("live_chat")
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -72,10 +80,45 @@ object YtDlpInfoParser {
                 uploadDate = dto.uploadDate?.let(::parseDate),
                 description = dto.description?.takeIf { it.isNotBlank() }?.take(MAX_DESCRIPTION_CHARS),
                 formats = dto.formats.orEmpty().mapNotNull(::toFormat),
-                hasSubtitles = dto.subtitles?.isNotEmpty() == true,
+                subtitles = subtitles(dto),
             ),
         )
     }
+
+    /**
+     * Manuales primero (ordenados por nombre) y después el automático del idioma original. YouTube
+     * ofrece además traducciones automáticas a ~150 idiomas: esas no se listan (ADR-021).
+     */
+    private fun subtitles(dto: InfoDto): List<SubtitleTrack> {
+        val manual = entries(dto.subtitles)
+            .filterKeys { it !in NOT_SUBTITLES }
+            .map { (lang, name) -> SubtitleTrack(lang, name) }
+            .sortedBy { (it.name ?: it.language).lowercase() }
+        val automatic = entries(dto.automaticCaptions)
+        val original = dto.language
+        // `xx-orig` es el reconocimiento de voz sin traducir; si no está, el del idioma del video.
+        val key = "$original-orig".takeIf { original != null && it in automatic }
+            ?: original?.takeIf { it in automatic }
+            ?: automatic.keys.firstOrNull { it.endsWith("-orig") }
+        val base = key?.removeSuffix("-orig")
+        val auto = key
+            ?.takeIf { manual.none { track -> track.language == base || track.language == key } }
+            ?.let { SubtitleTrack(it, automatic[it], automatic = true) }
+        return (manual + listOfNotNull(auto)).take(MAX_SUBTITLES)
+    }
+
+    /** Idioma → nombre (puede faltar), solo con claves válidas y al menos un archivo. */
+    private fun entries(map: Map<String, JsonElement>?): Map<String, String?> = map.orEmpty()
+        .filterKeys { SubtitleTrack.LANGUAGE.matches(it) }
+        .mapNotNull { (lang, value) ->
+            val files = (value as? JsonArray)?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            val name = files.firstNotNullOfOrNull { file ->
+                ((file as? JsonObject)?.get("name") as? JsonPrimitive)?.takeIf { it.isString }?.content
+                    ?.takeIf { it.isNotBlank() }
+            }
+            lang to name
+        }
+        .toMap()
 
     private fun toFormat(f: FormatDto): MediaFormat? {
         val formatId = f.formatId ?: return null
@@ -128,7 +171,10 @@ object YtDlpInfoParser {
         @SerialName("upload_date") val uploadDate: String? = null,
         val description: String? = null,
         val formats: List<FormatDto>? = null,
+        // Como JsonElement: un valor raro en los subtítulos no puede hacer fallar todo el análisis.
         val subtitles: Map<String, JsonElement>? = null,
+        @SerialName("automatic_captions") val automaticCaptions: Map<String, JsonElement>? = null,
+        val language: String? = null,
     )
 
     @Serializable

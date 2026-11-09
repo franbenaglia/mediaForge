@@ -49,6 +49,7 @@ internal fun DownloadPanel(
     onModeChange: (DownloadMode) -> Unit = {},
     onSelectAudioFormat: (Int) -> Unit = {},
     onSelectBitrate: (Int?) -> Unit = {},
+    onSelectSubtitle: (Int?) -> Unit = {},
 ) {
     val editable = !state.download.isActive && state.download !is WorkState.Saved
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -63,6 +64,7 @@ internal fun DownloadPanel(
                         }
                     }
                 }
+                if (state.subtitles.isNotEmpty()) SubtitleSection(state, onSelectSubtitle)
             } else {
                 AudioSection(state, onSelectAudioFormat, onSelectBitrate)
             }

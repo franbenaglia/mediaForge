@@ -17,8 +17,26 @@ data class MediaInfo(
     val uploadDate: LocalDate? = null,
     val description: String? = null,
     val formats: List<MediaFormat> = emptyList(),
-    val hasSubtitles: Boolean = false,
-)
+    /** Subtítulos que se pueden incrustar: manuales y, de los automáticos, solo el del idioma original. */
+    val subtitles: List<SubtitleTrack> = emptyList(),
+) {
+    val hasSubtitles: Boolean get() = subtitles.isNotEmpty()
+}
+
+/**
+ * Un idioma de subtítulos del sitio (ADR-021). [language] es la clave de yt-dlp (`es`, `en-US`,
+ * `en-orig`); [automatic], que lo generó el sitio (reconocimiento de voz) y no una persona.
+ */
+data class SubtitleTrack(val language: String, val name: String? = null, val automatic: Boolean = false) {
+    init {
+        require(LANGUAGE.matches(language)) { "invalid subtitle language: $language" }
+    }
+
+    companion object {
+        /** `--sub-langs` es una expresión regular: solo letras, números, `-` y `_`, y sin `-` al inicio. */
+        val LANGUAGE = Regex("[A-Za-z0-9][A-Za-z0-9_-]{0,31}")
+    }
+}
 
 /**
  * Sitio de origen tal como lo identifica el motor. No es una lista fija de plataformas:
