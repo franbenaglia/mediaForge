@@ -323,9 +323,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
   *Depende de:* —
   *Acepta:* sin violaciones en un recorrido completo; mediciones anotadas en `STATE.md`.
   *Hecho:* `StrictMode` en debug (solo log). Encontró 5 lecturas de disco en el hilo principal al armar los motores (`noBackupFilesDir` y `SharedPreferences` en `MediaModule`); arregladas con `Context.noBackupDir()` y preferencias perezosas. Queda una del sistema (fuentes de HyperOS), ajena a la app. Recorrido completo (descarga, pestañas, conversión) sin otras violaciones. Mediciones en `STATE.md`.
-- [ ] **T11.7** · P2 · Accesibilidad: descripciones de íconos, tamaño de los objetivos táctiles, texto al 200 % sin cortes, recorrido con TalkBack de Inicio, Descargas y Conversor.
+- [x] **T11.7** · P2 · Accesibilidad: descripciones de íconos, tamaño de los objetivos táctiles, texto al 200 % sin cortes, recorrido con TalkBack de Inicio, Descargas y Conversor.
   *Depende de:* —
   *Acepta:* sin problemas de accesibilidad en lint; recorrido manual registrado.
+  *Hecho:* revisión del código: interruptores y casillas de Ajustes y del recorte pasan a ser filas `toggleable` con su texto (TalkBack lee el nombre y se toca toda la fila); filas de calidad y de lista con 48 dp mínimos; títulos de sección de Ajustes como encabezados; los íconos sin descripción son decorativos con texto al lado. Lint sin problemas. En 24115RA8EG (2026-11-09): texto al 200 % sin cortes en todas las pantallas y recorrido con TalkBack de Inicio, Descargas, Conversor y Ajustes, ambos OK.
 - [x] **T11.9** · P1 · yt-dlp al día desde el primer uso: en una instalación nueva, el yt-dlp del APK (2025.11.12) da 403 en YouTube hasta actualizarlo a mano desde Ajustes. Buscar y aplicar la actualización verificada sola (al primer arranque y, por ejemplo, una vez por semana), con un ajuste para desactivarlo; si falla, seguir con la versión actual y avisar.
   *Depende de:* —
   *Acepta:* pruebas del ViewModel/servicio (cuándo busca, qué pasa si falla, el ajuste apagado); en el teléfono, una instalación limpia descarga de YouTube sin tocar Ajustes.

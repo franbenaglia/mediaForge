@@ -1,10 +1,10 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-08
+**Última actualización:** 2026-11-09
 
 ## Próximo paso
 
-Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 hechas y validadas. T11.4 hecha (encontró y arregló un cierre al abrir desde un enlace compartido). T11.5 hecha salvo correrla sin red; T11.6 hecha. Sigue T11.7 (accesibilidad) y la prueba final T11.8. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 hechas y validadas. T11.4 hecha (encontró y arregló un cierre al abrir desde un enlace compartido). T11.5 hecha salvo correrla sin red; T11.6 hecha. T11.7 hecha y validada. Sigue la prueba final T11.8 (con "MediaForge R8" e instalación limpia). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -59,6 +59,7 @@ Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 he
 | T10.8 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
 | Arranque en frío, debug, 24115RA8EG (`am start -W`) | 1,51–2,06 s antes de T11.6; 1,42–1,61 s después | 2026-11-08 |
 | Memoria recodificando un video largo (debug) | App: 157 MB PSS (heap Java 14 MB, nativo 16 MB), estable; FFmpeg: 120 MB RSS, pico 124 MB, estable | 2026-11-08 |
+| T11.7 manual en 24115RA8EG | OK: texto al 200 % y TalkBack | 2026-11-09 |
 | `AppDeviceTest` en 24115RA8EG | OK 3/3 (con el permiso de ventanas en segundo plano de HyperOS) | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 70,9 MB / 73,9 MB | 2026-11-08 |
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
