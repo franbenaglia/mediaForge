@@ -321,3 +321,26 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Actualizar en cada arranque: pedidos a GitHub sin necesidad (yt-dlp publica cada una o dos semanas).
 - Desactivado de fábrica: una instalación nueva no funciona con YouTube, y el usuario no tiene cómo saber por qué.
 - Programarlo con WorkManager: la app no lo usa (ADR-017), y una vez por arranque alcanza.
+
+
+---
+
+## ADR-023 · Fuentes de los binarios GPL publicadas con cada release
+
+**Fecha:** 2026-11-09 · **Estado:** aceptada
+
+**Contexto:**
+- El APK distribuye binarios GPL, LGPL y MPL: FFmpeg y unas 30 bibliotecas, más Readline y GDBM de Python. GPLv3 §6 obliga a ofrecer su código fuente correspondiente.
+- Esos binarios vienen de youtubedl-android 0.18.1, que reempaqueta paquetes de Termux, y ninguno de los dos guarda una copia fija de las fuentes. Si se apuntara solo a ellos, la obligación de que las fuentes sigan disponibles quedaría en manos de terceros.
+
+**Decisión:**
+- Cada GitHub Release lleva un archivo `mediaforge-<versión>-gpl-sources.tar.gz`, armado por `scripts/package-gpl-sources.sh`, que contiene:
+  - las fuentes originales de cada componente GPL, LGPL y MPL, con versión, licencia, URL y SHA-256 en `distribution/gpl-sources.tsv`; el script falla si una suma no coincide;
+  - el sistema de construcción y las recetas de `termux-packages` en `70d29feb94` (2025-10-17), con sus parches;
+  - el código de youtubedl-android en el tag `0.18.1`.
+- **Cómo se identificó la instantánea de Termux:** youtubedl-android no la declara, así que se dedujo de los binarios. Las versiones que traen escritas (FFmpeg 7.1.1, x265 4.1, GnuTLS 3.8.10, mpg123 1.33.2, libssh 0.11.3, libidn2 2.3.8) solo coinciden en Termux entre el 2025-09-18 y el 2025-10-17. Se toma el commit anterior al paso a FFmpeg 7.1.2, que también tiene Python 3.12.11, la versión del APK.
+- **Lo que no entra:** Python (PSF) y las bibliotecas permisivas no exigen fuentes; van en los avisos de licencia.
+
+**Descartadas:**
+- **Solo indicaciones a youtubedl-android y Termux** (GPLv3 §6(d) lo permite): si cualquiera de los dos borra algo, el incumplimiento sería nuestro.
+- **Compilar los binarios nosotros:** requiere Docker y horas de compilación por arquitectura, y cambiaría binarios ya probados.

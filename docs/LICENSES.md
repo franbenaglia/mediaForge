@@ -55,8 +55,8 @@ Auditoría de la Etapa 11 (T11.3): qué viene dentro del APK, con qué licencia,
 | Apache-2.0 | OpenSSL 3 (`libssl`, `libcrypto`) |
 | Apache-2.0 WITH LLVM-exception | `libc++_shared` |
 | GPL-3.0-or-later | GNU Readline (`libreadline`, `libhistory`), GDBM (`libgdbm`, `libgdbm_compat`) |
-| LGPL-2.1-or-later | libxcrypt (`libcrypt`) |
 | MIT / X11 / similares | ncurses (`libncurses*`, `libform*`, `libmenu*`, `libpanel*`, `libtinfo`, `libtic`), Expat, libffi |
+| BSD-2-Clause | `libcrypt` (implementación propia de Termux, no libxcrypt) |
 | Dominio público | SQLite |
 | Otras permisivas | zlib, XZ (`liblzma`), bzip2 |
 | Compatibilidad de Termux | `libandroid-support`, `libandroid-posix-semaphore` |
@@ -65,7 +65,10 @@ Las bibliotecas del sistema (`libandroid`, `libmediandk`, `libOpenSLES`) son de 
 
 ## Obligaciones
 
-1. **Código fuente correspondiente (GPL-3.0 §6, LGPL).** Hay que ofrecer el código fuente de cada binario GPL o LGPL que se distribuye: FFmpeg, x264, x265 y el resto. El de MediaForge ya es público. El de los motores viene de youtubedl-android y de las recetas de Termux. **Pendiente (Etapa 12):** publicar en cada GitHub Release un archivo con las fuentes (o los enlaces exactos y un aviso escrito, según §6). Lo recomendado es subir las fuentes, porque GPLv3 pide que estén disponibles mientras se distribuya el binario.
+1. **Código fuente correspondiente (GPL-3.0 §6, LGPL, MPL-2.0 §3.2).** Resuelto (ADR-023):
+   - `scripts/package-gpl-sources.sh` arma `mediaforge-<versión>-gpl-sources.tar.gz`, que se publica en cada GitHub Release.
+   - Contiene las fuentes originales de cada componente GPL, LGPL y MPL, verificadas por SHA-256 (`distribution/gpl-sources.tsv`).
+   - También van las recetas y el sistema de construcción de Termux en la misma instantánea, y youtubedl-android 0.18.1.
 2. **Avisos de copyright y textos de licencia** (Apache-2.0, BSD, MIT, ISC, MPL, FTL). Hay que incluir el texto de cada licencia y los avisos de copyright de cada biblioteca. **Pendiente (Etapa 12):** juntarlos de los paquetes de origen en `THIRD_PARTY_NOTICES.md` y mostrarlos en la app. Hoy la pantalla "Licencias" lista los componentes y su licencia, y enlaza a este documento.
 3. **Avisos de modificación (Apache-2.0 §4).** No se modificó ningún componente; si alguna vez se parchea, hay que avisarlo.
 4. **Sin restricciones adicionales.** La app no agrega términos que contradigan la GPL (sin DRM, sin cuentas, sin condiciones de uso extra).
