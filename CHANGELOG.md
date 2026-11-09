@@ -2,7 +2,7 @@
 
 All notable changes to MediaForge. Versions follow [Semantic Versioning](https://semver.org).
 
-## [1.0.0] - Unreleased
+## [1.0.0] - 2026-11-09
 
 First public release.
 

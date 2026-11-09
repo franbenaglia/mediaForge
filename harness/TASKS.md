@@ -344,10 +344,10 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
   *Depende de:* —
   *Acepta:* verify OK; se ve bien en el lanzador del teléfono (formas redonda y cuadrada, tema).
   *Hecho:* fondo `#101325` (del diseño), figura en `mipmap-*/ic_launcher_foreground.png` (72 de 108 dp, sin recortes en círculo ni squircle), monocromo con la silueta de reproducción y bandeja. Las variantes se distinguen por el nombre ("MediaForge R8"). Validado en 24115RA8EG (2026-11-09).
-- [~] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
+- [x] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
   *Depende de:* —
   *Acepta:* `apksigner verify` OK; el APK de release se instala limpio en el teléfono y funciona.
-  *Hecho:* clave del usuario en `~/keys/mediaforge-release.jks` (fuera del repo), `keystore.properties` ignorado. `build-release.sh` OK: arm64 56 MB, x86_64 59 MB, firma v2 verificada; certificado SHA-256 `69:EE:90:B0:22:F6:9E:59:D9:0F:6A:B3:AE:07:FA:96:87:75:43:39:88:66:67:8B:FB:33:47:E5:BC:1F:32:1A`. Falta probarlo en el teléfono.
+  *Hecho:* clave del usuario en `~/keys/mediaforge-release.jks` (fuera del repo), `keystore.properties` ignorado. `build-release.sh` OK: arm64 56 MB, x86_64 59 MB, firma v2 verificada; certificado SHA-256 `69:EE:90:B0:22:F6:9E:59:D9:0F:6A:B3:AE:07:FA:96:87:75:43:39:88:66:67:8B:FB:33:47:E5:BC:1F:32:1A`. Probado en 24115RA8EG con instalación limpia (2026-11-09): primer arranque, yt-dlp actualizado solo, descarga OK.
 - [x] **T12.3** · P1 · Versión 1.0.0: `versionCode`/`versionName`, `CHANGELOG.md` con el historial (etapas como versiones previas a 1.0), versión visible en Ajustes.
   *Depende de:* —
   *Acepta:* verify OK; el changelog cubre lo que hay.
