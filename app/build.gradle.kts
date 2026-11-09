@@ -1,9 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+}
+
+// Firma de release (T12.2): datos en keystore.properties, que nunca va al repo (ver docs/RELEASE.md).
+// Sin ese archivo, assembleRelease deja los APKs sin firmar.
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.isFile) file.inputStream().use(::load)
 }
 
 android {
@@ -35,6 +44,17 @@ android {
         jniLibs { useLegacyPackaging = true }
     }
 
+    signingConfigs {
+        if (keystoreProperties.isNotEmpty()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // La versión de desarrollo convive con la de uso.
@@ -44,6 +64,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
         }
         // Igual que release (R8, recursos reducidos) pero firmada con la clave de debug: sirve para
         // probar en el teléfono el código ofuscado sin el keystore. Convive con las otras dos (T11.1).
