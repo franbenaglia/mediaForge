@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 10 cerrada y validada en el teléfono (ADR-020, ADR-021). Sigue la Etapa 11 (calidad): planificar sus tareas en `TASKS.md` a partir de main.md. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. Sigue T11.1 (variante `minified` para probar R8). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -19,7 +19,7 @@ Etapa 10 cerrada y validada en el teléfono (ADR-020, ADR-021). Sigue la Etapa 1
 - [x] 8. Android Sharesheet (validado en el teléfono: Chrome, YouTube, otras apps, app cerrada o abierta, texto sin enlace, giro)
 - [x] 9. Historial y configuración (validado en el teléfono: historial, ajustes, solo Wi‑Fi, carpeta de destino, temporales)
 - [x] 10. Funciones avanzadas (validado en el teléfono: recorte, fotogramas, varios archivos, compresión, subtítulos, listas)
-- [ ] 11. Calidad
+- [ ] 11. Calidad (en curso)
 - [ ] 12. Distribución
 
 ## Implementado

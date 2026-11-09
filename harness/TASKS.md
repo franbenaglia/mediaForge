@@ -258,7 +258,7 @@ Historial persistente de descargas y conversiones, ajustes con DataStore y admin
   *Acepta:* validación manual registrada.
   *Hecho:* el usuario validó en 24115RA8EG (2026-11-08): migración con los trabajos anteriores, predeterminados, límite de descargas, tema, motor, historial (búsqueda, filtros, descargar de nuevo, borrar archivo), quitar completados, todo se conserva al reabrir. El ajuste de idioma por app no funcionaba en el teléfono y se quitó (ver ADR-019).
 
-## Etapa 10 · Funciones avanzadas (en curso)
+## Etapa 10 · Funciones avanzadas (hecha)
 
 Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md §5.2); subtítulos y listas de reproducción públicas en las descargas (main.md §2.3, §14). Diseño en ADR-020 (conversor) y ADR-021 (subtítulos y listas). La actualización del extractor ya está hecha (T3.8–T3.9).
 
@@ -295,6 +295,35 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
   *Acepta:* validación manual registrada.
   *Hecho:* 2026-11-08 en 24115RA8EG: recorte rápido y exacto, fragmento de audio, fotograma JPG y PNG, varios archivos, compresión, subtítulos manuales y automáticos, lista de YouTube en video y audio, video dentro de una lista. Se arregló el teclado de los tiempos y un cierre del servicio en primer plano.
 
-## Etapas 11–12
+## Etapa 11 · Calidad (en curso)
 
-Ver main.md §14. Se detallan al llegar.
+main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el APK de release, revisar seguridad y licencias, y cubrir con pruebas instrumentadas lo que hoy solo se probó a mano. Sin funciones nuevas.
+
+- [ ] **T11.1** · P1 · Variante `minified` (R8 y recursos reducidos igual que release, firmada con la clave de debug, `applicationIdSuffix ".minified"`) para probar el código ofuscado sin el keystore. Ajustar las reglas de R8 hasta que analizar, descargar, convertir y el historial funcionen.
+  *Depende de:* —
+  *Acepta:* `assembleMinified` compila sin advertencias de R8 sin explicar; prueba manual en el teléfono (YouTube video y audio, una conversión, compartir un enlace, historial); `[~]` hasta probarlo.
+- [ ] **T11.2** · P1 · Revisión de seguridad según main.md §11: URLs (esquemas, redirecciones, tiempos), argumentos de los procesos, rutas y nombres, temporales, permisos y componentes exportados, logs sin URLs con tokens. Registrar cada punto con su evidencia en `docs/SECURITY.md` y corregir lo que falte.
+  *Depende de:* —
+  *Acepta:* `docs/SECURITY.md` completo; pruebas para cada corrección.
+- [ ] **T11.3** · P1 · Auditoría de licencias: inventario de dependencias y binarios incluidos (yt-dlp, Python, FFmpeg y su configuración, QuickJS, youtubedl-android, AndroidX, Coil, etc.) con su licencia y compatibilidad con GPL-3.0 en `docs/LICENSES.md`; pantalla "Licencias" en Ajustes con los avisos que exigen.
+  *Depende de:* —
+  *Acepta:* documento completo; la pantalla se abre desde Ajustes (prueba de ViewModel o de UI).
+- [ ] **T11.4** · P1 · Pruebas instrumentadas de la app (main.md §12.3): navegación entre pestañas, enlace compartido que abre Inicio con la URL, conservación del estado al rotar y al recrear la actividad, permiso de notificaciones denegado sin cierres.
+  *Depende de:* —
+  *Acepta:* pruebas en `app/src/androidTest`, verdes en el teléfono con `./scripts/test-device.sh`.
+- [ ] **T11.5** · P2 · Pruebas sin red y con red separadas (main.md §12.4): las que necesitan Internet llevan una anotación y `test-device.sh` puede correr solo las otras; los archivos de prueba son propios o de uso libre y su origen está documentado.
+  *Depende de:* T11.4
+  *Acepta:* `./scripts/test-device.sh --offline` corre sin red; documentado en `ARCHITECTURE.md`.
+- [ ] **T11.6** · P2 · Hilo principal y memoria: `StrictMode` en debug (disco y red en el hilo principal, objetos sin cerrar); corregir lo que aparezca al usar la app. Medir arranque en frío y memoria durante una conversión larga.
+  *Depende de:* —
+  *Acepta:* sin violaciones en un recorrido completo; mediciones anotadas en `STATE.md`.
+- [ ] **T11.7** · P2 · Accesibilidad: descripciones de íconos, tamaño de los objetivos táctiles, texto al 200 % sin cortes, recorrido con TalkBack de Inicio, Descargas y Conversor.
+  *Depende de:* —
+  *Acepta:* sin problemas de accesibilidad en lint; recorrido manual registrado.
+- [ ] **T11.8** · P1 · Prueba final del MVP en el teléfono con el APK `minified` e instalación limpia (primer arranque): los 18 criterios de main.md §15, más TikTok, que sigue pendiente (FEASIBILITY §12).
+  *Depende de:* T11.1–T11.7
+  *Acepta:* cada criterio registrado como cumplido o con su problema.
+
+## Etapa 12 · Distribución
+
+Ver main.md §14. Se detalla al llegar.
