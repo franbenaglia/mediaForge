@@ -72,3 +72,16 @@ Otra app comparte texto (`ACTION_SEND`, `text/plain`) → `MainActivity` (`singl
 - "Solo Wi‑Fi": `UnmeteredNetwork` + `QueueSettings` → `JobScheduler.setDownloadsAllowed`; el servicio sigue vivo con "Esperando Wi‑Fi".
 - Los ajustes (`SettingsStore`) viven en DataStore Preferences (`files/datastore/settings.preferences_pb`). `QueueSettings` lleva el límite de descargas a la cola; Inicio lee los predeterminados al terminar cada análisis.
 
+## Pruebas
+
+- **En la JVM** (`./scripts/verify.sh`, sin red ni teléfono): dominio, ViewModels, comandos de yt-dlp y FFmpeg, parsers, Room y DataStore. Los motores se reemplazan por scripts de `sh` que imitan su salida.
+- **En el teléfono** (`./scripts/test-device.sh`, con permiso del usuario):
+  - `core:media`: motor, conversor y galería (`EngineDeviceTest`, `ConverterDeviceTest`, `MediaLibraryDeviceTest`).
+  - `app`: navegación, enlace compartido y recreación (`AppDeviceTest`).
+  - Las que necesitan Internet llevan `@RequiresNetwork`, y `test-device.sh --offline` las saltea (T11.5).
+- **Archivos de prueba:** sin material de terceros salvo Big Buck Bunny (Blender Foundation, CC BY), y nunca con URLs firmadas. El origen de cada uno está en un `README.md` junto a los archivos:
+  - `ytdlp/`: salidas de yt-dlp recortadas;
+  - `ffmpeg/`: `ffprobe` de archivos generados con `lavfi`;
+  - `update/`: un release real de yt-dlp con su firma.
+- El conversor se prueba con archivos que genera el propio FFmpeg (`testsrc2`, `sine`), así que no depende de ningún sitio.
+

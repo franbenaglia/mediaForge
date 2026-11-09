@@ -91,6 +91,7 @@ class EngineDeviceTest {
 
     /** T3.7: actualización real desde GitHub, con firma y hash verificados. */
     @Test
+    @RequiresNetwork
     fun t1b_updateYtDlp() = runBlocking {
         engine.ensureReady()
         val before = updater.installedVersion()
@@ -104,9 +105,11 @@ class EngineDeviceTest {
     }
 
     @Test
+    @RequiresNetwork
     fun t2_youtube() = probe("youtube", YOUTUBE)
 
     @Test
+    @RequiresNetwork
     fun t3_dailymotion() = probe("dailymotion", DAILYMOTION)
 
     private fun probe(name: String, url: String) = runBlocking {
@@ -148,6 +151,7 @@ class EngineDeviceTest {
 
     /** Cancelar una descarga HLS que usa ffmpeg como descargador no debe dejar procesos vivos. */
     @Test
+    @RequiresNetwork
     fun t4_cancelKillsFfmpegChild() = runBlocking {
         engine.ensureReady()
         val runtime = native.runtime()
@@ -188,6 +192,7 @@ class EngineDeviceTest {
 
     /** T4.8: descarga real de Dailymotion (HLS) con el camino de la app. Registra la salida sin query strings. */
     @Test
+    @RequiresNetwork
     fun t5_downloadDailymotion() = download("dailymotion", DAILYMOTION, listOf("hls-380"), 240)
 
     private fun download(name: String, url: String, formatIds: List<String>, height: Int) = runBlocking {

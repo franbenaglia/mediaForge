@@ -315,9 +315,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
   *Depende de:* —
   *Acepta:* pruebas en `app/src/androidTest`, verdes en el teléfono con `./scripts/test-device.sh`.
   *Hecho:* `AppDeviceTest` (3 pruebas, verdes en 24115RA8EG): todas las pestañas, enlace compartido con la app cerrada, recrear la actividad conserva la pestaña y el enlace escrito. Encontró un cierre real (navegar antes de que exista el grafo al abrir desde un enlace compartido), ya arreglado. `test-device.sh` deja la app instalada con sus datos. No se prueba el permiso de notificaciones denegado: revocarlo mata el proceso de la app de uso; queda en la prueba manual T11.8.
-- [ ] **T11.5** · P2 · Pruebas sin red y con red separadas (main.md §12.4): las que necesitan Internet llevan una anotación y `test-device.sh` puede correr solo las otras; los archivos de prueba son propios o de uso libre y su origen está documentado.
+- [~] **T11.5** · P2 · Pruebas sin red y con red separadas (main.md §12.4): las que necesitan Internet llevan una anotación y `test-device.sh` puede correr solo las otras; los archivos de prueba son propios o de uso libre y su origen está documentado.
   *Depende de:* T11.4
   *Acepta:* `./scripts/test-device.sh --offline` corre sin red; documentado en `ARCHITECTURE.md`.
+  *Hecho:* anotación `@RequiresNetwork` en las 5 pruebas del motor que usan Internet; `test-device.sh --offline` las filtra con `notAnnotation`. Los archivos de prueba ya tenían su origen documentado (README en cada carpeta); sección "Pruebas" en `ARCHITECTURE.md`. Falta correrlo en el teléfono sin red.
 - [ ] **T11.6** · P2 · Hilo principal y memoria: `StrictMode` en debug (disco y red en el hilo principal, objetos sin cerrar); corregir lo que aparezca al usar la app. Medir arranque en frío y memoria durante una conversión larga.
   *Depende de:* —
   *Acepta:* sin violaciones en un recorrido completo; mediciones anotadas en `STATE.md`.
