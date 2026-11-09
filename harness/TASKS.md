@@ -336,6 +336,34 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
   *Acepta:* cada criterio registrado como cumplido o con su problema.
   *Hecho:* 2026-11-09 en 24115RA8EG con "MediaForge R8" e instalación limpia: primer arranque, yt-dlp actualizado solo, análisis con calidades reales, video a otra calidad con progreso, abrir y compartir, MP3, cancelar, TikTok, enlace inválido, MP4 → MP3, cambio de formato, enlace compartido con la app cerrada, notificaciones apagadas, historial tras cerrar desde recientes. Todo OK, sin cierres. El teléfono rechazó dos veces `mediaProcessing` y la app siguió con `dataSync` (ver Problemas conocidos).
 
-## Etapa 12 · Distribución
+## Etapa 12 · Distribución (en curso)
 
-Ver main.md §14. Se detalla al llegar. Incluir, antes del primer release público (`docs/LICENSES.md`, Obligaciones): fuentes de los binarios GPL/LGPL en cada GitHub Release, y `THIRD_PARTY_NOTICES.md` con los avisos de copyright y textos de licencia, también visibles en la app.
+main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación para otro desarrollador y landing page en `githubpages/` (pedida por el usuario: inglés y español; el ícono y la imagen destacada los dio el usuario). La imagen destacada muestra pausa y AAC, que la app no tiene: va solo como ilustración; las funciones se muestran con capturas reales.
+
+- [ ] **T12.1** · P1 · Ícono nuevo (`githubpages/MediaForge_icon_512.png`) como ícono de la app: adaptativo (fondo y figura), monocromo para los íconos temáticos de Android 13+, en todas las densidades; las variantes debug y minified se distinguen.
+  *Depende de:* —
+  *Acepta:* verify OK; se ve bien en el lanzador del teléfono (formas redonda y cuadrada, tema).
+- [ ] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
+  *Depende de:* —
+  *Acepta:* `apksigner verify` OK; el APK de release se instala limpio en el teléfono y funciona.
+- [ ] **T12.3** · P1 · Versión 1.0.0: `versionCode`/`versionName`, `CHANGELOG.md` con el historial (etapas como versiones previas a 1.0), versión visible en Ajustes.
+  *Depende de:* —
+  *Acepta:* verify OK; el changelog cubre lo que hay.
+- [ ] **T12.4** · P1 · Obligaciones de licencias (`docs/LICENSES.md`): `THIRD_PARTY_NOTICES.md` con avisos de copyright y textos de licencia, visible en la app; fuentes correspondientes de los binarios GPL/LGPL (youtubedl-android y recetas de Termux con sus versiones) publicadas con el release, o el mecanismo que permita GPLv3 §6 con su justificación.
+  *Depende de:* —
+  *Acepta:* documento completo; decisión registrada en un ADR; el diálogo de licencias muestra los avisos.
+- [ ] **T12.5** · P1 · Documentación final (main.md §17): `README.md` en inglés (qué es, capturas, instalación por sideloading, aviso legal, compilación) y `docs/DEVELOPMENT.md` (clonar, entorno, compilar, pruebas, APK, arquitectura, actualizar yt-dlp y FFmpeg, continuar el desarrollo).
+  *Depende de:* T12.3, T12.6
+  *Acepta:* otro desarrollador puede compilar siguiendo solo esos documentos.
+- [ ] **T12.6** · P1 · Capturas reales en inglés y español (Inicio con un video analizado, calidades, descarga en curso, Conversor, Historial, Ajustes) con contenido de uso libre (Big Buck Bunny), en `githubpages/` y para el README.
+  *Depende de:* T12.1
+  *Acepta:* capturas sin datos personales.
+- [ ] **T12.7** · P1 · Landing page estática en `githubpages/` (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Publicada con un workflow de GitHub Actions (Pages desde esa carpeta).
+  *Depende de:* T12.3, T12.6
+  *Acepta:* se ve bien en el teléfono y en la computadora; publicada en GitHub Pages.
+- [ ] **T12.8** · P1 · GitHub Release v1.0.0: tag, APKs firmados, SHA-256, notas, fuentes según T12.4. La landing enlaza al último release.
+  *Depende de:* T12.2–T12.7
+  *Acepta:* release público; enlaces de la landing funcionan.
+- [ ] **T12.9** · P1 · Prueba como usuario: bajar el APK desde la landing en el teléfono, instalarlo, primer arranque y una descarga.
+  *Depende de:* T12.8
+  *Acepta:* validación manual registrada.

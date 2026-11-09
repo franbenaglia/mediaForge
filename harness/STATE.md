@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 11 cerrada: el MVP cumple los criterios de main.md §15 en el APK con R8 (T11.8). Sigue la Etapa 12 (distribución): planificar sus tareas en `TASKS.md` a partir de main.md §14, con las dos obligaciones de licencias que quedaron anotadas allí. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 cerrada: el MVP cumple los criterios de main.md §15 en el APK con R8 (T11.8). Etapa 12 (distribución): tareas T12.1–T12.9 en `TASKS.md`. Sigue T12.1 (ícono nuevo de la app). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -20,7 +20,7 @@ Etapa 11 cerrada: el MVP cumple los criterios de main.md §15 en el APK con R8 (
 - [x] 9. Historial y configuración (validado en el teléfono: historial, ajustes, solo Wi‑Fi, carpeta de destino, temporales)
 - [x] 10. Funciones avanzadas (validado en el teléfono: recorte, fotogramas, varios archivos, compresión, subtítulos, listas)
 - [x] 11. Calidad (validado en el teléfono: R8, seguridad, licencias, pruebas instrumentadas, StrictMode, accesibilidad, prueba final del MVP)
-- [ ] 12. Distribución
+- [ ] 12. Distribución (en curso)
 
 ## Implementado
 
