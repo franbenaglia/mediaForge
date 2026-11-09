@@ -4,6 +4,18 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-08 · Etapa 10
+
+**Objetivo:** funciones avanzadas (main.md §5.2, §2.3).
+
+**Hecho:** conversor con recorte rápido o exacto, fotograma JPG/PNG, varios archivos y compresión (ADR-020); subtítulos incrustados y listas de reproducción públicas (ADR-021). Todo validado en el teléfono (T10.8).
+
+**Problemas:** el teclado numérico no tenía ":" (ahora teclado completo); el teléfono rechazó el servicio en primer plano con "type none" y la app se cerraba: `JobService` ahora reintenta con `dataSync` y no se cae (causa sin confirmar, en Problemas conocidos).
+
+**Verificación:** `./scripts/verify.sh` OK (426 pruebas).
+
+---
+
 ## 2026-11-08 · Etapa 9
 
 **Hecho:** T9.1–T9.10 (ADR-019). Historial en Room (v2, migración automática), ajustes con DataStore, pantallas Historial y Ajustes, Inicio con los predeterminados, límite de descargas en vivo, solo Wi‑Fi, carpeta de destino (SAF) con vuelta a la galería, limpieza de temporales.

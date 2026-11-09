@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), T10.3 (fotograma) y T10.4 (varios archivos) hechas y probadas en el teléfono. T10.6 (subtítulos) y T10.7 (listas de reproducción), ADR-021, hechas; falta probarlas en el teléfono. Sigue T10.8 (prueba de la etapa en el teléfono) y cerrar la Etapa 10. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 10 cerrada y validada en el teléfono (ADR-020, ADR-021). Sigue la Etapa 11 (calidad): planificar sus tareas en `TASKS.md` a partir de main.md. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -18,7 +18,7 @@ Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), 
 - [x] 7. Gestor de trabajos (validado en el teléfono: varias a la vez, notificación con Cancelar, cerrar desde recientes, reintentar)
 - [x] 8. Android Sharesheet (validado en el teléfono: Chrome, YouTube, otras apps, app cerrada o abierta, texto sin enlace, giro)
 - [x] 9. Historial y configuración (validado en el teléfono: historial, ajustes, solo Wi‑Fi, carpeta de destino, temporales)
-- [ ] 10. Funciones avanzadas (en curso)
+- [x] 10. Funciones avanzadas (validado en el teléfono: recorte, fotogramas, varios archivos, compresión, subtítulos, listas)
 - [ ] 11. Calidad
 - [ ] 12. Distribución
 
@@ -55,8 +55,9 @@ Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), 
 
 | Comando | Resultado | Fecha |
 |---|---|---|
-| `./scripts/verify.sh` | OK: 372 pruebas (120 dominio + 107 app + 133 media + 12 data), lint sin errores, ktlint OK | 2026-11-08 |
-| APK debug arm64-v8a / x86_64 (con motores y Coil) | 65,6 MB / 68,5 MB | 2026-11-07 |
+| `./scripts/verify.sh` | OK: 426 pruebas (132 dominio + 129 app + 151 media + 14 data), lint sin errores, ktlint OK | 2026-11-08 |
+| T10.8 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
+| APK debug arm64-v8a / x86_64 (con motores y Coil) | 70,9 MB / 73,9 MB | 2026-11-08 |
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
 | T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
 | T8.3 manual en 24115RA8EG | OK: todos los casos | 2026-11-08 |
