@@ -319,9 +319,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
   *Depende de:* T11.4
   *Acepta:* `./scripts/test-device.sh --offline` corre sin red; documentado en `ARCHITECTURE.md`.
   *Hecho:* anotación `@RequiresNetwork` en las 5 pruebas del motor que usan Internet; `test-device.sh --offline` las filtra con `notAnnotation`. Los archivos de prueba ya tenían su origen documentado (README en cada carpeta); sección "Pruebas" en `ARCHITECTURE.md`. Falta correrlo en el teléfono sin red: el modo avión corta también la conexión de la computadora (usa el celular como módem), así que queda para cuando haya otra red.
-- [ ] **T11.6** · P2 · Hilo principal y memoria: `StrictMode` en debug (disco y red en el hilo principal, objetos sin cerrar); corregir lo que aparezca al usar la app. Medir arranque en frío y memoria durante una conversión larga.
+- [x] **T11.6** · P2 · Hilo principal y memoria: `StrictMode` en debug (disco y red en el hilo principal, objetos sin cerrar); corregir lo que aparezca al usar la app. Medir arranque en frío y memoria durante una conversión larga.
   *Depende de:* —
   *Acepta:* sin violaciones en un recorrido completo; mediciones anotadas en `STATE.md`.
+  *Hecho:* `StrictMode` en debug (solo log). Encontró 5 lecturas de disco en el hilo principal al armar los motores (`noBackupFilesDir` y `SharedPreferences` en `MediaModule`); arregladas con `Context.noBackupDir()` y preferencias perezosas. Queda una del sistema (fuentes de HyperOS), ajena a la app. Recorrido completo (descarga, pestañas, conversión) sin otras violaciones. Mediciones en `STATE.md`.
 - [ ] **T11.7** · P2 · Accesibilidad: descripciones de íconos, tamaño de los objetivos táctiles, texto al 200 % sin cortes, recorrido con TalkBack de Inicio, Descargas y Conversor.
   *Depende de:* —
   *Acepta:* sin problemas de accesibilidad en lint; recorrido manual registrado.
