@@ -4,8 +4,12 @@ import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaFormat
 import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.model.Playlist
+import com.fabapps.mediaforge.domain.model.PlaylistEntry
 import com.fabapps.mediaforge.domain.model.SourceSite
 import com.fabapps.mediaforge.domain.model.SubtitleTrack
+import com.fabapps.mediaforge.domain.url.UrlCheck
+import com.fabapps.mediaforge.domain.url.UrlValidator
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -19,7 +23,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 /**
- * Convierte la salida de `yt-dlp --dump-json` en [MediaInfo].
+ * Convierte la salida de `yt-dlp --dump-single-json` en [MediaInfo] (un video o una lista).
  *
  * Reemplaza a `VideoInfo` de youtubedl-android, que solo mapea `requested_formats` (FEASIBILITY §9).
  * Todo campo es opcional salvo `id`: faltan seguido según el sitio.
@@ -27,6 +31,12 @@ import kotlinx.serialization.json.JsonPrimitive
 object YtDlpInfoParser {
     const val MAX_DESCRIPTION_CHARS = 5_000
     const val MAX_SUBTITLES = 60
+
+    /** yt-dlp marca así lo que pide una cuenta o un pago; la app no lo intenta (main.md §1.2). */
+    private val RESTRICTED = setOf("private", "premium_only", "subscriber_only", "needs_auth")
+
+    /** Títulos que pone YouTube a los elementos que ya no se pueden ver. */
+    private val PLACEHOLDER_TITLES = setOf("[Private video]", "[Deleted video]")
 
     /** Claves de `subtitles` que no son subtítulos (el chat de un directo). */
     private val NOT_SUBTITLES = setOf("live_chat")
@@ -61,11 +71,9 @@ object YtDlpInfoParser {
             return Outcome.Failure(MediaError.Unknown(detail = "invalid yt-dlp JSON: ${e.message?.take(200)}"))
         }
 
-        if (dto.type == "playlist" || dto.type == "multi_video") {
-            return Outcome.Failure(MediaError.UnsupportedSite(detail = "playlists are not supported yet"))
-        }
         val id = dto.id?.takeIf { it.isNotBlank() }
             ?: return Outcome.Failure(MediaError.Unknown(detail = "yt-dlp JSON without id"))
+        if (dto.type == "playlist" || dto.type == "multi_video") return playlist(dto, id)
 
         val extractorKey = dto.extractorKey ?: dto.extractor ?: "Generic"
         return Outcome.Success(
@@ -73,7 +81,7 @@ object YtDlpInfoParser {
                 id = id,
                 sourceUrl = dto.webpageUrl ?: dto.originalUrl.orEmpty(),
                 title = dto.title?.takeIf { it.isNotBlank() } ?: dto.fulltitle?.takeIf { it.isNotBlank() } ?: id,
-                site = SourceSite(extractorKey = extractorKey, displayName = siteNames[extractorKey] ?: extractorKey),
+                site = SourceSite(extractorKey = extractorKey, displayName = siteName(extractorKey)),
                 uploader = dto.uploader ?: dto.channel ?: dto.creator,
                 durationSeconds = dto.duration?.takeIf { it >= 0 }?.toLong(),
                 thumbnailUrl = dto.thumbnail?.takeIf { it.startsWith("https://") || it.startsWith("http://") },
@@ -84,6 +92,54 @@ object YtDlpInfoParser {
             ),
         )
     }
+
+    /** Una lista: solo título y elementos; cada video se analiza al bajarlo (ADR-021). */
+    private fun playlist(dto: InfoDto, id: String): Outcome<MediaInfo> {
+        val all = dto.entries.orEmpty().take(Playlist.MAX_ENTRIES)
+        val entries = all.mapNotNull { (it as? JsonObject)?.let(::entry) }
+        if (entries.isEmpty()) {
+            return Outcome.Failure(MediaError.UnsupportedSite(detail = "playlist without downloadable entries"))
+        }
+        val extractorKey = dto.extractorKey ?: dto.extractor ?: "Generic"
+        return Outcome.Success(
+            MediaInfo(
+                id = id,
+                sourceUrl = dto.webpageUrl ?: dto.originalUrl.orEmpty(),
+                title = dto.title?.takeIf { it.isNotBlank() } ?: id,
+                site = SourceSite(extractorKey, siteName(extractorKey)),
+                uploader = dto.uploader ?: dto.channel,
+                playlist = Playlist(
+                    entries = entries,
+                    totalCount = dto.playlistCount?.takeIf { it >= 0 }?.toInt(),
+                    unavailable = all.size - entries.size,
+                ),
+            ),
+        )
+    }
+
+    /** Nulo si no se puede bajar sin más: privado, borrado, pide cuenta, o es otra lista adentro. */
+    private fun entry(obj: JsonObject): PlaylistEntry? {
+        fun text(key: String) =
+            (obj[key] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it.isNotBlank() }
+        if (text("_type") == "playlist" || text("ie_key")?.endsWith("Tab") == true) return null
+        if (text("availability")?.let { it in RESTRICTED } == true) return null
+        val title = text("title")
+        if (title != null && title in PLACEHOLDER_TITLES) return null
+        val url = listOfNotNull(text("url"), text("webpage_url"))
+            .firstNotNullOfOrNull { (UrlValidator.validate(it) as? UrlCheck.Valid)?.url }
+            ?: return null
+        val id = text("id") ?: url
+        val duration = (obj["duration"] as? JsonPrimitive)?.takeIf { !it.isString }?.content?.toDoubleOrNull()
+        return PlaylistEntry(
+            id = id,
+            url = url,
+            title = title ?: id,
+            durationSeconds = duration?.takeIf { it >= 0 }?.toLong(),
+        )
+    }
+
+    private fun siteName(extractorKey: String): String =
+        siteNames[extractorKey] ?: siteNames[extractorKey.removeSuffix("Tab")] ?: extractorKey
 
     /**
      * Manuales primero (ordenados por nombre) y después el automático del idioma original. YouTube
@@ -175,6 +231,9 @@ object YtDlpInfoParser {
         val subtitles: Map<String, JsonElement>? = null,
         @SerialName("automatic_captions") val automaticCaptions: Map<String, JsonElement>? = null,
         val language: String? = null,
+        // Listas: cada elemento como JsonElement por la misma razón que los subtítulos.
+        val entries: List<JsonElement>? = null,
+        @SerialName("playlist_count") val playlistCount: Double? = null,
     )
 
     @Serializable

@@ -284,4 +284,25 @@
     <string name="settings_temp_freed">Freed %1$s.</string>
     <string name="settings_temp_clean">Clean</string>
     <string name="settings_temp_note">Leftovers from downloads and conversions that did not finish. Running jobs are not touched.</string>
+    <string name="playlist_quality_hint">Each video is downloaded in the best quality it has up to the one chosen.</string>
+    <string name="playlist_selected">%1$d of %2$d selected</string>
+    <string name="playlist_select_all">Select all</string>
+    <string name="playlist_select_none">Select none</string>
+    <string name="playlist_truncated">Only the first %1$d of %2$d videos are listed.</string>
+    <plurals name="home_playlist_count">
+        <item quantity="one">Playlist · %d video</item>
+        <item quantity="other">Playlist · %d videos</item>
+    </plurals>
+    <plurals name="playlist_download">
+        <item quantity="one">Download %d video</item>
+        <item quantity="other">Download %d videos</item>
+    </plurals>
+    <plurals name="playlist_queued">
+        <item quantity="one">%d video added to Downloads.</item>
+        <item quantity="other">%d videos added to Downloads.</item>
+    </plurals>
+    <plurals name="playlist_unavailable">
+        <item quantity="one">%d video is not available (private, deleted or needs sign-in).</item>
+        <item quantity="other">%d videos are not available (private, deleted or need sign-in).</item>
+    </plurals>
 </resources>

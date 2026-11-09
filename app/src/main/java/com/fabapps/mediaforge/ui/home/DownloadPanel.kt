@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -22,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -30,6 +33,7 @@ import com.fabapps.mediaforge.R
 import com.fabapps.mediaforge.domain.download.VideoOption
 import com.fabapps.mediaforge.domain.model.DownloadSelection
 import com.fabapps.mediaforge.domain.model.JobState
+import com.fabapps.mediaforge.domain.model.Playlist
 import com.fabapps.mediaforge.ui.common.ErrorMessage
 import com.fabapps.mediaforge.ui.common.JobRow
 import com.fabapps.mediaforge.ui.common.SavedFile
@@ -50,7 +54,16 @@ internal fun DownloadPanel(
     onSelectAudioFormat: (Int) -> Unit = {},
     onSelectBitrate: (Int?) -> Unit = {},
     onSelectSubtitle: (Int?) -> Unit = {},
+    onToggleEntry: (Int) -> Unit = {},
+    onSelectAllEntries: (Boolean) -> Unit = {},
 ) {
+    val playlist = state.playlist
+    if (playlist != null) {
+        PlaylistPanel(state, playlist, onSelectOption, onDownload, onModeChange, onSelectAudioFormat, onSelectBitrate) {
+            PlaylistEntries(state, playlist, onToggleEntry, onSelectAllEntries)
+        }
+        return
+    }
     val editable = !state.download.isActive && state.download !is WorkState.Saved
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (editable) {
@@ -117,6 +130,102 @@ internal fun DownloadPanel(
     }
 }
 
+/** Una lista: mismo modo y calidad para todos los elementos elegidos; cada uno es un trabajo (ADR-021). */
+@Composable
+private fun PlaylistPanel(
+    state: HomeUiState,
+    playlist: Playlist,
+    onSelectOption: (Int) -> Unit,
+    onDownload: () -> Unit,
+    onModeChange: (DownloadMode) -> Unit,
+    onSelectAudioFormat: (Int) -> Unit,
+    onSelectBitrate: (Int?) -> Unit,
+    entries: @Composable () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        ModeSelector(state.mode, onModeChange)
+        if (state.mode == DownloadMode.VIDEO) {
+            Text(stringResource(R.string.download_quality), style = MaterialTheme.typography.titleSmall)
+            Column(Modifier.selectableGroup()) {
+                state.options.forEachIndexed { index, option ->
+                    OptionRow(option, isBest = index == 0, selected = index == state.selectedOption, showSize = false) {
+                        onSelectOption(index)
+                    }
+                }
+            }
+            Hint(stringResource(R.string.playlist_quality_hint))
+        } else {
+            AudioSection(state, onSelectAudioFormat, onSelectBitrate)
+        }
+        entries()
+        val count = state.playlistSelected.size
+        Button(onClick = onDownload, enabled = state.canDownload, modifier = Modifier.fillMaxWidth()) {
+            Text(pluralStringResource(R.plurals.playlist_download, count, count))
+        }
+        state.playlistQueued?.let { queued ->
+            Text(
+                pluralStringResource(R.plurals.playlist_queued, queued, queued),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        if (playlist.unavailable > 0) {
+            Hint(pluralStringResource(R.plurals.playlist_unavailable, playlist.unavailable, playlist.unavailable))
+        }
+        val total = playlist.totalCount
+        if (total != null && total > playlist.entries.size + playlist.unavailable) {
+            Hint(stringResource(R.string.playlist_truncated, Playlist.MAX_ENTRIES, total))
+        }
+    }
+}
+
+@Composable
+private fun PlaylistEntries(
+    state: HomeUiState,
+    playlist: Playlist,
+    onToggleEntry: (Int) -> Unit,
+    onSelectAllEntries: (Boolean) -> Unit,
+) {
+    val all = state.playlistSelected.size == playlist.entries.size
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(R.string.playlist_selected, state.playlistSelected.size, playlist.entries.size),
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(onClick = { onSelectAllEntries(!all) }) {
+            Text(stringResource(if (all) R.string.playlist_select_none else R.string.playlist_select_all))
+        }
+    }
+    Column {
+        playlist.entries.forEachIndexed { index, entry ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .toggleable(
+                        value = index in state.playlistSelected,
+                        onValueChange = { onToggleEntry(index) },
+                        role = Role.Checkbox,
+                    )
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(checked = index in state.playlistSelected, onCheckedChange = null)
+                Column(Modifier.padding(start = 12.dp).weight(1f)) {
+                    Text(entry.title, style = MaterialTheme.typography.bodyLarge, maxLines = 2)
+                    entry.durationSeconds?.let { seconds ->
+                        Text(
+                            Formatters.duration(seconds),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun ModeSelector(mode: DownloadMode, onModeChange: (DownloadMode) -> Unit) {
     val modes = listOf(
@@ -135,7 +244,13 @@ private fun ModeSelector(mode: DownloadMode, onModeChange: (DownloadMode) -> Uni
 }
 
 @Composable
-private fun OptionRow(option: VideoOption, isBest: Boolean, selected: Boolean, onClick: () -> Unit) {
+private fun OptionRow(
+    option: VideoOption,
+    isBest: Boolean,
+    selected: Boolean,
+    showSize: Boolean = true,
+    onClick: () -> Unit,
+) {
     val locale = LocalConfiguration.current.locales[0]
     val quality = option.height?.let { Formatters.quality(it, option.fps) }
     val size = when {
@@ -149,7 +264,7 @@ private fun OptionRow(option: VideoOption, isBest: Boolean, selected: Boolean, o
     val label = listOfNotNull(
         if (isBest) stringResource(R.string.download_best) else null,
         quality,
-        size,
+        size.takeIf { showSize },
         if (option.hasAudio) null else stringResource(R.string.download_no_audio),
     ).joinToString(stringResource(R.string.detail_separator))
     Row(

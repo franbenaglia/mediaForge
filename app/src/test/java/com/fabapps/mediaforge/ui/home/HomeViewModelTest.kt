@@ -5,6 +5,7 @@ import com.fabapps.mediaforge.domain.engine.MediaConverter
 import com.fabapps.mediaforge.domain.engine.MediaDownloader
 import com.fabapps.mediaforge.domain.engine.MediaExtractor
 import com.fabapps.mediaforge.domain.engine.Outcome
+import com.fabapps.mediaforge.domain.jobs.JobRequest
 import com.fabapps.mediaforge.domain.jobs.JobScheduler
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadRequest
@@ -14,6 +15,8 @@ import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaFormat
 import com.fabapps.mediaforge.domain.model.MediaInfo
 import com.fabapps.mediaforge.domain.model.OutputFile
+import com.fabapps.mediaforge.domain.model.Playlist
+import com.fabapps.mediaforge.domain.model.PlaylistEntry
 import com.fabapps.mediaforge.domain.model.ProcessingStep
 import com.fabapps.mediaforge.domain.model.SourceSite
 import com.fabapps.mediaforge.domain.model.SubtitleTrack
@@ -36,6 +39,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -529,6 +533,75 @@ class HomeViewModelTest {
         vm.onDownload()
         advanceUntilIdle()
         assertTrue(downloader.requests.single().selection is DownloadSelection.Audio)
+    }
+
+    // Listas (ADR-021)
+
+    private val list = MediaInfo(
+        id = "PL1",
+        sourceUrl = "https://www.youtube.com/playlist?list=PL1",
+        title = "Mix",
+        site = SourceSite("YoutubeTab", "YouTube"),
+        playlist = Playlist(
+            entries = listOf(
+                PlaylistEntry("a", "https://www.youtube.com/watch?v=a", "One", 60),
+                PlaylistEntry("b", "https://www.youtube.com/watch?v=b", "Two"),
+                PlaylistEntry("c", "https://www.youtube.com/watch?v=c", "Three"),
+            ),
+        ),
+    )
+
+    @Test
+    fun playlistStartsWithEverythingSelectedAndGenericQualities() = test {
+        analyzed(list)
+        assertEquals(setOf(0, 1, 2), state.playlistSelected)
+        assertEquals(listOf(null, 1080, 720, 480, 360), state.options.map { it.height })
+        assertTrue(state.canDownload)
+    }
+
+    @Test
+    fun playlistEnqueuesOneJobPerSelectedEntry() = test {
+        analyzed(list)
+        vm.onToggleEntry(1)
+        vm.onSelectOption(2)
+        vm.onDownload()
+        advanceUntilIdle()
+        assertEquals(2, state.playlistQueued)
+        assertFalse(state.canDownload)
+        val jobs = queue.observeAll().first()
+        assertEquals(setOf("One", "Three"), jobs.map { it.title }.toSet())
+        val requests = jobs.map { (it.request as JobRequest.Download).request }
+        assertEquals(
+            setOf("https://www.youtube.com/watch?v=a", "https://www.youtube.com/watch?v=c"),
+            requests.map { it.sourceUrl }.toSet(),
+        )
+        assertTrue(requests.all { (it.selection as DownloadSelection.Video).maxHeight == 720 })
+        assertTrue(requests.all { (it.selection as DownloadSelection.Video).formatIds.isEmpty() })
+    }
+
+    @Test
+    fun playlistAudioUsesTheChosenFormat() = test {
+        analyzed(list)
+        vm.onModeChange(DownloadMode.AUDIO)
+        vm.onDownload()
+        advanceUntilIdle()
+        val requests = queue.observeAll().first().map { (it.request as JobRequest.Download).request }
+        assertEquals(3, requests.size)
+        assertTrue(requests.all { (it.selection as DownloadSelection.Audio).formatIds.isEmpty() })
+    }
+
+    @Test
+    fun emptySelectionCannotDownloadAndChangingItAllowsQueuingAgain() = test {
+        analyzed(list)
+        vm.onSelectAllEntries(false)
+        assertFalse(state.canDownload)
+        vm.onSelectAllEntries(true)
+        vm.onDownload()
+        advanceUntilIdle()
+        assertFalse(state.canDownload)
+        vm.onToggleEntry(0)
+        assertNull(state.playlistQueued)
+        assertTrue(state.canDownload)
     }
 
     @Test

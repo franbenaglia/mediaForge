@@ -2,6 +2,7 @@ package com.fabapps.mediaforge.media.ytdlp
 
 import com.fabapps.mediaforge.domain.model.AudioFormat
 import com.fabapps.mediaforge.domain.model.DownloadSelection
+import com.fabapps.mediaforge.domain.model.Playlist
 import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import java.io.File
 
@@ -38,12 +39,22 @@ object YtDlpCommand {
     )
 
     /**
-     * `--dump-json` de un recurso. [url] tiene que venir de `UrlValidator`. Igual va después de `--`,
-     * así nunca puede interpretarse como opción.
+     * Información de un recurso en un solo JSON. [url] tiene que venir de `UrlValidator`. Igual va
+     * después de `--`, así nunca puede interpretarse como opción.
+     * - Un video sale completo, igual que con `--dump-json`.
+     * - Una lista sale con sus elementos sin analizar cada video (`--flat-playlist`), hasta 200 (ADR-021).
      */
     fun info(runtime: YtDlpRuntime, url: String): List<String> {
         require(!url.startsWith("-")) { "url looks like an option" }
-        return base(runtime) + listOf("--dump-json", "--no-progress", "--", url)
+        return base(runtime) + listOf(
+            "--dump-single-json",
+            "--flat-playlist",
+            "--playlist-items",
+            "1-${Playlist.MAX_ENTRIES}",
+            "--no-progress",
+            "--",
+            url,
+        )
     }
 
     /** Prefijo de las líneas de progreso (ver [YtDlpProgressParser]). */

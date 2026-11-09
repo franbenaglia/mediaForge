@@ -35,6 +35,8 @@ Recorte (Etapa 10, ADR-020): `ConversionRequest.clip` lleva inicio, fin y "corte
 
 Subtítulos (ADR-021): el análisis llena `MediaInfo.subtitles`; Inicio pone el elegido en `DownloadSelection.Video.subtitle` y yt-dlp lo incrusta (`--embed-subs`). Si el subtítulo falla, `YtDlpDownloader` vuelve a bajar sin él y termina con `JobNote.SUBTITLES_SKIPPED`, que llega al aviso por `JobScheduler.finished`.
 
+Listas (ADR-021): el análisis siempre usa `--dump-single-json --flat-playlist`; si el sitio devuelve una lista, `MediaInfo.playlist` trae los elementos (sin formatos). Inicio usa `VideoOptions.forPlaylist` (calidades por altura) y encola un `DownloadRequest` por elemento elegido.
+
 Calidades: `VideoOptions` arma una opción por altura con formatos concretos (`299+258`) para que el tamaño mostrado sea el que se baja; el comando agrega un respaldo por altura por si el sitio ya no ofrece esos IDs.
 
 ## Procesos nativos

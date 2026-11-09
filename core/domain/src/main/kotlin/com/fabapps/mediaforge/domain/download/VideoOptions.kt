@@ -41,6 +41,25 @@ object VideoOptions {
         return if (fits >= 0) fits else options.lastIndex
     }
 
+    /** Alturas que se ofrecen para una lista: cada video se baja con lo mejor que tenga hasta esa altura. */
+    val PLAYLIST_HEIGHTS = listOf(1080, 720, 480, 360)
+
+    /**
+     * Opciones para una lista (ADR-021): "la mejor" y un tope por altura. Sin formatos concretos ni
+     * tamaño, porque no se analizó cada video.
+     */
+    fun forPlaylist(container: VideoContainer = VideoContainer.MP4): List<VideoOption> =
+        (listOf<Int?>(null) + PLAYLIST_HEIGHTS).map { height ->
+            VideoOption(
+                height = height,
+                fps = null,
+                selection = DownloadSelection.Video(maxHeight = height, container = container),
+                estimatedBytes = null,
+                sizeIsApproximate = true,
+                hasAudio = true,
+            )
+        }
+
     fun from(info: MediaInfo, container: VideoContainer = VideoContainer.MP4): List<VideoOption> {
         val videos = info.formats.filter { it.hasVideo && it.height != null }
         if (videos.isEmpty()) {

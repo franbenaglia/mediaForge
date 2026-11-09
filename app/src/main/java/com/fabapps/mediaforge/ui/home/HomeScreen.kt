@@ -102,6 +102,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             onSelectAudioFormat = viewModel::onSelectAudioFormat,
             onSelectBitrate = viewModel::onSelectBitrate,
             onSelectSubtitle = viewModel::onSelectSubtitle,
+            onToggleEntry = viewModel::onToggleEntry,
+            onSelectAllEntries = viewModel::onSelectAllEntries,
         ),
     )
 }
@@ -115,6 +117,8 @@ internal data class DownloadActions(
     val onSelectAudioFormat: (Int) -> Unit = {},
     val onSelectBitrate: (Int?) -> Unit = {},
     val onSelectSubtitle: (Int?) -> Unit = {},
+    val onToggleEntry: (Int) -> Unit = {},
+    val onSelectAllEntries: (Boolean) -> Unit = {},
 )
 
 @Composable
@@ -185,6 +189,8 @@ private fun HomeContent(
                 onSelectAudioFormat = download.onSelectAudioFormat,
                 onSelectBitrate = download.onSelectBitrate,
                 onSelectSubtitle = download.onSelectSubtitle,
+                onToggleEntry = download.onToggleEntry,
+                onSelectAllEntries = download.onSelectAllEntries,
             )
         }
         if (state.canUpdateEngine) {
@@ -242,8 +248,14 @@ private fun AnalysisResult(analysis: AnalysisState, onRetry: () -> Unit) {
                 durationSeconds = info.durationSeconds,
                 thumbnail = info.thumbnailUrl?.let { url -> { RemoteThumbnail(url) } },
             )
+            val playlist = info.playlist
             Text(
-                pluralStringResource(R.plurals.home_formats_count, info.formats.size, info.formats.size),
+                if (playlist != null) {
+                    val count = playlist.totalCount ?: playlist.entries.size
+                    pluralStringResource(R.plurals.home_playlist_count, count, count)
+                } else {
+                    pluralStringResource(R.plurals.home_formats_count, info.formats.size, info.formats.size)
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

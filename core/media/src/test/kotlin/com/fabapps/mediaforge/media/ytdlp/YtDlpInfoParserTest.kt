@@ -3,6 +3,7 @@ package com.fabapps.mediaforge.media.ytdlp
 import com.fabapps.mediaforge.domain.engine.Outcome
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.model.PlaylistEntry
 import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -106,7 +107,7 @@ class YtDlpInfoParserTest {
     }
 
     @Test
-    fun playlistIsRejected() {
+    fun emptyPlaylistIsRejected() {
         val result = YtDlpInfoParser.parse(fixture("playlist.json"))
         assertTrue((result as Outcome.Failure).error is MediaError.UnsupportedSite)
     }
@@ -242,5 +243,46 @@ class YtDlpInfoParserTest {
     fun oddSubtitleValuesDoNotBreakTheAnalysis() {
         val info = parseJson("""{"id": "x", "subtitles": {"es": "nope", "en": [1, {"name": 3}]}}""")
         assertEquals(listOf(SubtitleTrack("en")), info.subtitles)
+    }
+
+    @Test
+    fun playlistListsEntriesWithoutFormats() {
+        val info = parseJson(
+            """
+            {"_type": "playlist", "id": "PL1", "title": "Mix", "extractor_key": "YoutubeTab",
+             "webpage_url": "https://www.youtube.com/playlist?list=PL1", "playlist_count": 250,
+             "entries": [
+               {"_type": "url", "ie_key": "Youtube", "id": "a1", "title": "One", "duration": 61.5,
+                "url": "https://www.youtube.com/watch?v=a1"},
+               {"_type": "url", "ie_key": "Youtube", "id": "b2", "title": "[Private video]",
+                "url": "https://www.youtube.com/watch?v=b2"},
+               {"_type": "url", "ie_key": "Youtube", "id": "c3", "title": "Members", "availability": "subscriber_only",
+                "url": "https://www.youtube.com/watch?v=c3"},
+               {"_type": "url", "ie_key": "YoutubeTab", "id": "UCx", "title": "Shorts",
+                "url": "https://www.youtube.com/@x/shorts"},
+               {"_type": "url", "id": "d4", "url": "javascript:alert(1)"},
+               {"_type": "url", "id": "e5", "url": "https://www.youtube.com/watch?v=e5"},
+               "garbage"
+             ]}
+            """.trimIndent(),
+        )
+        assertTrue(info.isPlaylist)
+        assertEquals("YouTube", info.site.displayName)
+        assertTrue(info.formats.isEmpty())
+        val playlist = info.playlist!!
+        assertEquals(
+            listOf(
+                PlaylistEntry("a1", "https://www.youtube.com/watch?v=a1", "One", 61),
+                PlaylistEntry("e5", "https://www.youtube.com/watch?v=e5", "e5"),
+            ),
+            playlist.entries,
+        )
+        assertEquals(250, playlist.totalCount)
+        assertEquals(5, playlist.unavailable)
+    }
+
+    @Test
+    fun singleVideoIsNotAPlaylist() {
+        assertFalse(parseOk("youtube.json").isPlaylist)
     }
 }

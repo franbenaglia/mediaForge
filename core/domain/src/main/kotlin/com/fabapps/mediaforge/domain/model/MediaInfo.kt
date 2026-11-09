@@ -19,9 +19,28 @@ data class MediaInfo(
     val formats: List<MediaFormat> = emptyList(),
     /** Subtítulos que se pueden incrustar: manuales y, de los automáticos, solo el del idioma original. */
     val subtitles: List<SubtitleTrack> = emptyList(),
+    /** Solo en una lista de reproducción (ADR-021); entonces no hay formatos ni subtítulos. */
+    val playlist: Playlist? = null,
 ) {
     val hasSubtitles: Boolean get() = subtitles.isNotEmpty()
+    val isPlaylist: Boolean get() = playlist != null
 }
+
+/** Elementos de una lista, sin analizar cada uno (`--flat-playlist`). */
+data class Playlist(
+    val entries: List<PlaylistEntry>,
+    /** Cuántos tiene la lista según el sitio; puede ser más que [entries] (se leen hasta [MAX_ENTRIES]). */
+    val totalCount: Int? = null,
+    /** Privados, borrados o que piden iniciar sesión: no se ofrecen. */
+    val unavailable: Int = 0,
+) {
+    companion object {
+        const val MAX_ENTRIES = 200
+    }
+}
+
+/** Un video de la lista. [url] ya pasó por `UrlValidator`. */
+data class PlaylistEntry(val id: String, val url: String, val title: String, val durationSeconds: Long? = null)
 
 /**
  * Un idioma de subtítulos del sitio (ADR-021). [language] es la clave de yt-dlp (`es`, `en-US`,

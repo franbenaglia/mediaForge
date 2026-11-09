@@ -15,6 +15,7 @@ import com.fabapps.mediaforge.domain.model.DownloadRequest
 import com.fabapps.mediaforge.domain.model.JobState
 import com.fabapps.mediaforge.domain.model.MediaError
 import com.fabapps.mediaforge.domain.model.MediaInfo
+import com.fabapps.mediaforge.domain.model.Playlist
 import com.fabapps.mediaforge.domain.model.SubtitleTrack
 import com.fabapps.mediaforge.domain.settings.PreferredMode
 import com.fabapps.mediaforge.domain.settings.SettingsStore
@@ -59,6 +60,10 @@ data class HomeUiState(
     val subtitles: List<SubtitleTrack> = emptyList(),
     /** Índice en [subtitles]; nulo = sin subtítulos. Solo en video. */
     val selectedSubtitle: Int? = null,
+    /** Elementos elegidos de una lista (índices en `playlist.entries`); arrancan todos (ADR-021). */
+    val playlistSelected: Set<Int> = emptySet(),
+    /** Cuántos trabajos se encolaron desde la lista; nulo hasta encolar o si se cambia la elección. */
+    val playlistQueued: Int? = null,
     /** Nombre del archivo sin extensión; arranca con el título. */
     val fileName: String = "",
     val download: WorkState = WorkState.None,
@@ -70,9 +75,13 @@ data class HomeUiState(
             analysis !is AnalysisState.Loading &&
             analysis !is AnalysisState.UpdatingEngine
 
+    /** La lista analizada; nula si es un solo video. */
+    val playlist: Playlist? get() = (analysis as? AnalysisState.Loaded)?.info?.playlist
+
     val canDownload: Boolean
         get() = analysis is AnalysisState.Loaded &&
             !download.isActive &&
+            (playlist == null || (playlistSelected.isNotEmpty() && playlistQueued == null)) &&
             (if (mode == DownloadMode.VIDEO) options.isNotEmpty() else audioOptions.isNotEmpty())
 
     val audioOption: AudioOption? get() = audioOptions.getOrNull(selectedAudio)
@@ -223,7 +232,8 @@ class HomeViewModel @Inject constructor(
                     val info = result.value
                     // Arranca con lo preferido en los ajustes (ADR-019).
                     val prefs = settings.settings.first()
-                    val video = VideoOptions.from(info)
+                    // Una lista no trae formatos: calidades por altura, para todos sus videos (ADR-021).
+                    val video = if (info.isPlaylist) VideoOptions.forPlaylist() else VideoOptions.from(info)
                     val audio = AudioOptions.from(info)
                     val audioIndex = AudioOptions.preferredIndex(audio, prefs.audioFormat)
                     val audioOption = audio.getOrNull(audioIndex)
@@ -241,6 +251,8 @@ class HomeViewModel @Inject constructor(
                             audioSourceBytes = audioOption?.let { option -> AudioOptions.sourceBytes(info, option) },
                             subtitles = info.subtitles,
                             selectedSubtitle = null,
+                            playlistSelected = info.playlist?.entries?.indices?.toSet().orEmpty(),
+                            playlistQueued = null,
                             fileName = info.title,
                         )
                     }
@@ -274,12 +286,41 @@ class HomeViewModel @Inject constructor(
 
     fun onSelectOption(index: Int) {
         if (index in _state.value.options.indices && !_state.value.download.isActive) {
-            _state.update { it.copy(selectedOption = index) }
+            _state.update { it.copy(selectedOption = index, playlistQueued = null) }
         }
     }
 
     fun onModeChange(mode: DownloadMode) {
-        if (!_state.value.download.isActive) _state.update { it.copy(mode = mode, download = WorkState.None) }
+        if (!_state.value.download.isActive) {
+            _state.update { it.copy(mode = mode, download = WorkState.None, playlistQueued = null) }
+        }
+    }
+
+    /** Marca o desmarca un elemento de la lista. */
+    fun onToggleEntry(index: Int) {
+        val playlist = _state.value.playlist ?: return
+        if (index !in playlist.entries.indices) return
+        _state.update {
+            val selected = if (index in
+                it.playlistSelected
+            ) {
+                it.playlistSelected - index
+            } else {
+                it.playlistSelected + index
+            }
+            it.copy(playlistSelected = selected, playlistQueued = null)
+        }
+    }
+
+    /** Todos o ninguno. */
+    fun onSelectAllEntries(all: Boolean) {
+        val playlist = _state.value.playlist ?: return
+        _state.update {
+            it.copy(
+                playlistSelected = if (all) playlist.entries.indices.toSet() else emptySet(),
+                playlistQueued = null,
+            )
+        }
     }
 
     fun onSelectAudioFormat(index: Int) {
@@ -319,6 +360,7 @@ class HomeViewModel @Inject constructor(
         val current = _state.value
         if (!current.canDownload) return
         val info = (current.analysis as AnalysisState.Loaded).info
+        info.playlist?.let { return enqueuePlaylist(current, info, it) }
         val (selection, expected) = when (current.mode) {
             DownloadMode.VIDEO -> current.options[current.selectedOption].let {
                 it.selection.copy(subtitle = current.subtitle) to it.estimatedBytes
@@ -343,6 +385,30 @@ class HomeViewModel @Inject constructor(
             )
             downloadId = job.id
             queue.workState(job.id).collect { work -> _state.update { it.copy(download = work) } }
+        }
+    }
+
+    /**
+     * Un trabajo por elemento elegido, con el mismo modo y calidad (ADR-021). No se siguen en pantalla:
+     * se ven en Descargas. Cada video se analiza al bajarlo.
+     */
+    private fun enqueuePlaylist(current: HomeUiState, info: MediaInfo, playlist: Playlist) {
+        val selection = when (current.mode) {
+            DownloadMode.VIDEO -> current.options[current.selectedOption].selection
+            DownloadMode.AUDIO -> current.audioOption!!.selection(current.audioBitrate)
+        }
+        val entries = playlist.entries.filterIndexed { index, _ -> index in current.playlistSelected }
+        _state.update { it.copy(playlistQueued = entries.size) }
+        viewModelScope.launch {
+            entries.forEach { entry ->
+                val request = DownloadRequest(
+                    jobId = UUID.randomUUID().toString(),
+                    sourceUrl = entry.url,
+                    selection = selection,
+                    fileName = entry.title,
+                )
+                queue.enqueue(JobRequest.Download(request), title = entry.title, sourceName = info.site.displayName)
+            }
         }
     }
 

@@ -276,4 +276,29 @@
     <string name="settings_temp_freed">Se liberaron %1$s.</string>
     <string name="settings_temp_clean">Limpiar</string>
     <string name="settings_temp_note">Restos de descargas y conversiones que no terminaron. No se tocan los trabajos en curso.</string>
+    <string name="playlist_quality_hint">Cada video se baja con la mejor calidad que tenga hasta la elegida.</string>
+    <string name="playlist_selected">%1$d de %2$d elegidos</string>
+    <string name="playlist_select_all">Elegir todos</string>
+    <string name="playlist_select_none">Ninguno</string>
+    <string name="playlist_truncated">Solo se listan los primeros %1$d de %2$d videos.</string>
+    <plurals name="home_playlist_count">
+        <item quantity="one">Lista · %d video</item>
+        <item quantity="many">Lista · %d videos</item>
+        <item quantity="other">Lista · %d videos</item>
+    </plurals>
+    <plurals name="playlist_download">
+        <item quantity="one">Descargar %d video</item>
+        <item quantity="many">Descargar %d videos</item>
+        <item quantity="other">Descargar %d videos</item>
+    </plurals>
+    <plurals name="playlist_queued">
+        <item quantity="one">%d video agregado a Descargas.</item>
+        <item quantity="many">%d videos agregados a Descargas.</item>
+        <item quantity="other">%d videos agregados a Descargas.</item>
+    </plurals>
+    <plurals name="playlist_unavailable">
+        <item quantity="one">%d video no está disponible (privado, borrado o pide iniciar sesión).</item>
+        <item quantity="many">%d videos no están disponibles (privados, borrados o piden iniciar sesión).</item>
+        <item quantity="other">%d videos no están disponibles (privados, borrados o piden iniciar sesión).</item>
+    </plurals>
 </resources>

@@ -273,9 +273,9 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 
 ---
 
-## ADR-021 · Subtítulos incrustados
+## ADR-021 · Subtítulos incrustados y listas de reproducción
 
-**Fecha:** 2026-11-08 · **Estado:** aceptada (la parte de listas de reproducción se agrega con T10.7)
+**Fecha:** 2026-11-08 · **Estado:** aceptada
 
 **Contexto:** main.md §5.1 pide descargar subtítulos cuando el sitio los ofrece. YouTube ofrece subtítulos manuales y automáticos (reconocimiento de voz), y además traducciones automáticas a ~150 idiomas. Sin `-i`, yt-dlp corta toda la descarga si un subtítulo falla, y con YouTube eso pasa seguido (HTTP 429).
 
@@ -286,6 +286,14 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - MOV no admite subtítulos de texto: el pedido lo rechaza (Inicio siempre baja MP4).
 - Si yt-dlp falla con "Unable to download video subtitles", el video se baja de nuevo sin subtítulos y el trabajo termina con `JobNote.SUBTITLES_SKIPPED`; el aviso de resultado lo dice. Cualquier otro error falla como siempre. La nota vive en memoria (no se guarda en Room).
 
+**Listas de reproducción (T10.7):**
+- El análisis usa `--dump-single-json --flat-playlist --playlist-items 1-200` siempre: un video sale igual que con `--dump-json`; una lista sale con sus elementos sin analizar cada video (unos segundos en vez de minutos). `--no-playlist` sigue: un enlace de video dentro de una lista (`watch?v=…&list=…`) trae solo el video.
+- Se leen hasta 200 elementos. No se ofrecen los privados, borrados (`[Private video]`, `[Deleted video]`), los que yt-dlp marca como de suscriptores, pago o con cuenta (main.md §1.2), las listas anidadas (pestañas de canal) ni los que no traen una URL `http(s)` válida. La pantalla dice cuántos quedaron afuera y si la lista tenía más de 200.
+- Un solo modo y calidad para todos. Como no hay formatos por video, las calidades son por altura ("La mejor", 1080, 720, 480, 360: `bv*[height<=h]+ba/b[height<=h]`) y sin tamaño; en audio, el formato elegido con bitrate automático o elegido. Sin subtítulos ni nombre editable: cada archivo lleva el título de su video.
+- Un trabajo por elemento elegido (ADR-017), encolados de una vez; no se siguen en Inicio: se ven en Descargas. Cada video se analiza recién al bajarlo, así que un elemento que falla no frena a los otros.
+
 **Descartadas:**
 - `-i` (`--ignore-errors`): también ocultaría errores del video.
 - Varios idiomas a la vez o archivo `.srt` aparte: más opciones en la pantalla para un caso poco común; se puede agregar después.
+- Analizar cada video de la lista para mostrar calidades y tamaños reales: con 200 elementos tarda minutos y hace cientos de pedidos a YouTube.
+- Un solo trabajo para toda la lista: un fallo la cortaría entera y no se podría cancelar un video suelto.

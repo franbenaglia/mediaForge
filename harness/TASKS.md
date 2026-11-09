@@ -286,9 +286,10 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
   *Depende de:* —
   *Acepta:* pruebas del parser, del comando y de `HomeViewModel`; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `MediaInfo.subtitles` (manuales y el automático original, ADR-021), `DownloadSelection.Video.subtitle` (en el JSON, opcional), `--embed-subs`; si el subtítulo falla, se baja sin él y el aviso lo dice (`JobNote`). Selector "Subtítulos" en Inicio (solo video). 17 pruebas.
-- [ ] **T10.7** · P1 · Listas de reproducción públicas: el análisis reconoce una lista (sin bajar cada video), muestra sus elementos (título, duración) para elegir; un mismo modo y calidad para todos; un trabajo por elemento. Hasta 200 elementos; las listas privadas o que piden iniciar sesión dan el error habitual.
+- [~] **T10.7** · P1 · Listas de reproducción públicas: el análisis reconoce una lista (sin bajar cada video), muestra sus elementos (título, duración) para elegir; un mismo modo y calidad para todos; un trabajo por elemento. Hasta 200 elementos; las listas privadas o que piden iniciar sesión dan el error habitual.
   *Depende de:* —
   *Acepta:* pruebas del parser, del comando y del ViewModel; `[~]` hasta probarlo en el teléfono.
+  *Hecho:* análisis con `--dump-single-json --flat-playlist --playlist-items 1-200`; `MediaInfo.playlist` (elementos con URL validada, sin privados ni de cuenta); `VideoOptions.forPlaylist` (calidades por altura); en Inicio, lista con casillas, "Elegir todos", "Descargar N videos" encola un trabajo por elemento. 6 pruebas.
 - [ ] **T10.8** · P1 · Prueba en el teléfono: recorte de video (rápido y exacto) y de audio, fotograma JPG y PNG, conversión de varios archivos, compresión, video con subtítulos, lista de reproducción de YouTube.
   *Depende de:* T10.2–T10.7
   *Acepta:* validación manual registrada.

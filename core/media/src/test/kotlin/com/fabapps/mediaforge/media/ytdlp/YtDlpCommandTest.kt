@@ -29,7 +29,7 @@ class YtDlpCommandTest {
                 "--cache-dir", "/c/yt-dlp",
                 "--js-runtimes", "quickjs:/n/libqjs.so",
                 "--ffmpeg-location", "/n/libffmpeg.so",
-                "--dump-json", "--no-progress",
+                "--dump-single-json", "--flat-playlist", "--playlist-items", "1-200", "--no-progress",
                 "--", "https://example.com/v",
             ),
             YtDlpCommand.info(runtime, "https://example.com/v"),

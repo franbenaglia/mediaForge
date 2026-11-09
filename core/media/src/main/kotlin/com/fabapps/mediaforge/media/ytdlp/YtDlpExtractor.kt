@@ -13,7 +13,7 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-/** Obtiene la información de un recurso con `yt-dlp --dump-json`. */
+/** Obtiene la información de un recurso (video o lista) con `yt-dlp --dump-single-json`. */
 class YtDlpExtractor @Inject constructor(
     private val engine: EngineInitializer,
     private val runtimeProvider: YtDlpRuntimeProvider,

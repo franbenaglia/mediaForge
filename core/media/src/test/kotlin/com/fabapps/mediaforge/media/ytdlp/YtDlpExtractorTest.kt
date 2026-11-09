@@ -83,7 +83,7 @@ class YtDlpExtractorTest {
         assertEquals(listOf("--", "https://www.youtube.com/watch?v=x"), args.takeLast(2))
         assertTrue("--ignore-config" in args)
         assertTrue("--no-playlist" in args)
-        assertTrue("--dump-json" in args)
+        assertTrue("--dump-single-json" in args)
         assertEquals("quickjs:/opt/qjs", args[args.indexOf("--js-runtimes") + 1])
         assertEquals("/opt/ffmpeg", args[args.indexOf("--ffmpeg-location") + 1])
     }
