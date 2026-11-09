@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -37,6 +39,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -409,7 +412,9 @@ private fun ImageOptions(state: ConverterUiState, media: LocalMedia, actions: Co
 private fun Trim(state: ConverterUiState, media: LocalMedia, actions: ConverterActions) {
     val trim = state.trim
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = trim.enabled, onValueChange = actions.onTrimEnabled, role = Role.Switch),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -417,7 +422,7 @@ private fun Trim(state: ConverterUiState, media: LocalMedia, actions: ConverterA
             Text(stringResource(R.string.converter_trim), style = MaterialTheme.typography.titleSmall)
             Note(stringResource(R.string.converter_trim_hint))
         }
-        Switch(checked = trim.enabled, onCheckedChange = actions.onTrimEnabled)
+        Switch(checked = trim.enabled, onCheckedChange = null)
     }
     if (!trim.enabled) return
     val error = state.trimError
@@ -458,8 +463,15 @@ private fun Trim(state: ConverterUiState, media: LocalMedia, actions: ConverterA
         null -> Note(stringResource(R.string.converter_trim_format_hint))
     }
     if (state.kind == TargetKind.VIDEO) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Checkbox(checked = trim.exact, onCheckedChange = actions.onExactCut)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .toggleable(value = trim.exact, onValueChange = actions.onExactCut, role = Role.Checkbox),
+        ) {
+            Checkbox(checked = trim.exact, onCheckedChange = null)
             Text(stringResource(R.string.converter_trim_exact), style = MaterialTheme.typography.bodyMedium)
         }
     }

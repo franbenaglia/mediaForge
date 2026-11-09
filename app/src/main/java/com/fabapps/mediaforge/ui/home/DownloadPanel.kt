@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -207,6 +208,7 @@ private fun PlaylistEntries(
                         onValueChange = { onToggleEntry(index) },
                         role = Role.Checkbox,
                     )
+                    .heightIn(min = 48.dp)
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -271,6 +273,7 @@ private fun OptionRow(
         modifier = Modifier
             .fillMaxWidth()
             .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
+            .heightIn(min = 48.dp)
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
