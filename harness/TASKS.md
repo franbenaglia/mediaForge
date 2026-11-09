@@ -340,9 +340,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
 
 main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación para otro desarrollador y landing page (pedida por el usuario: inglés y español; el ícono y la imagen destacada los dio el usuario). La landing vive en su propio repo, https://github.com/franbenaglia/mediaForgeLanding, trabajado en `githubpages/` (ignorado por este repo). La imagen destacada muestra pausa y AAC, que la app no tiene: va solo como ilustración; las funciones se muestran con capturas reales.
 
-- [ ] **T12.1** · P1 · Ícono nuevo (`MediaForge_icon_512.png` de la landing; la fuente queda en `docs/images/`) como ícono de la app: adaptativo (fondo y figura), monocromo para los íconos temáticos de Android 13+, en todas las densidades; las variantes debug y minified se distinguen.
+- [x] **T12.1** · P1 · Ícono nuevo (`MediaForge_icon_512.png` de la landing; la fuente queda en `docs/images/`) como ícono de la app: adaptativo (fondo y figura), monocromo para los íconos temáticos de Android 13+, en todas las densidades; las variantes debug y minified se distinguen.
   *Depende de:* —
   *Acepta:* verify OK; se ve bien en el lanzador del teléfono (formas redonda y cuadrada, tema).
+  *Hecho:* fondo `#101325` (del diseño), figura en `mipmap-*/ic_launcher_foreground.png` (72 de 108 dp, sin recortes en círculo ni squircle), monocromo con la silueta de reproducción y bandeja. Las variantes se distinguen por el nombre ("MediaForge R8"). Validado en 24115RA8EG (2026-11-09).
 - [ ] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
   *Depende de:* —
   *Acepta:* `apksigner verify` OK; el APK de release se instala limpio en el teléfono y funciona.

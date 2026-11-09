@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 11 cerrada: el MVP cumple los criterios de main.md §15 en el APK con R8 (T11.8). Etapa 12 (distribución): tareas T12.1–T12.9 en `TASKS.md`. Sigue T12.1 (ícono nuevo de la app). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 cerrada: el MVP cumple los criterios de main.md §15 en el APK con R8 (T11.8). Etapa 12 (distribución): tareas T12.1–T12.9 en `TASKS.md`. T12.1 (ícono) hecha. Sigue T12.2 (firma de release: el usuario crea el keystore). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
