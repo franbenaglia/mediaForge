@@ -114,4 +114,12 @@ class YtDlpExtractorTest {
         val result = extractor("garbage").extract("https://example.com/v")
         assertTrue((result as Outcome.Failure).error is MediaError.Unknown)
     }
+
+    @Test
+    fun oversizedOutputIsRejectedInsteadOfFillingMemory() = runBlocking {
+        val extractor = extractor("ok").apply { maxOutputChars = 1_000 }
+        val result = extractor.extract("https://example.com/v")
+        val error = (result as Outcome.Failure).error
+        assertTrue(error is MediaError.Unknown && error.detail!!.contains("output over"))
+    }
 }

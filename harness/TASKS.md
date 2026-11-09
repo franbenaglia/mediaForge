@@ -302,9 +302,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
 - [ ] **T11.1** · P1 · Variante `minified` (R8 y recursos reducidos igual que release, firmada con la clave de debug, `applicationIdSuffix ".minified"`) para probar el código ofuscado sin el keystore. Ajustar las reglas de R8 hasta que analizar, descargar, convertir y el historial funcionen.
   *Depende de:* —
   *Acepta:* `assembleMinified` compila sin advertencias de R8 sin explicar; prueba manual en el teléfono (YouTube video y audio, una conversión, compartir un enlace, historial); `[~]` hasta probarlo.
-- [ ] **T11.2** · P1 · Revisión de seguridad según main.md §11: URLs (esquemas, redirecciones, tiempos), argumentos de los procesos, rutas y nombres, temporales, permisos y componentes exportados, logs sin URLs con tokens. Registrar cada punto con su evidencia en `docs/SECURITY.md` y corregir lo que falte.
+- [x] **T11.2** · P1 · Revisión de seguridad según main.md §11: URLs (esquemas, redirecciones, tiempos), argumentos de los procesos, rutas y nombres, temporales, permisos y componentes exportados, logs sin URLs con tokens. Registrar cada punto con su evidencia en `docs/SECURITY.md` y corregir lo que falte.
   *Depende de:* —
   *Acepta:* `docs/SECURITY.md` completo; pruebas para cada corrección.
+  *Hecho:* `docs/SECURITY.md` con cada punto de §11, Android, logs y código descargado. Corrección: la salida del análisis tenía memoria ilimitada; ahora 32 MB y las últimas 200 líneas de stderr (1 prueba). Aceptado: yt-dlp sigue redirecciones sin validar el destino.
 - [ ] **T11.3** · P1 · Auditoría de licencias: inventario de dependencias y binarios incluidos (yt-dlp, Python, FFmpeg y su configuración, QuickJS, youtubedl-android, AndroidX, Coil, etc.) con su licencia y compatibilidad con GPL-3.0 en `docs/LICENSES.md`; pantalla "Licencias" en Ajustes con los avisos que exigen.
   *Depende de:* —
   *Acepta:* documento completo; la pantalla se abre desde Ajustes (prueba de ViewModel o de UI).
