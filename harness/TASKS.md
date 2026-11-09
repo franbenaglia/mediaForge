@@ -358,13 +358,17 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
   - Fuentes: `package-gpl-sources.sh` arma `mediaforge-<versión>-gpl-sources.tar.gz` (276 MB), con 29 fuentes verificadas, las recetas de Termux en `70d29feb94` y youtubedl-android 0.18.1 (ADR-023).
   - Avisos: `build-notices.sh` arma `assets/third_party_notices.txt` (73 componentes), visible en Ajustes → Licencias → Avisos completos (1 prueba de VM).
   - Corrección del inventario: `libcrypt` es la implementación BSD de Termux, no libxcrypt.
-- [~] **T12.5** · P1 · Documentación final (main.md §17): `README.md` en inglés (qué es, capturas, instalación por sideloading, aviso legal, compilación) y `docs/DEVELOPMENT.md` (clonar, entorno, compilar, pruebas, APK, arquitectura, actualizar yt-dlp y FFmpeg, continuar el desarrollo).
+- [x] **T12.5** · P1 · Documentación final (main.md §17): `README.md` en inglés (qué es, capturas, instalación por sideloading, aviso legal, compilación) y `docs/DEVELOPMENT.md` (clonar, entorno, compilar, pruebas, APK, arquitectura, actualizar yt-dlp y FFmpeg, continuar el desarrollo).
   *Depende de:* T12.3, T12.6
   *Acepta:* otro desarrollador puede compilar siguiendo solo esos documentos.
-  *Hecho:* `README.md` (en inglés: funciones, instalación, aviso legal, compilación, licencias) y `docs/DEVELOPMENT.md` (en inglés, con los puntos de main.md §17). Faltan las capturas del README (T12.6).
-- [ ] **T12.6** · P1 · Capturas reales en inglés y español (Inicio con un video analizado, calidades, descarga en curso, Conversor, Historial, Ajustes) con contenido de uso libre (Big Buck Bunny), en la landing y en `docs/images/` para el README.
+  *Hecho:* `README.md` (en inglés: funciones, instalación, aviso legal, compilación, licencias) y `docs/DEVELOPMENT.md` (en inglés, con los puntos de main.md §17). Capturas agregadas con T12.6.
+- [x] **T12.6** · P1 · Capturas reales en inglés y español (Inicio con un video analizado, calidades, descarga en curso, Conversor, Historial, Ajustes) con contenido de uso libre (Big Buck Bunny), en la landing y en `docs/images/` para el README.
   *Depende de:* T12.1
   *Acepta:* capturas sin datos personales.
+  *Hecho:*
+  - 6 pantallas por idioma (Inicio, calidades, Descargas, Conversor, Historial, Ajustes), sacadas de una instalación limpia de "MediaForge R8" con Big Buck Bunny; el idioma de la app se cambió con `cmd locale set-app-locales`.
+  - Se recortaron la barra de estado y la de navegación, se borró la burbuja de otra app que quedaba encima, y se escalaron a 720 px.
+  - Están en `docs/images/screenshots/` (inglés, para el README) y en la landing (12).
 - [ ] **T12.7** · P1 · Landing page estática (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Repo `mediaForgeLanding`, publicada con GitHub Pages desde `main` (raíz).
   *Depende de:* T12.3, T12.6
   *Acepta:* se ve bien en el teléfono y en la computadora; publicada en GitHub Pages.

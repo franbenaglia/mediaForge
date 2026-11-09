@@ -7,7 +7,12 @@ Built with Kotlin, Jetpack Compose, [yt-dlp](https://github.com/yt-dlp/yt-dlp) a
 
 **Status:** 1.0.0. Download the APK from [Releases](https://github.com/franbenaglia/mediaForge/releases/latest).
 
-<!-- Screenshots: docs/images/screenshots (T12.6) -->
+<p align="center">
+  <img src="docs/images/screenshots/1-home.png" width="200" alt="Home with a video analyzed">
+  <img src="docs/images/screenshots/2-qualities.png" width="200" alt="Real qualities with their sizes">
+  <img src="docs/images/screenshots/4-converter.png" width="200" alt="Offline converter">
+  <img src="docs/images/screenshots/5-history.png" width="200" alt="History">
+</p>
 
 ## Features
 
