@@ -91,6 +91,14 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun autoUpdateCanBeTurnedOff() = test {
+        assertTrue(state.settings.autoUpdateEngine)
+        vm.onAutoUpdateEngineChange(false)
+        advanceUntilIdle()
+        assertFalse(store.settings.value.autoUpdateEngine)
+    }
+
+    @Test
     fun licensesDialogOpensAndCloses() = test {
         assertFalse(state.showLicenses)
         vm.onOpenLicenses()

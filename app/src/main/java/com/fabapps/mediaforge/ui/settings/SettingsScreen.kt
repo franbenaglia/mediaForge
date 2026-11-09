@@ -74,6 +74,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onInstallEngine = viewModel::onInstallEngine,
             onOpenSource = { context.openLink(sourceUrl) },
             onOpenLicenses = viewModel::onOpenLicenses,
+            onAutoUpdateEngineChange = viewModel::onAutoUpdateEngineChange,
         ),
         appVersion = context.appVersion(),
     )
@@ -104,6 +105,7 @@ data class SettingsActions(
     val onInstallEngine: () -> Unit = {},
     val onOpenSource: () -> Unit = {},
     val onOpenLicenses: () -> Unit = {},
+    val onAutoUpdateEngineChange: (Boolean) -> Unit = {},
 )
 
 @Composable
@@ -304,6 +306,12 @@ private fun Engine(state: SettingsUiState, actions: SettingsActions) {
         if (state.busyEngine) CircularProgressIndicator(modifier = Modifier.padding(4.dp))
     }
     Note(stringResource(R.string.settings_engine_note))
+    Toggle(
+        title = stringResource(R.string.settings_engine_auto),
+        checked = state.settings.autoUpdateEngine,
+        onChange = actions.onAutoUpdateEngineChange,
+        note = stringResource(R.string.settings_engine_auto_note),
+    )
 }
 
 @Composable

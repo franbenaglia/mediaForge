@@ -43,7 +43,7 @@ Calidades: `VideoOptions` arma una opción por altura con formatos concretos (`2
 
 - Los binarios (`libpython.so`, `libffmpeg.so`, `libqjs.so`) vienen en `jniLibs` del APK y se ejecutan desde `nativeLibraryDir` (`useLegacyPackaging = true`). Android no permite ejecutar binarios descargados (targetSdk ≥ 29).
 - El primer arranque descomprime ~240 MB en `noBackupFilesDir`. Se hace con progreso, fuera del hilo principal y verificando antes el espacio libre.
-- yt-dlp (zipapp de Python) es lo único actualizable sin un APK nuevo. Se descarga, se verifica (firma + SHA-256), se prueba y recién entonces se activa, conservando la versión anterior.
+- yt-dlp (zipapp de Python) es lo único actualizable sin un APK nuevo. Se descarga, se verifica (firma + SHA-256), se prueba y recién entonces se activa, conservando la versión anterior. `EngineUpdates` (app) lo hace solo al abrir la app, como mucho una vez por semana (`EngineAutoUpdate`, ADR-022).
 - Todo comando se arma como lista de argumentos. Antes de pasarla, la URL se valida (solo `http`/`https`) y se coloca después de `--`.
 
 ## Almacenamiento

@@ -24,6 +24,10 @@ data class Settings(
     val dynamicColor: Boolean = true,
     /** URI de una carpeta elegida con el selector del sistema. Nulo = la galería. */
     val destinationTree: String? = null,
+    /** Buscar e instalar solo una versión nueva y verificada de yt-dlp (T11.9). */
+    val autoUpdateEngine: Boolean = true,
+    /** Última búsqueda automática completa (epoch ms); nula = nunca. No es un ajuste visible. */
+    val engineCheckedAt: Long? = null,
 ) {
     /** Corrige lo que no es válido (por ejemplo, de una versión anterior de la app). */
     fun normalized(): Settings = copy(

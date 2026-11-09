@@ -54,6 +54,8 @@ class DataStoreSettingsStoreTest {
             theme = ThemeMode.DARK,
             dynamicColor = false,
             destinationTree = "content://com.android.externalstorage.documents/tree/primary%3AMusic",
+            autoUpdateEngine = false,
+            engineCheckedAt = 1_794_000_000_000,
         )
         val first = dataStore(file)
         DataStoreSettingsStore(first).update { changed }

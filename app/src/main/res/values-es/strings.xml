@@ -307,4 +307,6 @@
     <string name="licenses_libraries">Bibliotecas de la app</string>
     <string name="licenses_close">Cerrar</string>
     <string name="licenses_details">Ver detalle</string>
+    <string name="settings_engine_auto">Actualizar automáticamente</string>
+    <string name="settings_engine_auto_note">Al abrir la app, como mucho una vez por semana, busca un yt-dlp nuevo y lo instala solo si la firma y el hash son correctos. Con \"Solo Wi‑Fi\" activo, espera a tener Wi‑Fi.</string>
 </resources>

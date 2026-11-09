@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.fabapps.mediaforge.domain.settings.Settings
 import com.fabapps.mediaforge.domain.settings.SettingsStore
@@ -42,6 +43,8 @@ class DataStoreSettingsStore(private val dataStore: DataStore<Preferences>) : Se
             theme = enumOf(prefs[THEME], defaults.theme),
             dynamicColor = prefs[DYNAMIC_COLOR] ?: defaults.dynamicColor,
             destinationTree = prefs[DESTINATION_TREE],
+            autoUpdateEngine = prefs[AUTO_UPDATE_ENGINE] ?: defaults.autoUpdateEngine,
+            engineCheckedAt = prefs[ENGINE_CHECKED_AT],
         ).normalized()
     }
 
@@ -55,6 +58,8 @@ class DataStoreSettingsStore(private val dataStore: DataStore<Preferences>) : Se
         prefs[THEME] = settings.theme.name
         prefs[DYNAMIC_COLOR] = settings.dynamicColor
         prefs.putOrRemove(DESTINATION_TREE, settings.destinationTree)
+        prefs[AUTO_UPDATE_ENGINE] = settings.autoUpdateEngine
+        prefs.putOrRemove(ENGINE_CHECKED_AT, settings.engineCheckedAt)
     }
 
     private fun <T> MutablePreferences.putOrRemove(key: Preferences.Key<T>, value: T?) {
@@ -74,5 +79,7 @@ class DataStoreSettingsStore(private val dataStore: DataStore<Preferences>) : Se
         val THEME = stringPreferencesKey("theme")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val DESTINATION_TREE = stringPreferencesKey("destination_tree")
+        val AUTO_UPDATE_ENGINE = booleanPreferencesKey("auto_update_engine")
+        val ENGINE_CHECKED_AT = longPreferencesKey("engine_checked_at")
     }
 }

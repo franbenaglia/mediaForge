@@ -297,3 +297,27 @@ El motor de trabajos (cola, reintentos) se decide en la Etapa 7: puede vivir en 
 - Varios idiomas a la vez o archivo `.srt` aparte: más opciones en la pantalla para un caso poco común; se puede agregar después.
 - Analizar cada video de la lista para mostrar calidades y tamaños reales: con 200 elementos tarda minutos y hace cientos de pedidos a YouTube.
 - Un solo trabajo para toda la lista: un fallo la cortaría entera y no se podría cancelar un video suelto.
+
+
+---
+
+## ADR-022 · yt-dlp se actualiza solo
+
+**Fecha:** 2026-11-08 · **Estado:** aceptada
+
+**Contexto:**
+- El yt-dlp que trae el APK (2025.11.12) da 403 en YouTube a los pocos meses.
+- Con una instalación limpia (T11.1), la app no podía descargar hasta que el usuario buscaba la actualización en Ajustes, y nada le indicaba que tenía que hacerlo.
+- main.md §10 pide actualizar sin reinstalar, con verificación y con opción manual.
+
+**Decisión:**
+- Al abrir la app, como mucho una vez cada 7 días, `EngineAutoUpdate` (dominio) busca la última versión compatible. Si es más nueva, la instala con el mismo camino verificado que el botón de Ajustes (firma OpenPGP, SHA-256, prueba de `--version`, se conserva la anterior).
+- Ajuste "Actualizar automáticamente", activado de fábrica. Con "Solo Wi‑Fi" y red medida, espera al próximo arranque.
+- Un fallo de red no cuenta como búsqueda, así que se reintenta en el próximo arranque. Un fallo al instalar sí cuenta, para no bajar ~3 MB cada vez que se abre la app.
+- La fecha de la última búsqueda se guarda con los ajustes, como un campo interno.
+- Sin aviso al usuario: Ajustes muestra la versión en uso. La búsqueda manual y el ofrecimiento tras un error `EngineOutdated` siguen igual.
+
+**Descartadas:**
+- Actualizar en cada arranque: pedidos a GitHub sin necesidad (yt-dlp publica cada una o dos semanas).
+- Desactivado de fábrica: una instalación nueva no funciona con YouTube, y el usuario no tiene cómo saber por qué.
+- Programarlo con WorkManager: la app no lo usa (ADR-017), y una vez por arranque alcanza.

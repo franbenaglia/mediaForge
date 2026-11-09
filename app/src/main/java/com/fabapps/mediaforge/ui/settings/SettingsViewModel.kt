@@ -141,6 +141,8 @@ class SettingsViewModel @Inject constructor(
 
     fun onWifiOnlyChange(enabled: Boolean) = edit { it.copy(wifiOnly = enabled) }
 
+    fun onAutoUpdateEngineChange(enabled: Boolean) = edit { it.copy(autoUpdateEngine = enabled) }
+
     /** Carpeta elegida con el selector del sistema (`null` si se canceló). Suelta el permiso de la anterior. */
     fun onFolderPicked(folder: String?) {
         folder ?: return
