@@ -306,9 +306,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
   *Depende de:* —
   *Acepta:* `docs/SECURITY.md` completo; pruebas para cada corrección.
   *Hecho:* `docs/SECURITY.md` con cada punto de §11, Android, logs y código descargado. Corrección: la salida del análisis tenía memoria ilimitada; ahora 32 MB y las últimas 200 líneas de stderr (1 prueba). Aceptado: yt-dlp sigue redirecciones sin validar el destino.
-- [ ] **T11.3** · P1 · Auditoría de licencias: inventario de dependencias y binarios incluidos (yt-dlp, Python, FFmpeg y su configuración, QuickJS, youtubedl-android, AndroidX, Coil, etc.) con su licencia y compatibilidad con GPL-3.0 en `docs/LICENSES.md`; pantalla "Licencias" en Ajustes con los avisos que exigen.
+- [x] **T11.3** · P1 · Auditoría de licencias: inventario de dependencias y binarios incluidos (yt-dlp, Python, FFmpeg y su configuración, QuickJS, youtubedl-android, AndroidX, Coil, etc.) con su licencia y compatibilidad con GPL-3.0 en `docs/LICENSES.md`; pantalla "Licencias" en Ajustes con los avisos que exigen.
   *Depende de:* —
   *Acepta:* documento completo; la pantalla se abre desde Ajustes (prueba de ViewModel o de UI).
+  *Hecho:* `docs/LICENSES.md` (dependencias Java/Kotlin, yt-dlp, Python, QuickJS, FFmpeg y ~140 bibliotecas nativas listadas de los AAR); todo compatible con GPL-3.0. Diálogo "Licencias de código abierto" en Ajustes con enlace al documento (2 pruebas). Quedan para la Etapa 12 dos obligaciones: publicar las fuentes de los binarios GPL/LGPL con cada release y juntar los avisos de copyright.
 - [ ] **T11.4** · P1 · Pruebas instrumentadas de la app (main.md §12.3): navegación entre pestañas, enlace compartido que abre Inicio con la URL, conservación del estado al rotar y al recrear la actividad, permiso de notificaciones denegado sin cierres.
   *Depende de:* —
   *Acepta:* pruebas en `app/src/androidTest`, verdes en el teléfono con `./scripts/test-device.sh`.
@@ -327,4 +328,4 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
 
 ## Etapa 12 · Distribución
 
-Ver main.md §14. Se detalla al llegar.
+Ver main.md §14. Se detalla al llegar. Incluir, antes del primer release público (`docs/LICENSES.md`, Obligaciones): fuentes de los binarios GPL/LGPL en cada GitHub Release, y `THIRD_PARTY_NOTICES.md` con los avisos de copyright y textos de licencia, también visibles en la app.

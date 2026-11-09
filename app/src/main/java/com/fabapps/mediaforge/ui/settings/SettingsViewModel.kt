@@ -59,6 +59,8 @@ data class SettingsUiState(
     val cleaningTemp: Boolean = false,
     /** Bytes liberados en la última limpieza. */
     val freedBytes: Long? = null,
+    /** Diálogo de licencias de terceros abierto (T11.3). */
+    val showLicenses: Boolean = false,
 ) {
     val canCleanTemp: Boolean get() = !cleaningTemp && (tempBytes ?: 0) > 0
 
@@ -84,6 +86,7 @@ class SettingsViewModel @Inject constructor(
     private val version = MutableStateFlow<String?>(null)
     private val engineStatus = MutableStateFlow<EngineStatus>(EngineStatus.Idle)
     private val folderDenied = MutableStateFlow(false)
+    private val showLicenses = MutableStateFlow(false)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val folderName = store.settings.map { it.destinationTree }.distinctUntilChanged().mapLatest { tree ->
@@ -96,7 +99,8 @@ class SettingsViewModel @Inject constructor(
             folderName,
             folderDenied,
             tempState,
-        ) { (settings, v, status), folder, denied, tmp ->
+            showLicenses,
+        ) { (settings, v, status), folder, denied, tmp, licenses ->
             SettingsUiState(
                 loading = false,
                 settings = settings,
@@ -107,12 +111,21 @@ class SettingsViewModel @Inject constructor(
                 tempBytes = tmp.bytes,
                 cleaningTemp = tmp.cleaning,
                 freedBytes = tmp.freed,
+                showLicenses = licenses,
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SettingsUiState())
 
     init {
         viewModelScope.launch { version.value = engine.installedVersion() }
         viewModelScope.launch { tempState.value = Temp(bytes = temp.removableBytes()) }
+    }
+
+    fun onOpenLicenses() {
+        showLicenses.value = true
+    }
+
+    fun onCloseLicenses() {
+        showLicenses.value = false
     }
 
     fun onModeChange(mode: PreferredMode) = edit { it.copy(mode = mode) }

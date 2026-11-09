@@ -73,10 +73,20 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             onCheckEngine = viewModel::onCheckEngine,
             onInstallEngine = viewModel::onInstallEngine,
             onOpenSource = { context.openLink(sourceUrl) },
+            onOpenLicenses = viewModel::onOpenLicenses,
         ),
         appVersion = context.appVersion(),
     )
+    if (state.showLicenses) {
+        LicensesDialog(
+            onDismiss = viewModel::onCloseLicenses,
+            onOpenDetails = { context.openLink(sourceUrl + LICENSES_PATH) },
+        )
+    }
 }
+
+/** El inventario completo, con las obligaciones de cada licencia (T11.3). */
+private const val LICENSES_PATH = "/blob/main/docs/LICENSES.md"
 
 data class SettingsActions(
     val onModeChange: (PreferredMode) -> Unit = {},
@@ -93,6 +103,7 @@ data class SettingsActions(
     val onCheckEngine: () -> Unit = {},
     val onInstallEngine: () -> Unit = {},
     val onOpenSource: () -> Unit = {},
+    val onOpenLicenses: () -> Unit = {},
 )
 
 @Composable
@@ -204,6 +215,7 @@ fun SettingsContent(
         Note(stringResource(R.string.settings_license))
         Note(stringResource(R.string.settings_privacy))
         OutlinedButton(onClick = actions.onOpenSource) { Text(stringResource(R.string.settings_source)) }
+        OutlinedButton(onClick = actions.onOpenLicenses) { Text(stringResource(R.string.licenses_title)) }
     }
 }
 

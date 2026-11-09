@@ -301,4 +301,10 @@
         <item quantity="many">%d videos no están disponibles (privados, borrados o piden iniciar sesión).</item>
         <item quantity="other">%d videos no están disponibles (privados, borrados o piden iniciar sesión).</item>
     </plurals>
+    <string name="licenses_title">Licencias de código abierto</string>
+    <string name="licenses_intro">MediaForge es GPL-3.0 e incluye estos componentes. El inventario completo, con las obligaciones de cada licencia, está en el código fuente.</string>
+    <string name="licenses_engines">Motores (yt-dlp, FFmpeg, Python y sus bibliotecas)</string>
+    <string name="licenses_libraries">Bibliotecas de la app</string>
+    <string name="licenses_close">Cerrar</string>
+    <string name="licenses_details">Ver detalle</string>
 </resources>

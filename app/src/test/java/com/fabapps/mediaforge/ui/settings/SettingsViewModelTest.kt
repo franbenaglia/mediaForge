@@ -91,6 +91,25 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun licensesDialogOpensAndCloses() = test {
+        assertFalse(state.showLicenses)
+        vm.onOpenLicenses()
+        advanceUntilIdle()
+        assertTrue(state.showLicenses)
+        vm.onCloseLicenses()
+        advanceUntilIdle()
+        assertFalse(state.showLicenses)
+    }
+
+    @Test
+    fun licensesListTheGplEngines() {
+        val all = ThirdPartyComponents.ENGINES + ThirdPartyComponents.LIBRARIES
+        assertTrue(all.any { it.name.startsWith("FFmpeg") && it.license == "GPL-3.0-or-later" })
+        assertTrue(all.any { it.name == "yt-dlp" })
+        assertTrue(all.all { it.name.isNotBlank() && it.license.isNotBlank() })
+    }
+
+    @Test
     fun everyChangeIsSaved() = test {
         vm.onModeChange(PreferredMode.AUDIO)
         vm.onMaxHeightChange(720)

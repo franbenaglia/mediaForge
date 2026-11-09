@@ -305,4 +305,10 @@
         <item quantity="one">%d video is not available (private, deleted or needs sign-in).</item>
         <item quantity="other">%d videos are not available (private, deleted or need sign-in).</item>
     </plurals>
+    <string name="licenses_title">Open source licenses</string>
+    <string name="licenses_intro">MediaForge is GPL-3.0 and includes these components. The full inventory, with each license\'s obligations, is in the source code.</string>
+    <string name="licenses_engines">Engines (yt-dlp, FFmpeg, Python and their libraries)</string>
+    <string name="licenses_libraries">App libraries</string>
+    <string name="licenses_close">Close</string>
+    <string name="licenses_details">Full details</string>
 </resources>
