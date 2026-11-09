@@ -5,7 +5,7 @@
 Android app to download, extract and convert media **on the device**: no servers, no accounts, no ads.
 Built with Kotlin, Jetpack Compose, [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [FFmpeg](https://ffmpeg.org).
 
-**Status:** 1.0.0. Download the APK from [Releases](https://github.com/franbenaglia/mediaForge/releases/latest).
+**Status:** 1.0.0. Download the APK from [Releases](https://github.com/franbenaglia/mediaForge/releases/latest) · Website: [franbenaglia.github.io/mediaForgeLanding](https://franbenaglia.github.io/mediaForgeLanding/)
 
 <p align="center">
   <img src="docs/images/screenshots/1-home.png" width="200" alt="Home with a video analyzed">

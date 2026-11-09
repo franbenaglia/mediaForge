@@ -370,13 +370,14 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
   - 6 pantallas por idioma (Inicio, calidades, Descargas, Conversor, Historial, Ajustes), sacadas de una instalación limpia de "MediaForge R8" con Big Buck Bunny; el idioma de la app se cambió con `cmd locale set-app-locales`.
   - Se recortaron la barra de estado y la de navegación, se borró la burbuja de otra app que quedaba encima, y se escalaron a 720 px.
   - Están en `docs/images/screenshots/` (inglés, para el README) y en la landing (12).
-- [~] **T12.7** · P1 · Landing page estática (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Repo `mediaForgeLanding`, publicada con GitHub Pages desde `main` (raíz).
+- [x] **T12.7** · P1 · Landing page estática (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Repo `mediaForgeLanding`, publicada con GitHub Pages desde `main` (raíz).
   *Depende de:* T12.3, T12.6
   *Acepta:* se ve bien en el teléfono y en la computadora; publicada en GitHub Pages.
-  *Hecho:* `index.html` (inglés) y `es/index.html`, `styles.css` sin recursos de terceros, capturas reales, imagen destacada como ilustración, huella del certificado. Revisada en navegador a 1280 y 390 px. Commit local en `mediaForgeLanding`; falta publicar (push y activar Pages).
-- [ ] **T12.8** · P1 · GitHub Release v1.0.0: tag, APKs firmados, SHA-256, notas, fuentes según T12.4. La landing enlaza al último release.
+  *Hecho:* `index.html` (inglés) y `es/index.html`, `styles.css` sin recursos de terceros, capturas reales, imagen destacada como ilustración, huella del certificado. Revisada en navegador a 1280 y 390 px. Publicada en https://franbenaglia.github.io/mediaForgeLanding/ (Pages desde `main`); los dos repos la tienen como página de inicio.
+- [x] **T12.8** · P1 · GitHub Release v1.0.0: tag, APKs firmados, SHA-256, notas, fuentes según T12.4. La landing enlaza al último release.
   *Depende de:* T12.2–T12.7
   *Acepta:* release público; enlaces de la landing funcionan.
+  *Hecho:* tag `v1.0.0` y release https://github.com/franbenaglia/mediaForge/releases/tag/v1.0.0 (2026-11-09), con los 2 APK, `SHA256SUMS`, `mediaforge-1.0.0-gpl-sources.tar.gz` (288 MB) y su `.sha256`, y notas con la huella del certificado. `releases/latest/download/app-arm64-v8a-release.apk` responde 200.
 - [ ] **T12.9** · P1 · Prueba como usuario: bajar el APK desde la landing en el teléfono, instalarlo, primer arranque y una descarga.
   *Depende de:* T12.8
   *Acepta:* validación manual registrada.
