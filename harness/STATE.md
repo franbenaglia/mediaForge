@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), T10.3 (fotograma) y T10.4 (varios archivos) hechas, falta probarlas en el teléfono. Siguen T10.6 (subtítulos) y T10.7 (listas de reproducción), con ADR-021 a escribir. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 10 (funciones avanzadas, ADR-020): T10.1 y T10.5 hechas; T10.2 (recorte), T10.3 (fotograma) y T10.4 (varios archivos) hechas y probadas en el teléfono. Siguen T10.6 (subtítulos) y T10.7 (listas de reproducción), con ADR-021 a escribir. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -81,6 +81,7 @@ Ninguno.
 - El APK de release (R8) todavía no se probó con youtubedl-android. Hay reglas en `core/media/consumer-rules.pro` (Jackson), pero se validan en el teléfono antes del primer release.
 
 - Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004); `AndroidGradlePluginVersion` y `NewerVersionAvailable` (hay versiones nuevas; se actualizan en una tarea propia, no a mitad de etapa); `DataExtractionRules` (`allowBackup=false` sigue haciendo falta para Android ≤ 11).
+- El teléfono de pruebas rechazó varias veces (2026-11-08) el servicio en primer plano con `InvalidForegroundServiceTypeException` ("type none") al empezar una conversión, y la app se cerraba. Causa sin confirmar (¿límite de 6 h de `mediaProcessing` o el sistema del fabricante?). Desde 02f198c, `JobService` reintenta con `dataSync` y, si tampoco puede, se detiene sin cerrar la app (queda un aviso `JobService` en logcat). En la prueba siguiente no se repitió.
 - Errores con "Detalles técnicos" (texto del motor sin query strings, seleccionable).
 - Un primer intento de descarga de Dailymotion falló con `Unknown` y no se volvió a reproducir (2026-11-07). Si reaparece, pedir el detalle técnico.
 - Pendientes de validar en el teléfono (FEASIBILITY §12): TikTok y primer arranque. (Tiempos de conversión en arm64 medidos en la Etapa 6.) (Análisis de Dailymotion y cancelación con ffmpeg hijo ya validados.)

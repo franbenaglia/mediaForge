@@ -266,15 +266,15 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
   *Depende de:* —
   *Acepta:* pruebas en la JVM (tiempos, validación, plan, comando, JSON viejo sin recorte).
   *Hecho:* `convert/Clip.kt` (`Clip`, `ClipProblem`, `TimeCodes`), `ConversionPlanner.plan(…, clip)` y `estimateBytes(…, clip)`, `FfmpegCommand.convert(…, clip)` con `-avoid_negative_ts make_zero`, `FfmpegConverter` (progreso sobre el fragmento), `RequestJson` (`clip` opcional, misma versión). 13 pruebas.
-- [~] **T10.2** · P1 · Recorte en la pantalla Conversor: inicio y fin, "Corte exacto" con su explicación, duración del fragmento, errores de rango; sirve también para extraer un fragmento de audio.
+- [x] **T10.2** · P1 · Recorte en la pantalla Conversor: inicio y fin, "Corte exacto" con su explicación, duración del fragmento, errores de rango; sirve también para extraer un fragmento de audio.
   *Depende de:* T10.1
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `TrimInput`/`TrimError` en `ConverterUiState` (inicio y fin vacíos = principio y final; recorte vacío = archivo entero), sección "Recortar" con interruptor, campos, "Corte exacto" y aviso del fotograma clave, duración del fragmento y tamaño proporcional. 5 pruebas.
-- [~] **T10.3** · P1 · Extracción de un fotograma: destino "Imagen" (JPG o PNG) en un instante del video, con la resolución original; se guarda en `Pictures/MediaForge` (o en la carpeta elegida); historial como conversión.
+- [x] **T10.3** · P1 · Extracción de un fotograma: destino "Imagen" (JPG o PNG) en un instante del video, con la resolución original; se guarda en `Pictures/MediaForge` (o en la carpeta elegida); historial como conversión.
   *Depende de:* T10.2
   *Acepta:* pruebas del plan, del comando y del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* `ConversionTarget.Image` e `ImageFormat`, `ConversionPlan.frameAtSeconds`, comando con `-ss`, `-frames:v 1` y `-update 1` (JPG con `-q:v 2`), paso `EXTRACT_FRAME`, `MediaStoreLibrary` guarda imágenes en `Pictures/MediaForge`, JSON, historial y Descargas. Destino "Imagen" en el Conversor con instante y formato. 8 pruebas.
-- [~] **T10.4** · P1 · Conversión masiva: elegir varios archivos (hasta 50), un mismo destino para todos, un trabajo por archivo con su nombre; los que no son compatibles (audio → video, imagen de un audio) se informan y no se encolan. El recorte no aplica a varios archivos.
+- [x] **T10.4** · P1 · Conversión masiva: elegir varios archivos (hasta 50), un mismo destino para todos, un trabajo por archivo con su nombre; los que no son compatibles (audio → video, imagen de un audio) se informan y no se encolan. El recorte no aplica a varios archivos.
   *Depende de:* T10.3
   *Acepta:* pruebas del ViewModel; `[~]` hasta probarlo en el teléfono.
   *Hecho:* selector `OpenMultipleDocuments` (uno solo sigue el flujo de siempre); `InputState.Batch` con `BatchFile` (se leen de a uno), plan por archivo, destino de video si todos tienen video, sin "Imagen" ni recorte; "Convertir N archivos" encola un trabajo por archivo compatible y avisa cuántos se saltean. 5 pruebas.
