@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 hechas y validadas. T11.4 hecha (encontró y arregló un cierre al abrir desde un enlace compartido). T11.5 hecha salvo correrla sin red; T11.6 hecha. T11.7 hecha y validada. Sigue la prueba final T11.8 (con "MediaForge R8" e instalación limpia). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 cerrada: el MVP cumple los criterios de main.md §15 en el APK con R8 (T11.8). Sigue la Etapa 12 (distribución): planificar sus tareas en `TASKS.md` a partir de main.md §14, con las dos obligaciones de licencias que quedaron anotadas allí. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -19,7 +19,7 @@ Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 he
 - [x] 8. Android Sharesheet (validado en el teléfono: Chrome, YouTube, otras apps, app cerrada o abierta, texto sin enlace, giro)
 - [x] 9. Historial y configuración (validado en el teléfono: historial, ajustes, solo Wi‑Fi, carpeta de destino, temporales)
 - [x] 10. Funciones avanzadas (validado en el teléfono: recorte, fotogramas, varios archivos, compresión, subtítulos, listas)
-- [ ] 11. Calidad (en curso)
+- [x] 11. Calidad (validado en el teléfono: R8, seguridad, licencias, pruebas instrumentadas, StrictMode, accesibilidad, prueba final del MVP)
 - [ ] 12. Distribución
 
 ## Implementado
@@ -59,6 +59,7 @@ Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 he
 | T10.8 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
 | Arranque en frío, debug, 24115RA8EG (`am start -W`) | 1,51–2,06 s antes de T11.6; 1,42–1,61 s después | 2026-11-08 |
 | Memoria recodificando un video largo (debug) | App: 157 MB PSS (heap Java 14 MB, nativo 16 MB), estable; FFmpeg: 120 MB RSS, pico 124 MB, estable | 2026-11-08 |
+| T11.8 manual en 24115RA8EG ("MediaForge R8", instalación limpia) | OK: los criterios de main.md §15 y TikTok | 2026-11-09 |
 | T11.7 manual en 24115RA8EG | OK: texto al 200 % y TalkBack | 2026-11-09 |
 | `AppDeviceTest` en 24115RA8EG | OK 3/3 (con el permiso de ventanas en segundo plano de HyperOS) | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 70,9 MB / 73,9 MB | 2026-11-08 |
@@ -88,7 +89,7 @@ Ninguno.
 - APK con R8 probado en el teléfono con la variante `minified` (T11.1). Si se agregan dependencias que usan reflexión, volver a probarla.
 
 - Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004); `AndroidGradlePluginVersion` y `NewerVersionAvailable` (hay versiones nuevas; se actualizan en una tarea propia, no a mitad de etapa); `DataExtractionRules` (`allowBackup=false` sigue haciendo falta para Android ≤ 11).
-- El teléfono de pruebas rechazó varias veces (2026-11-08) el servicio en primer plano con `InvalidForegroundServiceTypeException` ("type none") al empezar una conversión, y la app se cerraba. Causa sin confirmar (¿límite de 6 h de `mediaProcessing` o el sistema del fabricante?). Desde 02f198c, `JobService` reintenta con `dataSync` y, si tampoco puede, se detiene sin cerrar la app (queda un aviso `JobService` en logcat). En la prueba siguiente no se repitió.
+- El teléfono de pruebas rechazó varias veces (2026-11-08) el servicio en primer plano con `InvalidForegroundServiceTypeException` ("type none") al empezar una conversión, y la app se cerraba. Causa sin confirmar (¿límite de 6 h de `mediaProcessing` o el sistema del fabricante?). Desde 02f198c, `JobService` reintenta con `dataSync` y, si tampoco puede, se detiene sin cerrar la app (queda un aviso `JobService` en logcat). Se repitió en T11.8 (2026-11-09, instalación limpia, dos conversiones): el teléfono rechaza `mediaProcessing` de forma sistemática y el respaldo funciona. Las conversiones cuentan entonces contra el límite de `dataSync`.
 - `YtDlpDownloaderTest.cancellingKillsTheProcessAndLeavesNoPartialFiles` falló una vez por tiempo (10 s) durante `verify.sh` con la máquina cargada (2026-11-08); pasó 3 veces sola y en el verify siguiente. Si se repite, subir el tiempo o esperar la línea de destino en vez del progreso.
 - Errores con "Detalles técnicos" (texto del motor sin query strings, seleccionable).
 - Un primer intento de descarga de Dailymotion falló con `Unknown` y no se volvió a reproducir (2026-11-07). Si reaparece, pedir el detalle técnico.

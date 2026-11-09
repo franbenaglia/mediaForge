@@ -295,7 +295,7 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
   *Acepta:* validación manual registrada.
   *Hecho:* 2026-11-08 en 24115RA8EG: recorte rápido y exacto, fragmento de audio, fotograma JPG y PNG, varios archivos, compresión, subtítulos manuales y automáticos, lista de YouTube en video y audio, video dentro de una lista. Se arregló el teclado de los tiempos y un cierre del servicio en primer plano.
 
-## Etapa 11 · Calidad (en curso)
+## Etapa 11 · Calidad (hecha; T11.5 sin correr sin red)
 
 main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el APK de release, revisar seguridad y licencias, y cubrir con pruebas instrumentadas lo que hoy solo se probó a mano. Sin funciones nuevas.
 
@@ -331,9 +331,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
   *Depende de:* —
   *Acepta:* pruebas del ViewModel/servicio (cuándo busca, qué pasa si falla, el ajuste apagado); en el teléfono, una instalación limpia descarga de YouTube sin tocar Ajustes.
   *Hecho:* `EngineAutoUpdate` (dominio, 8 pruebas): al abrir la app, cada 7 días como mucho, con el mismo camino verificado; respeta "Solo Wi‑Fi"; ajuste "Actualizar automáticamente" (DataStore, VM). ADR-022. Validado en 24115RA8EG con instalación limpia de "MediaForge R8": descargó de YouTube sin tocar Ajustes (2026-11-08).
-- [ ] **T11.8** · P1 · Prueba final del MVP en el teléfono con el APK `minified` e instalación limpia (primer arranque): los 18 criterios de main.md §15, más TikTok, que sigue pendiente (FEASIBILITY §12).
+- [x] **T11.8** · P1 · Prueba final del MVP en el teléfono con el APK `minified` e instalación limpia (primer arranque): los 18 criterios de main.md §15, más TikTok, que sigue pendiente (FEASIBILITY §12).
   *Depende de:* T11.1–T11.7, T11.9
   *Acepta:* cada criterio registrado como cumplido o con su problema.
+  *Hecho:* 2026-11-09 en 24115RA8EG con "MediaForge R8" e instalación limpia: primer arranque, yt-dlp actualizado solo, análisis con calidades reales, video a otra calidad con progreso, abrir y compartir, MP3, cancelar, TikTok, enlace inválido, MP4 → MP3, cambio de formato, enlace compartido con la app cerrada, notificaciones apagadas, historial tras cerrar desde recientes. Todo OK, sin cierres. El teléfono rechazó dos veces `mediaProcessing` y la app siguió con `dataSync` (ver Problemas conocidos).
 
 ## Etapa 12 · Distribución
 

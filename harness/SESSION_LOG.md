@@ -4,6 +4,31 @@ Una entrada por sesión, la más reciente arriba. Solo lo necesario para continu
 
 ---
 
+## 2026-11-08/09 · Etapa 11
+
+**Objetivo:** calidad (main.md §11, §12, §14).
+
+**Hecho:**
+- Variante `minified` (R8) probada en el teléfono: el primer arranque fallaba por Commons Compress; regla de R8 agregada.
+- `docs/SECURITY.md`, con tope de memoria al análisis.
+- `docs/LICENSES.md` y diálogo de licencias.
+- yt-dlp se actualiza solo (ADR-022).
+- `AppDeviceTest`, que encontró un cierre al abrir desde un enlace compartido; arreglado.
+- `@RequiresNetwork` y `test-device.sh --offline`.
+- StrictMode: 5 lecturas de disco al iniciar, arregladas; arranque y memoria medidos.
+- Accesibilidad: filas con su texto, 48 dp y encabezados.
+- Prueba final del MVP con el APK R8: OK.
+
+**Problemas:**
+- La extensión Kotlin de VS Code lanza su propio Gradle al cambiar `build.gradle.kts`.
+- En HyperOS, las pruebas instrumentadas necesitan el permiso de ventanas en segundo plano.
+- El modo avión corta la conexión de la computadora, así que T11.5 no se corrió sin red.
+- Un test de cancelación falló una vez por tiempo con la máquina cargada.
+
+**Verificación:** `./scripts/verify.sh` OK.
+
+---
+
 ## 2026-11-08 · Etapa 10
 
 **Objetivo:** funciones avanzadas (main.md §5.2, §2.3).
