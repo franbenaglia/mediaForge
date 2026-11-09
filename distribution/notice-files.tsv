@@ -1,0 +1,9 @@
+# Textos de licencia sueltos, para componentes sin paquete de fuentes (T12.4).
+# Columnas: componente, versión, licencia, URL, SHA-256.
+libc++_shared (LLVM)	19	Apache-2.0 WITH LLVM-exception	https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-19.1.7/libcxx/LICENSE.TXT	539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b
+youtubedl-android	0.18.1	GPL-3.0	https://raw.githubusercontent.com/yausername/youtubedl-android/0.18.1/LICENSE	3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986
+yt-dlp	2025.11.12	Unlicense	https://raw.githubusercontent.com/yt-dlp/yt-dlp/2025.11.12/LICENSE	7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c
+libcrypt (Termux)	0.2	BSD-2-Clause	https://raw.githubusercontent.com/termux/termux-packages/70d29feb942cc00333d29204a76244e7fea0d6db/packages/libcrypt/LICENSE	311ad021879eeb7713e27e8d894950068689feafc198a236a95c2494710e3a1a
+libandroid-glob (Termux)	0.6	BSD-3-Clause	https://raw.githubusercontent.com/termux/termux-packages/70d29feb942cc00333d29204a76244e7fea0d6db/packages/libandroid-glob/LICENSE	5bc2d38d50f282548a27f7dd8b3ac8f3ac696ba501aaacd2bba821b15b018dac
+libandroid-posix-semaphore (Termux)	0.1	MIT	https://raw.githubusercontent.com/termux/termux-packages/70d29feb942cc00333d29204a76244e7fea0d6db/packages/libandroid-posix-semaphore/LICENSE	e239ef69c9c4eead9406bdc6a34f2bd1220c3dcd3b17c8377cb2fb73fdaf0d38
+Kotlin, kotlinx (coroutines, serialization), AndroidX, Jetpack Compose, Material 3, Room, DataStore, Navigation, Dagger/Hilt, Coil, OkHttp, Okio, Jackson, Apache Commons IO and Compress	-	Apache-2.0	https://www.apache.org/licenses/LICENSE-2.0.txt	cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30

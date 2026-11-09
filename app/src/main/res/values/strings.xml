@@ -313,4 +313,5 @@
     <string name="licenses_details">Full details</string>
     <string name="settings_engine_auto">Update automatically</string>
     <string name="settings_engine_auto_note">When you open the app, at most once a week, it looks for a new yt-dlp and installs it only if the signature and hash check out. With \"Wi‑Fi only\" on, it waits for Wi‑Fi.</string>
+    <string name="licenses_notices">Full notices</string>
 </resources>

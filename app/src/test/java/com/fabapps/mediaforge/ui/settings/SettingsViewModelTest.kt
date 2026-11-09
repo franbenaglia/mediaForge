@@ -71,11 +71,17 @@ class SettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        vm = SettingsViewModel(store, engine, folders, temp)
+        vm = SettingsViewModel(store, engine, folders, temp, notices)
     }
 
     @After
     fun tearDown() = Dispatchers.resetMain()
+
+    private var noticeReads = 0
+    private val notices = NoticesSource {
+        noticeReads++
+        listOf("FFmpeg", "GPL")
+    }
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         backgroundScope.launch { vm.state.collect {} }
@@ -107,6 +113,19 @@ class SettingsViewModelTest {
         vm.onCloseLicenses()
         advanceUntilIdle()
         assertFalse(state.showLicenses)
+    }
+
+    @Test
+    fun noticesAreReadOnceAndCanBeClosed() = test {
+        assertEquals(NoticesState.Closed, vm.noticesState.value)
+        vm.onOpenNotices()
+        advanceUntilIdle()
+        assertEquals(NoticesState.Open(listOf("FFmpeg", "GPL")), vm.noticesState.value)
+        vm.onCloseNotices()
+        vm.onOpenNotices()
+        advanceUntilIdle()
+        assertEquals(2, noticeReads)
+        assertEquals(NoticesState.Open(listOf("FFmpeg", "GPL")), vm.noticesState.value)
     }
 
     @Test

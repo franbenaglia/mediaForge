@@ -6,6 +6,8 @@ import com.fabapps.mediaforge.domain.storage.MediaLibrary
 import com.fabapps.mediaforge.jobs.ApplicationScope
 import com.fabapps.mediaforge.jobs.JobNotifications
 import com.fabapps.mediaforge.media.storage.GalleryLibrary
+import com.fabapps.mediaforge.ui.settings.AssetNoticesSource
+import com.fabapps.mediaforge.ui.settings.NoticesSource
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -22,6 +24,9 @@ abstract class FilesModule {
 
     @Binds
     abstract fun tempStorage(storage: JobFoldersTempStorage): TempStorage
+
+    @Binds
+    abstract fun noticesSource(source: AssetNoticesSource): NoticesSource
 
     @Binds
     abstract fun destinationFolders(folders: SafDestinationFolders): DestinationFolders

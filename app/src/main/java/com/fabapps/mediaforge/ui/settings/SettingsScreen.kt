@@ -87,7 +87,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         LicensesDialog(
             onDismiss = viewModel::onCloseLicenses,
             onOpenDetails = { context.openLink(sourceUrl + LICENSES_PATH) },
+            onOpenNotices = viewModel::onOpenNotices,
         )
+    }
+    val notices by viewModel.noticesState.collectAsStateWithLifecycle()
+    (notices as? NoticesState.Open)?.let { open ->
+        NoticesDialog(paragraphs = open.paragraphs, onDismiss = viewModel::onCloseNotices)
     }
 }
 

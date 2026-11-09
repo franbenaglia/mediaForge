@@ -11,7 +11,7 @@ Auditoría de la Etapa 11 (T11.3): qué viene dentro del APK, con qué licencia,
   - Lo Apache-2.0 y LGPL-3.0 solo es compatible con GPL**v3**, y esa es la licencia de la app. Por eso se usa `--enable-version3`.
   - No hay componentes "nonfree": no está `libfdk-aac`.
 - **Los binarios nativos vienen de youtubedl-android 0.18.1,** que a su vez los toma de paquetes de Termux. El APK no trae los textos de licencia de esas bibliotecas.
-- **Pendiente antes del primer release público (Etapa 12):** ver "Obligaciones", más abajo.
+- **Obligaciones:** resueltas en la Etapa 12 (ver "Obligaciones", más abajo).
 
 ## Código de la app y bibliotecas Java/Kotlin
 
@@ -69,7 +69,11 @@ Las bibliotecas del sistema (`libandroid`, `libmediandk`, `libOpenSLES`) son de 
    - `scripts/package-gpl-sources.sh` arma `mediaforge-<versión>-gpl-sources.tar.gz`, que se publica en cada GitHub Release.
    - Contiene las fuentes originales de cada componente GPL, LGPL y MPL, verificadas por SHA-256 (`distribution/gpl-sources.tsv`).
    - También van las recetas y el sistema de construcción de Termux en la misma instantánea, y youtubedl-android 0.18.1.
-2. **Avisos de copyright y textos de licencia** (Apache-2.0, BSD, MIT, ISC, MPL, FTL). Hay que incluir el texto de cada licencia y los avisos de copyright de cada biblioteca. **Pendiente (Etapa 12):** juntarlos de los paquetes de origen en `THIRD_PARTY_NOTICES.md` y mostrarlos en la app. Hoy la pantalla "Licencias" lista los componentes y su licencia, y enlaza a este documento.
+2. **Avisos de copyright y textos de licencia** (Apache-2.0, BSD, MIT, ISC, MPL, FTL). Resuelto:
+   - `scripts/build-notices.sh` baja la fuente original de cada componente (`distribution/gpl-sources.tsv`, `notice-sources.tsv` y `notice-files.tsv`, con su SHA-256) y copia sus archivos LICENSE, COPYING, NOTICE y PATENTS.
+   - Los junta en `app/src/main/assets/third_party_notices.txt`: 73 componentes y unos 950 KB, con los textos repetidos una sola vez.
+   - La app lo muestra en Ajustes → Licencias → Avisos completos.
+   - Hay que volver a generarlo si cambia youtubedl-android o una dependencia.
 3. **Avisos de modificación (Apache-2.0 §4).** No se modificó ningún componente; si alguna vez se parchea, hay que avisarlo.
 4. **Sin restricciones adicionales.** La app no agrega términos que contradigan la GPL (sin DRM, sin cuentas, sin condiciones de uso extra).
 

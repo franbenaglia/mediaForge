@@ -351,9 +351,13 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
   *Depende de:* —
   *Acepta:* verify OK; el changelog cubre lo que hay.
   *Hecho:* `versionName` 1.0.0 (`versionCode` 1: no hubo publicaciones antes); `CHANGELOG.md` en inglés (público), con fecha "Unreleased" hasta T12.8 y la historia por etapas. Ajustes ya mostraba la versión.
-- [ ] **T12.4** · P1 · Obligaciones de licencias (`docs/LICENSES.md`): `THIRD_PARTY_NOTICES.md` con avisos de copyright y textos de licencia, visible en la app; fuentes correspondientes de los binarios GPL/LGPL (youtubedl-android y recetas de Termux con sus versiones) publicadas con el release, o el mecanismo que permita GPLv3 §6 con su justificación.
+- [x] **T12.4** · P1 · Obligaciones de licencias (`docs/LICENSES.md`): `THIRD_PARTY_NOTICES.md` con avisos de copyright y textos de licencia, visible en la app; fuentes correspondientes de los binarios GPL/LGPL (youtubedl-android y recetas de Termux con sus versiones) publicadas con el release, o el mecanismo que permita GPLv3 §6 con su justificación.
   *Depende de:* —
   *Acepta:* documento completo; decisión registrada en un ADR; el diálogo de licencias muestra los avisos.
+  *Hecho:*
+  - Fuentes: `package-gpl-sources.sh` arma `mediaforge-<versión>-gpl-sources.tar.gz` (276 MB), con 29 fuentes verificadas, las recetas de Termux en `70d29feb94` y youtubedl-android 0.18.1 (ADR-023).
+  - Avisos: `build-notices.sh` arma `assets/third_party_notices.txt` (73 componentes), visible en Ajustes → Licencias → Avisos completos (1 prueba de VM).
+  - Corrección del inventario: `libcrypt` es la implementación BSD de Termux, no libxcrypt.
 - [ ] **T12.5** · P1 · Documentación final (main.md §17): `README.md` en inglés (qué es, capturas, instalación por sideloading, aviso legal, compilación) y `docs/DEVELOPMENT.md` (clonar, entorno, compilar, pruebas, APK, arquitectura, actualizar yt-dlp y FFmpeg, continuar el desarrollo).
   *Depende de:* T12.3, T12.6
   *Acepta:* otro desarrollador puede compilar siguiendo solo esos documentos.

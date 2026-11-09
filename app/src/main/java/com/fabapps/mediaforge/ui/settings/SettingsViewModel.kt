@@ -44,6 +44,14 @@ sealed interface EngineStatus {
     data class Failed(val error: MediaError) : EngineStatus
 }
 
+/** Diálogo de avisos de terceros (T12.4). */
+sealed interface NoticesState {
+    data object Closed : NoticesState
+
+    /** [paragraphs] nulo mientras se lee el archivo. */
+    data class Open(val paragraphs: List<String>?) : NoticesState
+}
+
 data class SettingsUiState(
     val loading: Boolean = true,
     val settings: Settings = Settings(),
@@ -78,7 +86,11 @@ class SettingsViewModel @Inject constructor(
     private val engine: ExtractorEngine,
     private val folders: DestinationFolders,
     private val temp: TempStorage,
+    private val notices: NoticesSource,
 ) : ViewModel() {
+    private val noticesFlow = MutableStateFlow<NoticesState>(NoticesState.Closed)
+    val noticesState: StateFlow<NoticesState> = noticesFlow
+
     private data class Temp(val bytes: Long? = null, val cleaning: Boolean = false, val freed: Long? = null)
 
     private val tempState = MutableStateFlow(Temp())
@@ -126,6 +138,21 @@ class SettingsViewModel @Inject constructor(
 
     fun onCloseLicenses() {
         showLicenses.value = false
+    }
+
+    /** Abre los avisos completos; se leen una vez, fuera del hilo principal. */
+    fun onOpenNotices() {
+        val loaded = (noticesFlow.value as? NoticesState.Open)?.paragraphs
+        noticesFlow.value = NoticesState.Open(loaded)
+        if (loaded != null) return
+        viewModelScope.launch {
+            val paragraphs = notices.paragraphs()
+            if (noticesFlow.value is NoticesState.Open) noticesFlow.value = NoticesState.Open(paragraphs)
+        }
+    }
+
+    fun onCloseNotices() {
+        noticesFlow.value = NoticesState.Closed
     }
 
     fun onModeChange(mode: PreferredMode) = edit { it.copy(mode = mode) }
