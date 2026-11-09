@@ -299,9 +299,10 @@ Recorte, fotogramas, conversión masiva y compresión en el conversor (main.md �
 
 main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el APK de release, revisar seguridad y licencias, y cubrir con pruebas instrumentadas lo que hoy solo se probó a mano. Sin funciones nuevas.
 
-- [ ] **T11.1** · P1 · Variante `minified` (R8 y recursos reducidos igual que release, firmada con la clave de debug, `applicationIdSuffix ".minified"`) para probar el código ofuscado sin el keystore. Ajustar las reglas de R8 hasta que analizar, descargar, convertir y el historial funcionen.
+- [x] **T11.1** · P1 · Variante `minified` (R8 y recursos reducidos igual que release, firmada con la clave de debug, `applicationIdSuffix ".minified"`) para probar el código ofuscado sin el keystore. Ajustar las reglas de R8 hasta que analizar, descargar, convertir y el historial funcionen.
   *Depende de:* —
   *Acepta:* `assembleMinified` compila sin advertencias de R8 sin explicar; prueba manual en el teléfono (YouTube video y audio, una conversión, compartir un enlace, historial); `[~]` hasta probarlo.
+  *Hecho:* build type `minified` ("MediaForge R8", `.minified`), 56 MB contra 71 MB de debug, sin advertencias de R8. En el teléfono falló el primer arranque: Commons Compress (de youtubedl-android) crea por reflexión los campos extra de ZIP; regla `-keep` en `core/media/consumer-rules.pro`. Después todo funcionó, incluida la actualización de yt-dlp (firma y descarga). Validado en 24115RA8EG (2026-11-08).
 - [x] **T11.2** · P1 · Revisión de seguridad según main.md §11: URLs (esquemas, redirecciones, tiempos), argumentos de los procesos, rutas y nombres, temporales, permisos y componentes exportados, logs sin URLs con tokens. Registrar cada punto con su evidencia en `docs/SECURITY.md` y corregir lo que falte.
   *Depende de:* —
   *Acepta:* `docs/SECURITY.md` completo; pruebas para cada corrección.
@@ -322,8 +323,11 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
 - [ ] **T11.7** · P2 · Accesibilidad: descripciones de íconos, tamaño de los objetivos táctiles, texto al 200 % sin cortes, recorrido con TalkBack de Inicio, Descargas y Conversor.
   *Depende de:* —
   *Acepta:* sin problemas de accesibilidad en lint; recorrido manual registrado.
+- [ ] **T11.9** · P1 · yt-dlp al día desde el primer uso: en una instalación nueva, el yt-dlp del APK (2025.11.12) da 403 en YouTube hasta actualizarlo a mano desde Ajustes. Buscar y aplicar la actualización verificada sola (al primer arranque y, por ejemplo, una vez por semana), con un ajuste para desactivarlo; si falla, seguir con la versión actual y avisar.
+  *Depende de:* —
+  *Acepta:* pruebas del ViewModel/servicio (cuándo busca, qué pasa si falla, el ajuste apagado); en el teléfono, una instalación limpia descarga de YouTube sin tocar Ajustes.
 - [ ] **T11.8** · P1 · Prueba final del MVP en el teléfono con el APK `minified` e instalación limpia (primer arranque): los 18 criterios de main.md §15, más TikTok, que sigue pendiente (FEASIBILITY §12).
-  *Depende de:* T11.1–T11.7
+  *Depende de:* T11.1–T11.7, T11.9
   *Acepta:* cada criterio registrado como cumplido o con su problema.
 
 ## Etapa 12 · Distribución

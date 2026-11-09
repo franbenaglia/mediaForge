@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. Sigue T11.1 (variante `minified` para probar R8). Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 hechas. Sigue T11.9 (yt-dlp al día desde el primer uso), después T11.4–T11.7 y la prueba final T11.8. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -79,9 +79,9 @@ Ninguno.
 
 ## Problemas conocidos
 
-- El yt-dlp incluido en el APK (2025.11.12) falla con Dailymotion (403) hasta que se actualiza. Con T3.9 la app lo ofrece sola; evaluar actualizar automáticamente en el primer arranque (Etapa 9, ajustes).
+- El yt-dlp incluido en el APK (2025.11.12) da 403 en YouTube y Dailymotion hasta que se actualiza (visto otra vez con la instalación limpia de "MediaForge R8", 2026-11-08). Se resuelve con T11.9 (actualización automática).
 
-- El APK de release (R8) todavía no se probó con youtubedl-android. Hay reglas en `core/media/consumer-rules.pro` (Jackson), pero se validan en el teléfono antes del primer release.
+- APK con R8 probado en el teléfono con la variante `minified` (T11.1). Si se agregan dependencias que usan reflexión, volver a probarla.
 
 - Advertencias de lint aceptadas: `OldTargetApi` (target 36 a propósito, ADR-004); `AndroidGradlePluginVersion` y `NewerVersionAvailable` (hay versiones nuevas; se actualizan en una tarea propia, no a mitad de etapa); `DataExtractionRules` (`allowBackup=false` sigue haciendo falta para Android ≤ 11).
 - El teléfono de pruebas rechazó varias veces (2026-11-08) el servicio en primer plano con `InvalidForegroundServiceTypeException` ("type none") al empezar una conversión, y la app se cerraba. Causa sin confirmar (¿límite de 6 h de `mediaProcessing` o el sistema del fabricante?). Desde 02f198c, `JobService` reintenta con `dataSync` y, si tampoco puede, se detiene sin cerrar la app (queda un aviso `JobService` en logcat). En la prueba siguiente no se repitió.
