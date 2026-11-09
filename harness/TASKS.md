@@ -338,9 +338,9 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
 
 ## Etapa 12 · Distribución (en curso)
 
-main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación para otro desarrollador y landing page en `githubpages/` (pedida por el usuario: inglés y español; el ícono y la imagen destacada los dio el usuario). La imagen destacada muestra pausa y AAC, que la app no tiene: va solo como ilustración; las funciones se muestran con capturas reales.
+main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación para otro desarrollador y landing page (pedida por el usuario: inglés y español; el ícono y la imagen destacada los dio el usuario). La landing vive en su propio repo, https://github.com/franbenaglia/mediaForgeLanding, trabajado en `githubpages/` (ignorado por este repo). La imagen destacada muestra pausa y AAC, que la app no tiene: va solo como ilustración; las funciones se muestran con capturas reales.
 
-- [ ] **T12.1** · P1 · Ícono nuevo (`githubpages/MediaForge_icon_512.png`) como ícono de la app: adaptativo (fondo y figura), monocromo para los íconos temáticos de Android 13+, en todas las densidades; las variantes debug y minified se distinguen.
+- [ ] **T12.1** · P1 · Ícono nuevo (`MediaForge_icon_512.png` de la landing; la fuente queda en `docs/images/`) como ícono de la app: adaptativo (fondo y figura), monocromo para los íconos temáticos de Android 13+, en todas las densidades; las variantes debug y minified se distinguen.
   *Depende de:* —
   *Acepta:* verify OK; se ve bien en el lanzador del teléfono (formas redonda y cuadrada, tema).
 - [ ] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
@@ -355,10 +355,10 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
 - [ ] **T12.5** · P1 · Documentación final (main.md §17): `README.md` en inglés (qué es, capturas, instalación por sideloading, aviso legal, compilación) y `docs/DEVELOPMENT.md` (clonar, entorno, compilar, pruebas, APK, arquitectura, actualizar yt-dlp y FFmpeg, continuar el desarrollo).
   *Depende de:* T12.3, T12.6
   *Acepta:* otro desarrollador puede compilar siguiendo solo esos documentos.
-- [ ] **T12.6** · P1 · Capturas reales en inglés y español (Inicio con un video analizado, calidades, descarga en curso, Conversor, Historial, Ajustes) con contenido de uso libre (Big Buck Bunny), en `githubpages/` y para el README.
+- [ ] **T12.6** · P1 · Capturas reales en inglés y español (Inicio con un video analizado, calidades, descarga en curso, Conversor, Historial, Ajustes) con contenido de uso libre (Big Buck Bunny), en la landing y en `docs/images/` para el README.
   *Depende de:* T12.1
   *Acepta:* capturas sin datos personales.
-- [ ] **T12.7** · P1 · Landing page estática en `githubpages/` (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Publicada con un workflow de GitHub Actions (Pages desde esa carpeta).
+- [ ] **T12.7** · P1 · Landing page estática (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Repo `mediaForgeLanding`, publicada con GitHub Pages desde `main` (raíz).
   *Depende de:* T12.3, T12.6
   *Acepta:* se ve bien en el teléfono y en la computadora; publicada en GitHub Pages.
 - [ ] **T12.8** · P1 · GitHub Release v1.0.0: tag, APKs firmados, SHA-256, notas, fuentes según T12.4. La landing enlaza al último release.

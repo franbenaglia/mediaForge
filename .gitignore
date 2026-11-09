@@ -17,3 +17,6 @@ keystore.properties
 
 # Sistema
 .DS_Store
+
+# Landing page: repo aparte (franbenaglia/mediaForgeLanding), clonado acá
+githubpages/
