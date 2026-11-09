@@ -311,9 +311,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
   *Depende de:* —
   *Acepta:* documento completo; la pantalla se abre desde Ajustes (prueba de ViewModel o de UI).
   *Hecho:* `docs/LICENSES.md` (dependencias Java/Kotlin, yt-dlp, Python, QuickJS, FFmpeg y ~140 bibliotecas nativas listadas de los AAR); todo compatible con GPL-3.0. Diálogo "Licencias de código abierto" en Ajustes con enlace al documento (2 pruebas). Quedan para la Etapa 12 dos obligaciones: publicar las fuentes de los binarios GPL/LGPL con cada release y juntar los avisos de copyright.
-- [ ] **T11.4** · P1 · Pruebas instrumentadas de la app (main.md §12.3): navegación entre pestañas, enlace compartido que abre Inicio con la URL, conservación del estado al rotar y al recrear la actividad, permiso de notificaciones denegado sin cierres.
+- [x] **T11.4** · P1 · Pruebas instrumentadas de la app (main.md §12.3): navegación entre pestañas, enlace compartido que abre Inicio con la URL, conservación del estado al rotar y al recrear la actividad, permiso de notificaciones denegado sin cierres.
   *Depende de:* —
   *Acepta:* pruebas en `app/src/androidTest`, verdes en el teléfono con `./scripts/test-device.sh`.
+  *Hecho:* `AppDeviceTest` (3 pruebas, verdes en 24115RA8EG): todas las pestañas, enlace compartido con la app cerrada, recrear la actividad conserva la pestaña y el enlace escrito. Encontró un cierre real (navegar antes de que exista el grafo al abrir desde un enlace compartido), ya arreglado. `test-device.sh` deja la app instalada con sus datos. No se prueba el permiso de notificaciones denegado: revocarlo mata el proceso de la app de uso; queda en la prueba manual T11.8.
 - [ ] **T11.5** · P2 · Pruebas sin red y con red separadas (main.md §12.4): las que necesitan Internet llevan una anotación y `test-device.sh` puede correr solo las otras; los archivos de prueba son propios o de uso libre y su origen está documentado.
   *Depende de:* T11.4
   *Acepta:* `./scripts/test-device.sh --offline` corre sin red; documentado en `ARCHITECTURE.md`.

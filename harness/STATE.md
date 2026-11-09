@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 hechas y validadas. Sigue T11.4 (pruebas instrumentadas de la app), después T11.5–T11.7 y la prueba final T11.8. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 hechas y validadas. T11.4 hecha (encontró y arregló un cierre al abrir desde un enlace compartido). Sigue T11.5 (pruebas sin red), T11.6, T11.7 y la prueba final T11.8. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -57,6 +57,7 @@ Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 he
 |---|---|---|
 | `./scripts/verify.sh` | OK: 426 pruebas (132 dominio + 129 app + 151 media + 14 data), lint sin errores, ktlint OK | 2026-11-08 |
 | T10.8 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |
+| `AppDeviceTest` en 24115RA8EG | OK 3/3 (con el permiso de ventanas en segundo plano de HyperOS) | 2026-11-08 |
 | APK debug arm64-v8a / x86_64 (con motores y Coil) | 70,9 MB / 73,9 MB | 2026-11-08 |
 | `RoomJobStoreDeviceTest` en 24115RA8EG | OK 2/2 | 2026-11-08 |
 | T7.7 manual en 24115RA8EG | OK: todos los pasos | 2026-11-08 |

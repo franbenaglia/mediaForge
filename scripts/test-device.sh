@@ -17,3 +17,11 @@ fi
 # Motor (core:media): un solo APK de prueba. Mediciones en logcat con la etiqueta MFDEVICE y
 # fixtures en files/fixtures (ver EngineDeviceTest).
 timeout 1800 ./gradlew :core:media:connectedDebugAndroidTest "$@"
+
+# App (T11.4): se prueba la app de desarrollo real. Se instala como actualización (conserva los
+# datos) y queda instalada: sin esta opción, Gradle la desinstalaría al terminar y se perdería el
+# historial del teléfono de pruebas.
+# En Xiaomi/HyperOS, la app necesita el permiso "Mostrar ventanas emergentes mientras se ejecuta en
+# segundo plano" (Otros permisos): sin él, la actividad nunca abre y la prueba queda colgada.
+timeout 1800 ./gradlew :app:connectedDebugAndroidTest \
+    -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true "$@"
