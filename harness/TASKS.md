@@ -323,10 +323,10 @@ main.md §11, §12 y §14: que lo que ya funciona en debug funcione igual en el 
 - [ ] **T11.7** · P2 · Accesibilidad: descripciones de íconos, tamaño de los objetivos táctiles, texto al 200 % sin cortes, recorrido con TalkBack de Inicio, Descargas y Conversor.
   *Depende de:* —
   *Acepta:* sin problemas de accesibilidad en lint; recorrido manual registrado.
-- [~] **T11.9** · P1 · yt-dlp al día desde el primer uso: en una instalación nueva, el yt-dlp del APK (2025.11.12) da 403 en YouTube hasta actualizarlo a mano desde Ajustes. Buscar y aplicar la actualización verificada sola (al primer arranque y, por ejemplo, una vez por semana), con un ajuste para desactivarlo; si falla, seguir con la versión actual y avisar.
+- [x] **T11.9** · P1 · yt-dlp al día desde el primer uso: en una instalación nueva, el yt-dlp del APK (2025.11.12) da 403 en YouTube hasta actualizarlo a mano desde Ajustes. Buscar y aplicar la actualización verificada sola (al primer arranque y, por ejemplo, una vez por semana), con un ajuste para desactivarlo; si falla, seguir con la versión actual y avisar.
   *Depende de:* —
   *Acepta:* pruebas del ViewModel/servicio (cuándo busca, qué pasa si falla, el ajuste apagado); en el teléfono, una instalación limpia descarga de YouTube sin tocar Ajustes.
-  *Hecho:* `EngineAutoUpdate` (dominio, 8 pruebas): al abrir la app, cada 7 días como mucho, con el mismo camino verificado; respeta "Solo Wi‑Fi"; ajuste "Actualizar automáticamente" (DataStore, VM). ADR-022.
+  *Hecho:* `EngineAutoUpdate` (dominio, 8 pruebas): al abrir la app, cada 7 días como mucho, con el mismo camino verificado; respeta "Solo Wi‑Fi"; ajuste "Actualizar automáticamente" (DataStore, VM). ADR-022. Validado en 24115RA8EG con instalación limpia de "MediaForge R8": descargó de YouTube sin tocar Ajustes (2026-11-08).
 - [ ] **T11.8** · P1 · Prueba final del MVP en el teléfono con el APK `minified` e instalación limpia (primer arranque): los 18 criterios de main.md §15, más TikTok, que sigue pendiente (FEASIBILITY §12).
   *Depende de:* T11.1–T11.7, T11.9
   *Acepta:* cada criterio registrado como cumplido o con su problema.

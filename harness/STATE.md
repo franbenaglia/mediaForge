@@ -4,7 +4,7 @@
 
 ## Próximo paso
 
-Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 hechas. Sigue T11.9 (yt-dlp al día desde el primer uso), después T11.4–T11.7 y la prueba final T11.8. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
+Etapa 11 (calidad): tareas T11.1–T11.8 en `TASKS.md`. T11.1–T11.3 y T11.9 hechas y validadas. Sigue T11.4 (pruebas instrumentadas de la app), después T11.5–T11.7 y la prueba final T11.8. Quedan pendientes, P3: T6.7 (leer la entrada sin copiarla) y T7.8 (pausa real de descargas).
 
 ## Etapas
 
@@ -79,7 +79,7 @@ Ninguno.
 
 ## Problemas conocidos
 
-- El yt-dlp incluido en el APK (2025.11.12) da 403 en YouTube y Dailymotion hasta que se actualiza (visto otra vez con la instalación limpia de "MediaForge R8", 2026-11-08). Se resuelve con T11.9 (actualización automática).
+- El yt-dlp incluido en el APK (2025.11.12) da 403 en YouTube y Dailymotion hasta que se actualiza. Desde T11.9 la app lo actualiza sola al primer arranque (validado); sin red en ese momento, la primera descarga puede fallar hasta el próximo arranque.
 
 - APK con R8 probado en el teléfono con la variante `minified` (T11.1). Si se agregan dependencias que usan reflexión, volver a probarla.
 
