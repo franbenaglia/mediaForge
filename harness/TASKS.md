@@ -344,12 +344,13 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
   *Depende de:* —
   *Acepta:* verify OK; se ve bien en el lanzador del teléfono (formas redonda y cuadrada, tema).
   *Hecho:* fondo `#101325` (del diseño), figura en `mipmap-*/ic_launcher_foreground.png` (72 de 108 dp, sin recortes en círculo ni squircle), monocromo con la silueta de reproducción y bandeja. Las variantes se distinguen por el nombre ("MediaForge R8"). Validado en 24115RA8EG (2026-11-09).
-- [ ] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
+- [~] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
   *Depende de:* —
   *Acepta:* `apksigner verify` OK; el APK de release se instala limpio en el teléfono y funciona.
-- [ ] **T12.3** · P1 · Versión 1.0.0: `versionCode`/`versionName`, `CHANGELOG.md` con el historial (etapas como versiones previas a 1.0), versión visible en Ajustes.
+- [x] **T12.3** · P1 · Versión 1.0.0: `versionCode`/`versionName`, `CHANGELOG.md` con el historial (etapas como versiones previas a 1.0), versión visible en Ajustes.
   *Depende de:* —
   *Acepta:* verify OK; el changelog cubre lo que hay.
+  *Hecho:* `versionName` 1.0.0 (`versionCode` 1: no hubo publicaciones antes); `CHANGELOG.md` en inglés (público), con fecha "Unreleased" hasta T12.8 y la historia por etapas. Ajustes ya mostraba la versión.
 - [ ] **T12.4** · P1 · Obligaciones de licencias (`docs/LICENSES.md`): `THIRD_PARTY_NOTICES.md` con avisos de copyright y textos de licencia, visible en la app; fuentes correspondientes de los binarios GPL/LGPL (youtubedl-android y recetas de Termux con sus versiones) publicadas con el release, o el mecanismo que permita GPLv3 §6 con su justificación.
   *Depende de:* —
   *Acepta:* documento completo; decisión registrada en un ADR; el diálogo de licencias muestra los avisos.
