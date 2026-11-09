@@ -347,6 +347,7 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
 - [~] **T12.2** · P1 · Firma de release: keystore creado por el usuario fuera del repo, `keystore.properties` (ignorado), `build-release.sh` produce APKs firmados arm64 y x86_64 con sus SHA-256; procedimiento en `docs/RELEASE.md` (crear la clave, respaldarla, firmar, verificar con `apksigner`).
   *Depende de:* —
   *Acepta:* `apksigner verify` OK; el APK de release se instala limpio en el teléfono y funciona.
+  *Hecho:* clave del usuario en `~/keys/mediaforge-release.jks` (fuera del repo), `keystore.properties` ignorado. `build-release.sh` OK: arm64 56 MB, x86_64 59 MB, firma v2 verificada; certificado SHA-256 `69:EE:90:B0:22:F6:9E:59:D9:0F:6A:B3:AE:07:FA:96:87:75:43:39:88:66:67:8B:FB:33:47:E5:BC:1F:32:1A`. Falta probarlo en el teléfono.
 - [x] **T12.3** · P1 · Versión 1.0.0: `versionCode`/`versionName`, `CHANGELOG.md` con el historial (etapas como versiones previas a 1.0), versión visible en Ajustes.
   *Depende de:* —
   *Acepta:* verify OK; el changelog cubre lo que hay.
@@ -369,9 +370,10 @@ main.md §1.1, §14, §17 y §18: APK firmado en GitHub Releases, documentación
   - 6 pantallas por idioma (Inicio, calidades, Descargas, Conversor, Historial, Ajustes), sacadas de una instalación limpia de "MediaForge R8" con Big Buck Bunny; el idioma de la app se cambió con `cmd locale set-app-locales`.
   - Se recortaron la barra de estado y la de navegación, se borró la burbuja de otra app que quedaba encima, y se escalaron a 720 px.
   - Están en `docs/images/screenshots/` (inglés, para el README) y en la landing (12).
-- [ ] **T12.7** · P1 · Landing page estática (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Repo `mediaForgeLanding`, publicada con GitHub Pages desde `main` (raíz).
+- [~] **T12.7** · P1 · Landing page estática (inglés y español): descripción, funciones, tecnologías, requisitos (Android 8+, arm64 o x86_64), capturas, versión e historial, enlace al APK y a GitHub, avisos legales y licencias. Sin rastreadores ni recursos de terceros. Repo `mediaForgeLanding`, publicada con GitHub Pages desde `main` (raíz).
   *Depende de:* T12.3, T12.6
   *Acepta:* se ve bien en el teléfono y en la computadora; publicada en GitHub Pages.
+  *Hecho:* `index.html` (inglés) y `es/index.html`, `styles.css` sin recursos de terceros, capturas reales, imagen destacada como ilustración, huella del certificado. Revisada en navegador a 1280 y 390 px. Commit local en `mediaForgeLanding`; falta publicar (push y activar Pages).
 - [ ] **T12.8** · P1 · GitHub Release v1.0.0: tag, APKs firmados, SHA-256, notas, fuentes según T12.4. La landing enlaza al último release.
   *Depende de:* T12.2–T12.7
   *Acepta:* release público; enlaces de la landing funcionan.
