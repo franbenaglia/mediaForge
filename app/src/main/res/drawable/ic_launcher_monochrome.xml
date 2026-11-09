@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ícono provisorio: triángulo de reproducción sobre un yunque estilizado. -->
+<!-- Ícono monocromo (íconos temáticos de Android 13+): reproducción sobre una bandeja de descarga,
+     las dos figuras blancas del ícono principal. Solo cuenta la forma; el sistema le pone el color. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
